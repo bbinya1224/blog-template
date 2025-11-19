@@ -24,7 +24,7 @@ export const isValidUrl = (url: string): boolean => {
  */
 export const isValidNaverRssUrl = (url: string): boolean => {
   if (!isValidUrl(url)) return false;
-  return url.includes('blog.naver.com/rss');
+  return url.includes('rss.blog.naver.com') && url.endsWith('.xml');
 };
 
 /**

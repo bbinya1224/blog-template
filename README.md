@@ -17,11 +17,11 @@ npm run dev
 | --- | --- |
 | `src/app` | App Router 기반 페이지(`/`, `/analyze`, `/generate`)와 API Routes |
 | `src/components` | Step Indicator, Section Card 등 공통 UI |
-| `src/lib` | RSS 크롤러, 스타일 분석 휴리스틱, 리뷰 생성기, 파일 저장 유틸 |
+| `src/lib` | Claude API 클라이언트, RSS 크롤러, 스타일 분석, 리뷰 생성기, 파일 저장 유틸 |
 | `data/rss-content` | RSS에서 정제한 블로그 본문(`blog-posts.txt`) |
 | `data/styles` | 스타일 프로필 JSON (`my-style.json`) |
 | `data/reviews` | 생성된 리뷰를 `{가게명}_{날짜}.md`로 저장 |
-| `prompts/prompts.ts` | 스타일 분석/리뷰 생성/수정 프롬프트 원본 (앱에서는 `src/lib/prompts.ts`를 통해 재사용) |
+| `prompts/prompts.ts` | 스타일 분석/리뷰 생성/수정 프롬프트 원본 (Claude API에서 사용) |
 
 ## 구현된 흐름
 

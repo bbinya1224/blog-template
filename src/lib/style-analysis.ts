@@ -194,11 +194,27 @@ export const generateStyleProfileWithClaude = async (
       STYLE_USER_PROMPT,
     );
 
-    // JSON 파싱
-    const cleanedJson = responseText
-      .replace(/```json/g, '')
-      .replace(/```/g, '')
-      .trim();
+    console.log('\n[스타일 분석] Claude 응답 (첫 500자):');
+    console.log(responseText.substring(0, 500));
+    console.log('...\n');
+
+    // JSON 추출 - 여러 방법 시도
+    let cleanedJson = responseText;
+
+    // 1. 코드 블록 마커 제거
+    cleanedJson = cleanedJson.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+
+    // 2. JSON 객체만 추출 (가장 바깥쪽 {} 사이의 내용)
+    const jsonMatch = cleanedJson.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanedJson = jsonMatch[0];
+    }
+
+    cleanedJson = cleanedJson.trim();
+
+    console.log('[스타일 분석] 정제된 JSON (첫 300자):');
+    console.log(cleanedJson.substring(0, 300));
+    console.log('...\n');
 
     const styleProfile = JSON.parse(cleanedJson) as StyleProfile;
 
@@ -215,6 +231,9 @@ export const generateStyleProfileWithClaude = async (
 
     return styleProfile;
   } catch (error) {
+    // 원본 에러 로깅 (디버깅용)
+    console.error('스타일 분석 상세 에러:', error);
+
     if (error instanceof StyleAnalysisError) {
       throw error;
     }
@@ -225,8 +244,12 @@ export const generateStyleProfileWithClaude = async (
       );
     }
 
-    throw new StyleAnalysisError(
-      'Claude API를 사용한 스타일 분석 중 오류가 발생했습니다.',
-    );
+    // 에러 메시지를 포함하여 더 자세한 정보 제공
+    const errorMessage =
+      error instanceof Error
+        ? `스타일 분석 중 오류: ${error.message}`
+        : 'Claude API를 사용한 스타일 분석 중 오류가 발생했습니다.';
+
+    throw new StyleAnalysisError(errorMessage);
   }
 };

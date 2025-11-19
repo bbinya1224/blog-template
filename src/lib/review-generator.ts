@@ -95,15 +95,18 @@ export const generateReviewWithClaudeAPI = async (
 
     return review.trim();
   } catch (error) {
+    console.error('리뷰 생성 상세 에러:', error);
+
     if (error instanceof AppError) {
       throw error;
     }
 
-    throw new AppError(
-      'Claude API를 사용한 리뷰 생성 중 오류가 발생했습니다.',
-      'REVIEW_GENERATION_ERROR',
-      500,
-    );
+    const errorMessage =
+      error instanceof Error
+        ? `리뷰 생성 중 오류: ${error.message}`
+        : 'Claude API를 사용한 리뷰 생성 중 오류가 발생했습니다.';
+
+    throw new AppError(errorMessage, 'REVIEW_GENERATION_ERROR', 500);
   }
 };
 
@@ -128,14 +131,17 @@ export const editReviewWithClaudeAPI = async (
 
     return editedReview.trim();
   } catch (error) {
+    console.error('리뷰 수정 상세 에러:', error);
+
     if (error instanceof AppError) {
       throw error;
     }
 
-    throw new AppError(
-      'Claude API를 사용한 리뷰 수정 중 오류가 발생했습니다.',
-      'REVIEW_EDIT_ERROR',
-      500,
-    );
+    const errorMessage =
+      error instanceof Error
+        ? `리뷰 수정 중 오류: ${error.message}`
+        : 'Claude API를 사용한 리뷰 수정 중 오류가 발생했습니다.';
+
+    throw new AppError(errorMessage, 'REVIEW_EDIT_ERROR', 500);
   }
 };

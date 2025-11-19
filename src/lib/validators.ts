@@ -25,7 +25,7 @@ export const validateAnalyzePayload = (
 
   if (!isValidNaverRssUrl(data.rssUrl)) {
     throw new ValidationError(
-      '유효한 네이버 블로그 RSS URL을 입력해주세요. (예: https://blog.naver.com/rss/{블로그ID})',
+      '유효한 네이버 블로그 RSS URL을 입력해주세요. (예: https://rss.blog.naver.com/블로그ID.xml)',
     );
   }
 

@@ -6,17 +6,18 @@ import { SectionCard } from "@/components/section-card";
 import { StepIndicator } from "@/components/step-indicator";
 import type { StyleProfile } from "@/lib/types";
 
-const steps = [
-  { label: "스타일 분석", status: "current" as const },
-  { label: "리뷰 생성", status: "upcoming" as const },
-  { label: "수정/보관", status: "upcoming" as const },
-];
+type StepStatus = "current" | "completed" | "upcoming";
+
+interface Step {
+  label: string;
+  status: StepStatus;
+}
 
 type Status = "idle" | "running" | "success" | "error";
 
 export default function AnalyzePage() {
   const [rssUrl, setRssUrl] = useState("");
-  const [maxPosts, setMaxPosts] = useState(25);
+  const [maxPosts, setMaxPosts] = useState(15);
   const [status, setStatus] = useState<Status>("idle");
   const [statusMessage, setStatusMessage] = useState("");
   const [styleProfile, setStyleProfile] = useState<StyleProfile | null>(null);
@@ -83,14 +84,14 @@ export default function AnalyzePage() {
             RSS 기반으로 내 블로그 톤을 추출해요.
           </h1>
           <p className="text-gray-600">
-            최근 20~30개의 포스트를 읽고 문체, 말투, 문단 구조를 JSON으로 정리합니다.
+            최근 10~20개의 포스트를 읽고 문체, 말투, 문단 구조를 JSON으로 정리합니다.
           </p>
         </div>
       </section>
 
       <SectionCard
         title="RSS 정보 입력"
-        description="네이버 블로그 주소 형식: https://blog.naver.com/rss/{블로그ID}"
+        description="네이버 블로그 RSS 주소 형식: https://rss.blog.naver.com/블로그ID.xml"
         footer={
           statusMessage && (
             <p
@@ -118,7 +119,7 @@ export default function AnalyzePage() {
               required
               value={rssUrl}
               onChange={(event) => setRssUrl(event.target.value)}
-              placeholder="https://blog.naver.com/rss/블로그ID"
+              placeholder="https://rss.blog.naver.com/블로그ID.xml"
               className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
@@ -135,13 +136,13 @@ export default function AnalyzePage() {
                 name="maxPosts"
                 type="number"
                 min={5}
-                max={40}
+                max={25}
                 value={maxPosts}
                 onChange={(event) => setMaxPosts(Number(event.target.value))}
                 className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               />
               <p className="mt-2 text-sm text-gray-500">
-                추천 범위 20~30개, 글이 많을수록 정확도가 높아집니다.
+                추천 범위 10~20개, 각 포스트의 일부만 사용하여 스타일을 분석합니다.
               </p>
             </div>
           </div>

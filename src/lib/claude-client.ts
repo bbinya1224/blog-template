@@ -7,8 +7,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { AppError } from './errors';
 
 // 모델 상수
-export const CLAUDE_SONNET = 'claude-3-5-sonnet-20241022';
-export const CLAUDE_HAIKU = 'claude-3-5-haiku-20241022';
+export const CLAUDE_SONNET = 'claude-sonnet-4-5-20250929'; // Sonnet 3.5 (안정 버전)
+export const CLAUDE_HAIKU = 'claude-3-haiku-20240307'; // Haiku 3.0 (안정 버전)
 
 // Lazy initialization - API 호출 시점에 클라이언트 생성
 let anthropic: Anthropic | null = null;
@@ -24,7 +24,7 @@ const getAnthropicClient = (): Anthropic => {
     throw new AppError(
       'ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다. .env.local 파일을 확인해주세요.',
       'MISSING_API_KEY',
-      500,
+      500
     );
   }
 
@@ -42,7 +42,7 @@ export const callClaude = async (
   systemPrompt: string,
   userPrompt: string,
   model: string = CLAUDE_SONNET,
-  maxTokens: number = 4096,
+  maxTokens: number = 4096
 ): Promise<string> => {
   try {
     const client = getAnthropicClient();
@@ -64,7 +64,7 @@ export const callClaude = async (
       throw new AppError(
         'Claude API 응답에서 텍스트를 찾을 수 없습니다.',
         'INVALID_API_RESPONSE',
-        500,
+        500
       );
     }
 
@@ -79,27 +79,27 @@ export const callClaude = async (
         throw new AppError(
           'Claude API 인증에 실패했습니다. API 키를 확인해주세요.',
           'AUTHENTICATION_FAILED',
-          401,
+          401
         );
       }
       if (error.status === 429) {
         throw new AppError(
           'Claude API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.',
           'RATE_LIMIT_EXCEEDED',
-          429,
+          429
         );
       }
       throw new AppError(
         `Claude API 오류: ${error.message}`,
         'CLAUDE_API_ERROR',
-        error.status || 500,
+        error.status || 500
       );
     }
 
     throw new AppError(
       'Claude API 호출 중 예상치 못한 오류가 발생했습니다.',
       'UNEXPECTED_ERROR',
-      500,
+      500
     );
   }
 };
@@ -110,11 +110,11 @@ export const callClaude = async (
 export const analyzeStyleWithClaude = async (
   blogText: string,
   systemPrompt: string,
-  userPromptTemplate: string,
+  userPromptTemplate: string
 ): Promise<string> => {
   const userPrompt = userPromptTemplate.replace(
     '{여기에 blog-posts.txt 내용 붙이기}',
-    blogText,
+    blogText
   );
 
   return callClaude(systemPrompt, userPrompt, CLAUDE_SONNET, 4096);
@@ -135,7 +135,7 @@ export const generateReviewWithClaude = async (
     extra?: string;
   },
   systemPrompt: string,
-  userPromptTemplate: string,
+  userPromptTemplate: string
 ): Promise<string> => {
   const userPrompt = userPromptTemplate
     .replace('{스타일 프로필 JSON}', styleProfileJson)
@@ -157,7 +157,7 @@ export const editReviewWithClaude = async (
   originalReview: string,
   editRequest: string,
   styleProfileJson: string,
-  promptTemplate: string,
+  promptTemplate: string
 ): Promise<string> => {
   const userPrompt = promptTemplate
     .replace('{기존 리뷰 텍스트}', originalReview)
