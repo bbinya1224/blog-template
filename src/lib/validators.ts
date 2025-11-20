@@ -3,9 +3,9 @@
  * 순수 함수로 구성되어 재사용 가능하며 테스트 용이
  */
 
-import type { ReviewPayload, AnalyzePayload } from './types';
-import { ValidationError } from './errors';
-import { isValidNaverRssUrl, isNonEmptyString } from './utils';
+import type { ReviewPayload, AnalyzePayload } from '@/lib/types';
+import { ValidationError } from '@/lib/errors';
+import { isValidNaverRssUrl, isNonEmptyString } from '@/lib/utils';
 
 /**
  * AnalyzePayload 검증

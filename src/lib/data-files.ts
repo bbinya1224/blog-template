@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
-import type { ReviewPayload, StyleProfile } from './types';
-import { sanitizeFileName } from './utils';
+import type { ReviewPayload, StyleProfile } from '@/lib/types';
+import { sanitizeFileName } from '@/lib/utils';
 
 const DATA_ROOT = path.join(process.cwd(), 'data');
 const RSS_DIR = path.join(DATA_ROOT, 'rss-content');

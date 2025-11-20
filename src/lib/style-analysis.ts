@@ -3,11 +3,11 @@
  * 비즈니스 로직을 순수 함수로 분리
  */
 
-import type { StyleProfile } from './types';
-import { StyleAnalysisError } from './errors';
-import { unique } from './utils';
-import { analyzeStyleWithClaude } from './claude-client';
-import { STYLE_ANALYSIS_PROMPT, STYLE_USER_PROMPT } from './prompts';
+import type { StyleProfile } from '@/lib/types';
+import { StyleAnalysisError } from '@/lib/errors';
+import { unique } from '@/lib/utils';
+import { analyzeStyleWithClaude } from '@/lib/claude-client';
+import { STYLE_ANALYSIS_PROMPT, STYLE_USER_PROMPT } from '@/lib/prompts';
 
 const COMMON_SECTIONS = [
   '방문 이유',

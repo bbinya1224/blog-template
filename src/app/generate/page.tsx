@@ -34,8 +34,20 @@ export default function GeneratePage() {
   const [isCopying, setIsCopying] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const loadProfile = async () => {
       try {
+        // 1. localStorage에서 먼저 확인
+        if (typeof window !== 'undefined') {
+          const savedProfile = localStorage.getItem('styleProfile');
+          if (savedProfile) {
+            const profile = JSON.parse(savedProfile) as StyleProfile;
+            setStyleProfile(profile);
+            setStatusMessage('✅ 저장된 스타일 프로필을 불러왔습니다.');
+            return;
+          }
+        }
+
+        // 2. localStorage에 없으면 API에서 불러오기
         const response = await fetch('/api/style-profile');
         if (!response.ok) {
           throw new Error('스타일 프로필을 불러오지 못했습니다.');
@@ -44,12 +56,16 @@ export default function GeneratePage() {
           styleProfile: StyleProfile;
         };
         setStyleProfile(styleProfile);
+        setStatusMessage('✅ 스타일 프로필을 불러왔습니다.');
       } catch (error) {
         console.warn(error);
+        setStatusMessage(
+          '⚠️ 스타일 프로필이 없습니다. 먼저 스타일 분석을 진행해주세요.',
+        );
       }
     };
 
-    fetchProfile();
+    loadProfile();
   }, []);
 
   const isGenerateDisabled = useMemo(() => {

@@ -1,1 +1,1 @@
-export * from "../../prompts/prompts";
+export * from '@prompts/prompts';
