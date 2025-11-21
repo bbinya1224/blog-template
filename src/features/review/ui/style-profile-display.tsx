@@ -1,0 +1,58 @@
+/**
+ * 스타일 프로필 표시 컴포넌트
+ * - 현재 적용된 스타일 프로필을 요약해서 보여줌
+ */
+
+import { SectionCard } from '@/shared/ui/section-card';
+import type { StyleProfile } from '@/entities/style-profile/model/types';
+
+interface StyleProfileDisplayProps {
+  styleProfile: StyleProfile | null;
+}
+
+export const StyleProfileDisplay = ({
+  styleProfile,
+}: StyleProfileDisplayProps) => {
+  if (!styleProfile) {
+    return (
+      <SectionCard title="스타일 프로필 없음">
+        <p className="text-sm text-gray-600">
+          아직 스타일 분석이 완료되지 않은 것 같아요. 먼저{' '}
+          <a
+            className="font-semibold text-blue-500 underline-offset-2 hover:underline"
+            href="/analyze"
+          >
+            스타일 분석
+          </a>{' '}
+          페이지에서 프로필을 생성해주세요.
+        </p>
+      </SectionCard>
+    );
+  }
+
+  return (
+    <SectionCard
+      title="적용된 스타일"
+      description="최근 분석된 결과를 요약해서 보여줍니다."
+    >
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-1 text-sm text-gray-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">
+            문체
+          </p>
+          <p>{styleProfile.writing_style.formality}</p>
+          <p>{styleProfile.writing_style.tone}</p>
+          <p>{styleProfile.writing_style.emotion}</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">
+            구조
+          </p>
+          <p className="mt-1 text-sm text-gray-700">
+            {styleProfile.structure_pattern.overall_flow}
+          </p>
+        </div>
+      </div>
+    </SectionCard>
+  );
+};

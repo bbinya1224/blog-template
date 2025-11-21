@@ -1,15 +1,16 @@
-import type { ReviewPayload, StyleProfile } from '@/lib/types';
-import { formatKoreanDate } from '@/lib/utils';
+import type { ReviewPayload } from '@/entities/review/model/types';
+import type { StyleProfile } from '@/entities/style-profile/model/types';
+import { formatKoreanDate } from '@/shared/lib/utils';
 import {
   generateReviewWithClaude,
   editReviewWithClaude,
-} from '@/lib/claude-client';
+} from '@/shared/api/claude-client';
 import {
   REVIEW_ANALYSIS_PROMPT,
   REVIEW_USER_PROMPT,
   REVIEW_EDIT_PROMPT,
-} from '@/lib/prompts';
-import { AppError } from '@/lib/errors';
+} from '@/shared/config/prompts';
+import { AppError } from '@/shared/lib/errors';
 
 export const buildReviewText = (
   payload: ReviewPayload,

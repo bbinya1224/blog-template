@@ -29,6 +29,7 @@ export const isValidNaverRssUrl = (url: string): boolean => {
 
 /**
  * 문자열이 비어있지 않은지 확인
+ * unknown 타입도 받을 수 있어 validator에서 안전하게 사용 가능
  */
 export const isNonEmptyString = (value: unknown): value is string => {
   return typeof value === 'string' && value.trim().length > 0;

@@ -5,7 +5,7 @@
  * - 다음 단계 CTA
  */
 
-import type { StyleProfile } from '@/lib/types';
+import type { StyleProfile } from '@/entities/style-profile/model/types';
 
 interface StyleProfileSummaryProps {
   styleProfile: StyleProfile;

@@ -12,8 +12,8 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { RssCrawlingError } from '@/lib/errors';
-import { stripHtmlTags, normalizeText } from '@/lib/utils';
+import { RssCrawlingError } from '@/shared/lib/errors';
+import { stripHtmlTags, normalizeText } from '@/shared/lib/utils';
 
 /* =========================
  * UA 로테이션 & 유틸

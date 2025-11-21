@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { SectionCard } from "@/components/section-card";
-import { StepIndicator } from "@/components/step-indicator";
+import Link from 'next/link';
+import { SectionCard } from '@/shared/ui/section-card';
+import { StepIndicator } from '@/shared/ui/step-indicator';
 
 const steps = [
   { label: "스타일 분석", status: "current" as const },

@@ -6,8 +6,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import type { StyleProfile } from '@/lib/types';
-import { STORAGE_KEYS, API_ENDPOINTS, STATUS_MESSAGES } from '@/lib/constants';
+import type { StyleProfile } from '@/entities/style-profile/model/types';
+import { STORAGE_KEYS, API_ENDPOINTS, STATUS_MESSAGES } from '@/shared/config/constants';
 
 type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
 
