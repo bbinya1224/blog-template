@@ -35,6 +35,8 @@ const emptyForm: ReviewPayload = {
   name: '',
   location: '',
   date: '',
+  menu: '',
+  companion: '',
   summary: '',
   pros: '',
   cons: '',
@@ -83,6 +85,7 @@ export default function GeneratePage() {
       !form.name.trim() ||
       !form.location.trim() ||
       !form.date ||
+      !form.menu.trim() ||
       !form.summary.trim()
     );
   }, [status, form]);

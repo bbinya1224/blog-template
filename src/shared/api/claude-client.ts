@@ -1,16 +1,12 @@
-/**
- * Claude API 클라이언트
- * Anthropic API를 사용한 스타일 분석 및 리뷰 생성
- */
-
 import Anthropic from '@anthropic-ai/sdk';
 import { AppError } from '@/shared/lib/errors';
+import type { ReviewPayload } from '@/entities/review/model/types';
 
 // 모델 상수
 export const CLAUDE_SONNET = 'claude-sonnet-4-5-20250929'; // Sonnet 3.5 (안정 버전)
 export const CLAUDE_HAIKU = 'claude-3-haiku-20240307'; // Haiku 3.0 (안정 버전)
 
-// Lazy initialization - API 호출 시점에 클라이언트 생성
+// Lazy initialization
 let anthropic: Anthropic | null = null;
 
 const getAnthropicClient = (): Anthropic => {
@@ -22,7 +18,7 @@ const getAnthropicClient = (): Anthropic => {
 
   if (!ANTHROPIC_API_KEY) {
     throw new AppError(
-      'ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다. .env.local 파일을 확인해주세요.',
+      'ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다.',
       'MISSING_API_KEY',
       500
     );
@@ -58,7 +54,6 @@ export const callClaude = async (
       ],
     });
 
-    // 응답에서 텍스트 추출
     const textContent = message.content.find((block) => block.type === 'text');
     if (!textContent || textContent.type !== 'text') {
       throw new AppError(
@@ -77,14 +72,14 @@ export const callClaude = async (
     if (error instanceof Anthropic.APIError) {
       if (error.status === 401) {
         throw new AppError(
-          'Claude API 인증에 실패했습니다. API 키를 확인해주세요.',
+          'Claude API 인증 실패: API 키를 확인해주세요.',
           'AUTHENTICATION_FAILED',
           401
         );
       }
       if (error.status === 429) {
         throw new AppError(
-          'Claude API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.',
+          'Claude API 요청 한도 초과 (Rate Limit).',
           'RATE_LIMIT_EXCEEDED',
           429
         );
@@ -117,23 +112,24 @@ export const analyzeStyleWithClaude = async (
     blogText
   );
 
-  return callClaude(systemPrompt, userPrompt, CLAUDE_SONNET, 4096);
+  return callClaude(systemPrompt, userPrompt, CLAUDE_SONNET, 8192);
 };
+
+/**
+ * 리뷰 생성용 데이터 인터페이스 정의
+ * ReviewPayload를 확장하여 타입 중복 제거
+ */
+export interface ReviewGenerationData extends ReviewPayload {
+  tavily_search_result_context?: string;
+  writing_samples?: string;
+}
 
 /**
  * 리뷰 생성용 Claude Haiku 호출
  */
 export const generateReviewWithClaude = async (
   styleProfileJson: string,
-  reviewData: {
-    name: string;
-    location: string;
-    date: string;
-    summary: string;
-    pros?: string;
-    cons?: string;
-    extra?: string;
-  },
+  reviewData: ReviewGenerationData,
   systemPrompt: string,
   userPromptTemplate: string
 ): Promise<string> => {
@@ -142,10 +138,17 @@ export const generateReviewWithClaude = async (
     .replace('{name}', reviewData.name)
     .replace('{location}', reviewData.location)
     .replace('{date}', reviewData.date)
+    .replace('{menu}', reviewData.menu)
+    .replace('{companion}', reviewData.companion)
     .replace('{summary}', reviewData.summary)
     .replace('{pros}', reviewData.pros || '')
     .replace('{cons}', reviewData.cons || '')
-    .replace('{extra}', reviewData.extra || '');
+    .replace('{extra}', reviewData.extra || '')
+    .replace(
+      '{tavily_search_result_context}',
+      reviewData.tavily_search_result_context || '정보 없음'
+    )
+    .replace('{writing_samples}', reviewData.writing_samples || '샘플 없음');
 
   return callClaude(systemPrompt, userPrompt, CLAUDE_HAIKU, 4096);
 };

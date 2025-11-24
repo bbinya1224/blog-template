@@ -11,6 +11,12 @@ const STYLES_DIR = path.join(DATA_ROOT, 'styles');
 
 export const BLOG_POSTS_PATH = path.join(RSS_DIR, 'blog-posts.txt');
 export const STYLE_PROFILE_PATH = path.join(STYLES_DIR, 'my-style.json');
+export const BLOG_SAMPLES_PATH = path.join(
+  process.cwd(),
+  'data',
+  'rss-content',
+  'blog-samples.json'
+);
 
 /**
  * 데이터 폴더 구조 생성
@@ -88,4 +94,15 @@ export const saveReviewToFile = async (
   await fs.writeFile(filePath, body, 'utf-8');
 
   return filePath;
+};
+
+// 샘플 배열을 JSON으로 저장하는 함수
+export const saveBlogSamples = async (samples: string[]) => {
+  const dir = path.dirname(BLOG_SAMPLES_PATH);
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(
+    BLOG_SAMPLES_PATH,
+    JSON.stringify(samples, null, 2),
+    'utf-8'
+  );
 };

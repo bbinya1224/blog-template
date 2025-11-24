@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.69.0",
+    "@tavily/core": "^0.5.13",
     "axios": "^1.13.2",
     "cheerio": "^1.1.2",
     "next": "16.0.3",

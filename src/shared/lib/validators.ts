@@ -68,11 +68,23 @@ export const isValidReviewPayload = (
     throw new ValidationError('방문 날짜는 필수 입력 항목입니다.');
   }
 
+  if (!isNonEmptyString(p.menu)) {
+    throw new ValidationError('주문한 메뉴는 필수 입력 항목입니다.');
+  }
+
   // 날짜 형식 검증
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   if (!dateRegex.test(p.date as string)) {
     throw new ValidationError(
       '날짜는 YYYY-MM-DD 형식이어야 합니다. (예: 2024-01-15)',
+    );
+  }
+
+  // 실제 날짜 유효성 검사
+  const dateObj = new Date(p.date as string);
+  if (isNaN(dateObj.getTime())) {
+    throw new ValidationError(
+      '유효하지 않은 날짜입니다. 올바른 날짜를 입력해주세요.',
     );
   }
 
