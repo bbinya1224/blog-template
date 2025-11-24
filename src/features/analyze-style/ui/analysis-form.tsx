@@ -1,14 +1,5 @@
-/**
- * 스타일 분석 폼 컴포넌트
- * - RSS URL 입력
- * - 최근 글 개수 설정
- * - 분석 실행
- */
-
-import type { Dispatch, FormEvent, SetStateAction } from 'react';
-// TODO: 아래 컴포넌트들은 shared/ui 레이어로 이동하는 것을 권장합니다.
-// import { UrlInput, NumberInput } from '@/shared/ui/input';
-import { UrlInput, NumberInput } from './temp-inputs'; // 임시 경로
+import type { FormEvent } from 'react';
+import { UrlInput, NumberInput } from '@/shared/ui/input';
 import { ANALYSIS_CONFIG } from '@/shared/config/constants';
 
 const UI_CLASSES = {
@@ -33,7 +24,7 @@ interface AnalysisFormProps {
   isDisabled: boolean;
   isLoading: boolean;
   onRssUrlChange: (value: string) => void;
-  onMaxPostsChange: Dispatch<SetStateAction<number>>;
+  onMaxPostsChange: (value: number) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
 
@@ -51,7 +42,7 @@ export const AnalysisForm = ({
       id='rssUrl'
       label={FORM_TEXTS.RSS_URL_LABEL}
       value={rssUrl}
-      onChange={(e) => onRssUrlChange(e.target.value)}
+      onValueChange={onRssUrlChange}
       placeholder={FORM_TEXTS.RSS_URL_PLACEHOLDER}
       required
     />
@@ -61,7 +52,7 @@ export const AnalysisForm = ({
         id='maxPosts'
         label={FORM_TEXTS.MAX_POSTS_LABEL}
         value={maxPosts}
-        onChange={(e) => onMaxPostsChange(Number(e.target.value))}
+        onValueChange={onMaxPostsChange}
         min={ANALYSIS_CONFIG.MIN_POSTS}
         max={ANALYSIS_CONFIG.MAX_POSTS}
         description={FORM_TEXTS.MAX_POSTS_DESCRIPTION}

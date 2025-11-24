@@ -18,10 +18,9 @@
         "name": "next"
       }
     ],
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@prompts/*": ["prompts/*"]
+      "@/*": ["./src/*"],
+      "@prompts/*": ["./prompts/*"]
     }
   },
   "include": [

@@ -27,7 +27,7 @@ import {
   AnalysisPageHeader,
   AnalysisForm,
 } from '@/features/analyze-style';
-import { PAGE_TEXTS } from './texts';
+import { PAGE_TEXTS } from '@/features/analyze-style/constants/texts';
 
 type StepStatus = 'current' | 'completed' | 'upcoming';
 

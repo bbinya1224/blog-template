@@ -162,6 +162,7 @@ const AnalysisForm = ({ onSubmit, ... }) => (/* 폼만 담당 */);
   - 훅: use + PascalCase
   - 유틸 함수: camelCase
   - 상수: UPPER_SNAKE_CASE
+- **`any`/`unknown` 지양**: 외부 입력은 `Partial<T>` + 타입 가드(`asserts`)로 체크하고, 명시적 DTO를 통해 타입을 좁혀서 사용합니다.
 
 ## 다음 단계 제안
 
