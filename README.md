@@ -1,173 +1,155 @@
 # 블로그 톤 기반 리뷰 자동 생성 도구
 
-내 블로그 문체를 학습해 1500자 이상의 리뷰를 자동으로 만들어주는 로컬 전용 Next.js 앱입니다.
+내 블로그 문체를 학습해 **1500자 이상**의 리뷰를 자동으로 만들어주는 로컬 전용 Next.js 앱입니다.
+
+## ✨ 주요 기능
+
+- 📝 네이버 블로그 RSS 분석으로 나만의 문체 학습
+- 🔍 **Tavily 검색으로 실제 가게 정보 자동 수집**
+- 🤖 Claude AI로 내 말투를 흉내낸 1500~2000자 리뷰 생성
+- 🎨 생성된 리뷰 실시간 수정 및 복사
+- 💾 모든 데이터 로컬 저장 (프라이버시 보장)
 
 ## 🚀 빠른 시작
 
+### 1. 설치
+
 ```bash
 npm install
+```
+
+### 2. 환경 변수 설정
+
+`.env.example` 파일을 복사하여 `.env.local` 생성:
+
+```bash
+cp .env.example .env.local
+```
+
+다음 API 키를 발급받아 `.env.local`에 추가:
+
+```env
+# 필수 API 키
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+TAVILY_API_KEY=your_tavily_api_key_here
+```
+
+**API 키 발급**:
+- **Anthropic** (Claude AI): https://console.anthropic.com/
+  - 용도: 스타일 분석 + 리뷰 생성
+- **Tavily** (검색): https://tavily.com/
+  - 용도: 가게 정보 자동 검색
+  - 무료: 월 1,000회
+
+### 3. 개발 서버 실행
+
+```bash
 npm run dev
 ```
 
-브라우저에서 http://localhost:3000 을 열어 스타일 분석 → 리뷰 생성 플로우를 바로 확인할 수 있습니다.
+브라우저에서 http://localhost:3000 접속
 
-## 🏗️ 아키텍처 특징
+## 📖 사용 방법
 
-### 함수형 프로그래밍 패턴
-- **순수 함수**: 비즈니스 로직을 순수 함수로 분리하여 테스트 용이성 향상
-- **불변성**: 상태 변경을 최소화하고 예측 가능한 데이터 흐름
-- **고차 함수**: 재사용 가능한 커스텀 훅과 유틸리티 함수
+### 1단계: 스타일 분석 (`/analyze`)
+1. 네이버 블로그 RSS URL 입력 (예: `https://rss.blog.naver.com/YOUR_BLOG.xml`)
+2. 분석할 최근 글 개수 선택 (권장: 10~20개)
+3. 크롤링 및 분석 완료 대기
+4. 생성된 스타일 프로필 확인
 
-### 타입 안정성
-- **엄격한 타입 정의**: 모든 함수와 컴포넌트에 명시적 타입
-- **타입 가드**: 런타임 타입 검증으로 안전성 보장
-- **제네릭 활용**: 재사용 가능한 타입 안전 유틸리티
+### 2단계: 리뷰 생성 (`/generate`)
+1. **기본 정보**: 가게명, 위치, 방문 날짜
+2. **개인 경험**: 주문한 메뉴(필수), 동행인
+3. **평가**: 한줄평, 장점, 단점, 추가 팁
+4. 생성 버튼 클릭 → 1500~2000자 리뷰 자동 생성
+5. 리뷰 복사 또는 수정 요청
 
-### 컴포넌트 설계
-- **Atomic Design**: 작고 재사용 가능한 컴포넌트로 분해
-- **단일 책임 원칙**: 각 컴포넌트는 하나의 역할만 수행
-- **Props Drilling 방지**: 커스텀 훅으로 로직 분리
+## 🏗️ 기술 스택
 
-## 📁 폴더 구조
+### Frontend
+- **Next.js 16** (App Router, React 19, Turbopack)
+- **TypeScript** (Strict 모드)
+- **Tailwind CSS 4**
 
-### 핵심 디렉토리
+### Backend/API
+- **Claude AI**
+  - Sonnet 4.5: 스타일 분석
+  - Haiku 3.0: 리뷰 생성 및 수정
+- **Tavily API**: 실시간 가게 정보 검색
+- **Axios + Cheerio**: RSS 크롤링
 
-| 경로 | 설명 |
-| --- | --- |
-| `src/app` | App Router 기반 페이지(`/`, `/analyze`, `/generate`)와 API Routes |
-| `src/components` | 재사용 가능한 UI 컴포넌트 (Atomic Design 패턴) |
-| `src/hooks` | 커스텀 React 훅 (로직 재사용) |
-| `src/lib` | 비즈니스 로직, 유틸리티, API 클라이언트 |
-| `data/` | 런타임 데이터 저장소 (RSS 콘텐츠, 스타일 프로필, 생성된 리뷰) |
-| `prompts/` | Claude API 프롬프트 템플릿 |
+### 아키텍처
+- **FSD (Feature-Sliced Design)**: 계층형 구조
+- **함수형 프로그래밍**: 순수 함수 중심
+- **타입 안전성**: Strict TypeScript + 런타임 검증
 
-### 새로 추가된 파일
+## 📁 프로젝트 구조
 
-#### 커스텀 훅 (`src/hooks/`)
-- `useLocalStorage.ts` - localStorage를 React state처럼 사용
-- `useStyleProfile.ts` - 스타일 프로필 관리 (로드/저장/삭제)
-- `useAsync.ts` - 비동기 작업 상태 관리
-
-#### 유틸리티 (`src/lib/`)
-- `constants.ts` - 전역 상수 (API 엔드포인트, 스타일, 메시지 등)
-
-#### 컴포넌트 (`src/components/`)
-- `style-profile-summary.tsx` - 스타일 프로필 요약 표시
-  - 핵심 정보 하이라이트
-  - 접기/펼치기 기능
-  - 다음 단계 CTA
-
-## 구현된 흐름
-
-1. **스타일 분석 페이지 (`/analyze`)**
-   - RSS URL + 최근 글 개수를 입력하면 `/api/fetch-rss` → `/api/analyze-style` 순으로 호출
-   - **Claude Sonnet API**를 사용하여 블로그 문체를 분석하고 스타일 프로필 JSON 생성
-2. **리뷰 생성 페이지 (`/generate`)**
-   - 폼 입력 후 `/api/generate-review`를 호출해 리뷰를 만들고 `data/reviews`에 저장
-   - **Claude Haiku API**를 사용하여 스타일 프로필 기반으로 1500자+ 리뷰 생성
-   - 생성된 텍스트는 UI에서 바로 복사하거나 수정 요청(`/api/edit-review`)으로 재가공 가능
-   - 수정 요청도 **Claude Haiku API**를 통해 자연스럽게 개선
-
-## 환경 설정
-
-1. `.env.local` 파일 생성 (`.env.example` 참고)
-2. Anthropic API 키 발급: https://console.anthropic.com/
-3. `.env.local`에 키 추가:
-   ```
-   ANTHROPIC_API_KEY=your_api_key_here
-   ```
-
-## 💡 코드 패턴 예제
-
-### 1. 순수 함수로 비즈니스 로직 분리
-
-```typescript
-// ❌ Before: 컴포넌트 내부에 로직 혼재
-const Component = () => {
-  const [data, setData] = useState(null);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const res = await fetch('/api/data');
-    const json = await res.json();
-    setData(json);
-  };
-};
-
-// ✅ After: 순수 함수로 분리
-const fetchData = async (): Promise<Data> => {
-  const res = await fetch('/api/data');
-  if (!res.ok) throw new Error('Failed to fetch');
-  return res.json();
-};
-
-const Component = () => {
-  const { data, execute } = useAsync(fetchData);
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    execute();
-  };
-};
+```
+blog-template/
+├── app/                    # Next.js App Router 페이지 및 API
+│   ├── analyze/           # 스타일 분석 페이지
+│   ├── generate/          # 리뷰 생성 페이지
+│   └── api/               # API 라우트
+├── src/
+│   ├── entities/          # 도메인 엔티티 (types)
+│   ├── features/          # 기능 모듈 (analyze, review, rss-crawler)
+│   ├── shared/            # 공유 유틸리티
+│   └── widgets/           # 복합 UI 컴포넌트
+├── prompts/               # Claude API 프롬프트 템플릿
+├── data/                  # 런타임 데이터 (생성됨, git ignore)
+│   ├── rss-content/       # 크롤링된 블로그 글
+│   ├── styles/            # 스타일 프로필
+│   └── reviews/           # 생성된 리뷰
+└── docs/                  # 개발 문서
 ```
 
-### 2. 커스텀 훅으로 로직 재사용
+## 🔧 주요 명령어
 
-```typescript
-// ✅ useStyleProfile 훅 사용
-const Component = () => {
-  const { styleProfile, saveProfile, loadProfile } = useStyleProfile();
+```bash
+# 개발 서버 실행
+npm run dev
 
-  // 자동으로 마운트 시 로드됨
-  // localStorage → API fallback 자동 처리
-};
+# 프로덕션 빌드
+npm run build
+
+# 프로덕션 서버 실행
+npm start
+
+# 타입 체크
+npx tsc --noEmit
+
+# 린트
+npm run lint
 ```
 
-### 3. 상수로 매직 넘버/스트링 제거
+## 💰 비용
 
-```typescript
-// ❌ Before
-<button className="rounded-xl bg-blue-500 py-3 px-6...">
+**API 사용료** (종량제):
+- **Claude Sonnet 4.5**: $3/MTok (입력), $15/MTok (출력)
+  - 스타일 분석 1회: 약 $0.05~0.10
+- **Claude Haiku 3.0**: $0.25/MTok (입력), $1.25/MTok (출력)
+  - 리뷰 생성 1회: 약 $0.01~0.02
+- **Tavily**: 무료 1,000회/월, 이후 $0.001/검색
 
-// ✅ After
-import { BUTTON_STYLES } from '@/lib/constants';
-<button className={BUTTON_STYLES.PRIMARY}>
-```
+**예상 비용**: 월 10~20개 리뷰 생성 시 약 $1~2
 
-### 4. 작은 컴포넌트로 분해
+## 📚 추가 문서
 
-```typescript
-// ✅ 각 컴포넌트는 단일 책임
-const PageHeader = () => (/* 헤더만 담당 */);
-const StatusMessage = ({ message, isError }) => (/* 상태 메시지만 담당 */);
-const AnalysisForm = ({ onSubmit, ... }) => (/* 폼만 담당 */);
-```
+- [개발 가이드](docs/development-guide.md) - 코드 컨벤션, 패턴, 폴더 구조
+- [아키텍처 상세](docs/architecture.md) - FSD 구조, 데이터 플로우
+- [PRD](docs/prd.md) - 제품 요구사항 문서
+- [UI 디자인 스펙](docs/UI-Design-Spec.md) - 디자인 가이드
 
-## 🛠️ 개발 가이드
+## ⚠️ 제한 사항
 
-### 새 기능 추가 시 체크리스트
+- 네이버 블로그 RSS 전용 (다른 플랫폼 미지원)
+- 비공개 블로그 크롤링 불가
+- API 호출 실패 시 재시도 없음
+- 검색 결과가 없는 경우 일반적인 리뷰로 생성
 
-1. **순수 함수 우선**: 로직을 순수 함수로 작성 → 테스트 용이
-2. **타입 정의**: 모든 함수와 컴포넌트에 명시적 타입 추가
-3. **상수 사용**: 반복되는 값은 `constants.ts`에 정의
-4. **훅 재사용**: 비슷한 로직이면 커스텀 훅으로 추출
-5. **컴포넌트 분해**: 100줄 넘으면 작은 컴포넌트로 분리
+## 📄 라이선스
 
-### 코드 스타일
+MIT License
 
-- **ESLint/Prettier** 자동 포맷팅
-- **함수형 컴포넌트** 사용 (React.FC 지양)
-- **명명 규칙**:
-  - 컴포넌트: PascalCase
-  - 훅: use + PascalCase
-  - 유틸 함수: camelCase
-  - 상수: UPPER_SNAKE_CASE
-- **`any`/`unknown` 지양**: 외부 입력은 `Partial<T>` + 타입 가드(`asserts`)로 체크하고, 명시적 DTO를 통해 타입을 좁혀서 사용합니다.
-
-## 다음 단계 제안
-
-1. ✅ ~~스타일 분석 페이지 리팩토링~~
-2. 🔄 리뷰 생성 페이지 리팩토링 (동일한 패턴 적용)
-3. 📝 생성된 리뷰 목록/재편집 페이지 추가
-4. 🎨 스타일 프로필 편집/재분석 기능
-5. 🧪 단위 테스트 추가 (Jest + React Testing Library)
+---
