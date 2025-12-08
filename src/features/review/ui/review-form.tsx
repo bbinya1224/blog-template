@@ -114,6 +114,22 @@ export const ReviewForm = ({
       </h3>
 
       <div>
+        <label className='label-base' htmlFor='user_draft'>
+          자유 메모/초안 (Draft) - 💡 가장 중요!
+        </label>
+        <textarea
+          id='user_draft'
+          value={form.user_draft || ''}
+          onChange={onChange('user_draft')}
+          placeholder='여기에 생각나는 대로 막 적어주세요. AI가 이 내용을 바탕으로 살을 붙여 1500자로 늘려드립니다. (예: 커피는 산미가 강해서 호불호 갈릴 듯. 근데 케이크는 진짜 꾸덕하고 맛있음. 사장님이 서비스로 쿠키도 주심...)'
+          className='input-base h-40 resize-none bg-yellow-50 border-yellow-200 focus:border-yellow-400 focus:ring-yellow-400'
+        />
+        <p className='text-xs text-gray-500 mt-1'>
+          * 키워드보다 <b>줄글로 적어주시면</b> 훨씬 자연스러운 리뷰가 나옵니다.
+        </p>
+      </div>
+
+      <div>
         <label className='label-base' htmlFor='summary'>
           한줄평 (제목 감) *
         </label>

@@ -6,8 +6,8 @@
 import type { StyleProfile } from '@/entities/style-profile/model/types';
 import { StyleAnalysisError } from '@/shared/lib/errors';
 import { unique } from '@/shared/lib/utils';
-import { analyzeStyleWithClaude } from '@/shared/api/claude-client';
-import { STYLE_ANALYSIS_PROMPT, STYLE_USER_PROMPT } from '@/shared/config/prompts';
+import { analyzeStyleWithClaude, analyzePdfStyleWithClaude } from '@/shared/api/claude-client';
+import { STYLE_ANALYSIS_PROMPT, STYLE_USER_PROMPT, STYLE_PDF_USER_PROMPT } from '@/shared/config/prompts';
 
 const COMMON_SECTIONS = [
   '방문 이유',
@@ -195,6 +195,84 @@ export const generateStyleProfileWithClaude = async (
     );
 
     console.log('\n[스타일 분석] Claude 응답 (첫 500자):');
+    console.log(responseText.substring(0, 500));
+    console.log('...\n');
+
+    // JSON 추출 - 여러 방법 시도
+    let cleanedJson = responseText;
+
+    // 1. 코드 블록 마커 제거
+    cleanedJson = cleanedJson.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+
+    // 2. JSON 객체만 추출 (가장 바깥쪽 {} 사이의 내용)
+    const jsonMatch = cleanedJson.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanedJson = jsonMatch[0];
+    }
+
+    cleanedJson = cleanedJson.trim();
+
+    console.log('[스타일 분석] 정제된 JSON (첫 300자):');
+    console.log(cleanedJson.substring(0, 300));
+    console.log('...\n');
+
+    const styleProfile = JSON.parse(cleanedJson) as StyleProfile;
+
+    // 기본 구조 검증
+    if (
+      !styleProfile.writing_style ||
+      !styleProfile.structure_pattern ||
+      !styleProfile.keyword_profile
+    ) {
+      throw new StyleAnalysisError(
+        'Claude API 응답이 올바른 형식이 아닙니다.',
+      );
+    }
+
+    return styleProfile;
+  } catch (error) {
+    // 원본 에러 로깅 (디버깅용)
+    console.error('스타일 분석 상세 에러:', error);
+
+    if (error instanceof StyleAnalysisError) {
+      throw error;
+    }
+
+    if (error instanceof SyntaxError) {
+      throw new StyleAnalysisError(
+        'Claude API 응답을 JSON으로 파싱할 수 없습니다. 다시 시도해주세요.',
+      );
+    }
+
+    // 에러 메시지를 포함하여 더 자세한 정보 제공
+    const errorMessage =
+      error instanceof Error
+        ? `스타일 분석 중 오류: ${error.message}`
+        : 'Claude API를 사용한 스타일 분석 중 오류가 발생했습니다.';
+
+    throw new StyleAnalysisError(errorMessage);
+  }
+};
+
+/**
+ * PDF 파일을 사용한 스타일 프로필 생성
+ */
+/**
+ * PDF에서 추출한 텍스트를 사용한 스타일 프로필 생성
+ */
+export const generateStyleProfileFromPdfText = async (
+  pdfText: string,
+): Promise<StyleProfile> => {
+  try {
+    // Claude Sonnet API 호출 (Text)
+    // 기존 analyzeStyleWithClaude를 재사용하되, 프롬프트만 PDF용으로 교체
+    const responseText = await analyzeStyleWithClaude(
+      pdfText,
+      STYLE_ANALYSIS_PROMPT,
+      STYLE_PDF_USER_PROMPT,
+    );
+
+    console.log('\n[스타일 분석] Claude 응답 (PDF Text) (첫 500자):');
     console.log(responseText.substring(0, 500));
     console.log('...\n');
 

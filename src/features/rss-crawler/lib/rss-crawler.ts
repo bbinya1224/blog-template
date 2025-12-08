@@ -198,10 +198,18 @@ const fetchHtml = async (url: string, referer?: string) => {
     headers: {
       'User-Agent': getRandomUserAgent(),
       Referer: referer || 'https://blog.naver.com',
-      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      'Upgrade-Insecure-Requests': '1',
     },
   });
   return res.data;
+};
+
+const enforceHttps = (url: string): string => {
+  if (url.startsWith('http://')) {
+    return url.replace('http://', 'https://');
+  }
+  return url;
 };
 
 export const crawlBlogRss = async (
@@ -212,7 +220,10 @@ export const crawlBlogRss = async (
   const debug = options?.debug ?? false;
 
   try {
-    const rssResponse = await axios.get<string>(rssUrl, {
+    // 1. RSS URL HTTPS 강제
+    const secureRssUrl = enforceHttps(rssUrl);
+    
+    const rssResponse = await axios.get<string>(secureRssUrl, {
       timeout: 20000,
       headers: {
         'User-Agent': getRandomUserAgent(),
@@ -243,7 +254,7 @@ export const crawlBlogRss = async (
       let extracted: ExtractResult | null = null;
 
       for (let j = 0; j < candidateUrls.length; j++) {
-        const url = candidateUrls[j];
+        const url = enforceHttps(candidateUrls[j]);
         try {
           console.log(`  → 시도 URL #${j + 1}: ${url}`);
 

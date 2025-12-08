@@ -1,12 +1,5 @@
 'use client';
 
-/**
- * 스타일 분석 페이지
- * - FSD 아키텍처: 얇은 조합 레이어 (Composition Layer)
- * - 비즈니스 로직은 features/analyze-style에 위임
- * - UI 컴포넌트 조합만 담당
- */
-
 import {
   useCallback,
   useEffect,
@@ -43,7 +36,6 @@ export default function AnalyzePage() {
     ANALYSIS_CONFIG.DEFAULT_MAX_POSTS
   );
 
-  // 비동기 작업 관리
   const {
     data: styleProfile,
     execute: executeAnalysis,
@@ -53,7 +45,6 @@ export default function AnalyzePage() {
     error,
   } = useAsync(analyzeStyle);
 
-  // 계산된 값들
   const isDisabled = useMemo(
     () => isLoading || !rssUrl.trim(),
     [isLoading, rssUrl]
@@ -84,7 +75,6 @@ export default function AnalyzePage() {
     [isSuccess]
   );
 
-  // 이벤트 핸들러
   const handleSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -101,10 +91,8 @@ export default function AnalyzePage() {
     <div className='space-y-10'>
       <StepIndicator steps={steps} />
 
-      {/* 페이지 헤더 */}
       <AnalysisPageHeader />
 
-      {/* RSS 입력 폼 */}
       <SectionCard
         title={PAGE_TEXTS.RSS_FORM_TITLE}
         description={PAGE_TEXTS.RSS_FORM_DESCRIPTION}
@@ -123,9 +111,14 @@ export default function AnalyzePage() {
           onMaxPostsChange={setMaxPosts}
           onSubmit={handleSubmit}
         />
+        <div className="mt-4 text-center text-sm text-gray-500">
+          혹시 RSS가 안 되시나요?
+          <a href="/analyze/pdf" className="text-blue-500 hover:underline">
+            PDF로 분석하기
+          </a>
+        </div>
       </SectionCard>
 
-      {/* 분석 결과 */}
       {styleProfile && (
         <SectionCard
           title={PAGE_TEXTS.RESULT_CARD_TITLE}

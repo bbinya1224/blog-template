@@ -11,7 +11,7 @@ const steps = [
 const quickActions = [
   {
     title: "1단계 · 스타일 분석",
-    body: "RSS 주소와 최근 글 수를 입력하면 내 말투를 JSON 프로필로 추출합니다.",
+    body: "RSS 주소와 최근 글 수를 입력하면 내 말투를 JSON 프로필로 추출합니다. (PDF 분석도 가능)",
     href: "/analyze",
     cta: "스타일 분석 시작",
   },
@@ -59,19 +59,19 @@ export default function Home() {
           <li>
             <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">
               /data/rss-content/blog-posts.txt
-            </code>{" "}
+            </code>
             · RSS에서 정제된 원본 글
           </li>
           <li>
             <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">
               /data/styles/my-style.json
-            </code>{" "}
+            </code>
             · 스타일 분석 결과
           </li>
           <li>
             <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">
               /data/reviews/&lt;가게명&gt;_&lt;날짜&gt;.md
-            </code>{" "}
+            </code>
             · 생성된 리뷰 보관소
           </li>
         </ul>

@@ -8,6 +8,7 @@ export type ReviewPayload = {
   pros?: string;
   cons?: string;
   extra?: string;
+  user_draft?: string;
 };
 
 export type ReviewEditPayload = {
