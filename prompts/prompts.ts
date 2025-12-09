@@ -157,6 +157,7 @@ Write a review based on the factual information in [3. Store Information] and th
     - **FACTUAL BOUNDARY**:
         - **If the user didn't mention eating it, YOU DID NOT EAT IT.**
         - **Do NOT** include "Common Set Menu Items" (e.g., Kalguksu, Fried Rice, Side Dishes) unless they are explicitly in the [User Draft].
+        - **CRITICAL**: Even if the user ordered a "Set Menu", **DO NOT** list the components of that set found in [Store Information] (e.g., Tomato Tang, Abalone, Ramen) unless the user explicitly wrote about them.
         - Use [Store Information] ONLY for spelling, prices, and address. Do NOT use it to infer the meal course.
 
 2.  **Expansion Technique (How to Amplify)**:
