@@ -110,23 +110,24 @@ export const ReviewForm = ({
     {/* 섹션 3: 평가 및 디테일 */}
     <div className='space-y-4'>
       <h3 className='text-lg font-semibold text-gray-900 border-b pb-2'>
-        📝 상세 평가
+        📝 상세 평가 (Ghostwriter Mode)
       </h3>
 
-      <div>
-        <label className='label-base' htmlFor='user_draft'>
-          자유 메모/초안 (Draft) - 💡 가장 중요!
+      <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
+        <label className='label-base text-purple-900 font-bold' htmlFor='user_draft'>
+          👻 고스트라이터에게 초안 넘기기 (권장)
         </label>
+        <p className='text-sm text-purple-700 mb-2'>
+          여기에 겪은 일을 의식의 흐름대로 적어주세요. AI가 <b>당신의 말투로 2000자 에세이</b>를 완성해드립니다.<br/>
+          (이 칸을 채우면 아래 장점/단점은 무시됩니다.)
+        </p>
         <textarea
           id='user_draft'
           value={form.user_draft || ''}
           onChange={onChange('user_draft')}
-          placeholder='여기에 생각나는 대로 막 적어주세요. AI가 이 내용을 바탕으로 살을 붙여 1500자로 늘려드립니다. (예: 커피는 산미가 강해서 호불호 갈릴 듯. 근데 케이크는 진짜 꾸덕하고 맛있음. 사장님이 서비스로 쿠키도 주심...)'
-          className='input-base h-40 resize-none bg-yellow-50 border-yellow-200 focus:border-yellow-400 focus:ring-yellow-400'
+          placeholder='예: 오이도 가서 조개구이 먹음. 3층이라 뷰가 좋았음. 근데 주차가 좀 빡셌음. 사장님이 친절하게 구워주심. 칼국수는 국물이 시원했음...'
+          className='input-base h-60 resize-none bg-white border-purple-200 focus:border-purple-500 focus:ring-purple-500'
         />
-        <p className='text-xs text-gray-500 mt-1'>
-          * 키워드보다 <b>줄글로 적어주시면</b> 훨씬 자연스러운 리뷰가 나옵니다.
-        </p>
       </div>
 
       <div>

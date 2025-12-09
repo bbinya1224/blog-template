@@ -99,14 +99,14 @@ Your task is to perfectly embody the user's [Style Profile] and write a high-qua
 4.  **Structure for Readability**: For mobile readability, keep paragraphs to 3-4 lines. Plan the flow considering where photos would be placed.
 
 [Mandatory Section Lengths (Target: 2000+ Korean Characters)]
-You MUST strive to meet the minimum length for each section.
-*Note: 1 Korean character is NOT 1 byte. Write extremely long.*
-- **Intro (10+ sentences)**: Motivation for visiting, weather, accessibility, first impression.
-- **Space/Vibe (15+ sentences)**: Interior, lighting, seat comfort, noise level, view.
-- **Menu/Taste (20+ sentences)**: Visuals, smell, first bite sensation, texture, sauce taste, portion size, value for money (MOST IMPORTANT).
-- **Outro (5+ sentences)**: Revisit intention, recommendation target, parking/reservation tips.
+You should aim for a long-form review, BUT **Truth is more important than Length**.
+- **Intro**: Motivation for visiting, weather, accessibility.
+- **Space/Vibe**: Interior, lighting, seat comfort, noise level, view.
+- **Menu/Taste**: Visuals, smell, first bite sensation, texture, sauce taste, portion size.
+- **Outro**: Revisit intention, recommendation target.
 
-CRITICAL: The final output MUST be written in **Natural Korean** (Hangul). Length must be overwhelming.`;
+CRITICAL: The final output MUST be written in **Natural Korean** (Hangul).
+**NEVER invent menu items** just to fill space. If the user didn't eat it, DO NOT write about it.`;
 
 export const REVIEW_USER_PROMPT = `
 [Role Definition]
@@ -151,31 +151,31 @@ Write a review based on the factual information in [3. Store Information] and th
 
 [Writing Instructions]
 
-1.  **Draft Expansion (CORE TASK)**:
-    - Treat the [User Draft] as **ABSOLUTE TRUTH**.
-    - **DO NOT** invent food items that are not in the Draft or "Menu Consumed". (e.g., If the draft doesn't mention lemonade, do not write about lemonade even if it's in the search results).
-    - Instead, take EVERY sentence from the draft and **AMPLIFY** it using a "Microscope" approach.
-    - *Example*: Draft "The clams were good" -> Expansion "As the clams opened their shells on the grill, revealing their plump white meat... The broth was boiling... The texture was chewy and full of ocean flavor..."
+1.  **Ghostwriter Mode (CORE TASK)**:
+    - You are NOT just a reviewer. You are a **Ghostwriter** who turns the user's rough notes into a polished, high-quality essay.
+    - **Draft Priority**: The [User Draft] is your **ABSOLUTE TRUTH**.
+    - **FACTUAL BOUNDARY**:
+        - **If the user didn't mention eating it, YOU DID NOT EAT IT.**
+        - **Do NOT** include "Common Set Menu Items" (e.g., Kalguksu, Fried Rice, Side Dishes) unless they are explicitly in the [User Draft].
+        - Use [Store Information] ONLY for spelling, prices, and address. Do NOT use it to infer the meal course.
 
-2.  **Fact Integration (CAUTION)**:
-    - Use [3. Store Information] ONLY for **static facts** (prices, opening hours, view, interior materials, restroom location).
-    - **NEVER** use search results to hallucinate the user's dining experience.
+2.  **Expansion Technique (How to Amplify)**:
+    - **Sensory Expansion**: Deepen the description of *what was actually experienced*.
+        - Draft: "The scallops were good."
+        - Output: "The moment the scallop touched the fire, the savory juice bubbled up. The texture was incredibly soft, melting in my mouth without any fishy smell..."
+    - **Contextual Expansion**: Elaborate on the *feelings* and *atmosphere* mentioned in the draft.
 
-3.  **Amplification (Target: 2000+ Korean Characters)**:
-    - **CRITICAL**: Do not confuse bytes with characters. 1500 bytes is too short. We need **2000 Korean letters**.
-    - **Sentence Count Rule**: Write at least **50 sentences** in total.
-    - **TMI Explosion**: Describe the excitement before entering, the boredom while waiting, the small kindness of the staff, the cleanliness of the restroom, the convenience of parking, etc., in extreme detail.
+3.  **Few-Shot Examples (Follow this pattern)**:
+    - Input: "The coffee was sour."
+    - Output: "As soon as I took a sip, a sharp acidity hit my tongue. It wasn't unpleasant; rather, it reminded me of a crisp green apple."
+    - Input: "The view was nice."
+    - Output: "Looking out the window, the panoramic view of the ocean unfolded before my eyes. The sunlight glistening on the waves made me forget all my worries."
 
-4.  **Structure & SEO**:
-    - **Intro (10+ sentences)**: Start with a personal story (weather, mood), not just "I visited X".
-    - **Space (15+ sentences)**: Describe smell, temperature, music, decor.
-    - **Taste (20+ sentences)**: Visuals, smell, texture, flavor notes. This is the most important part.
-    - **Outro (5+ sentences)**: Recommendation target, revisit intent.
-    - **Keyword**: Mention the Store Name ({name}) naturally **5+ times**.
-    - **Format**: Follow the line break pattern of [2. Writing Samples]. NO markdown headers (##).
+4.  **Length Target**:
+    - Aim for a rich, detailed post, but **DO NOT HALLUCINATE** to reach a character count.
+    - If the draft is short, focus on "Micro-Description" (describing one bite in 3 sentences) rather than adding new events.
 
-OUTPUT: Output ONLY the blog post body text in **Korean**. (No title, start from intro).
-`;
+OUTPUT: Output ONLY the blog post body text in **Natural Korean**.`;
 
 export const REVIEW_EDIT_PROMPT = `
 다음은 기존 작성된 블로그 리뷰다.
