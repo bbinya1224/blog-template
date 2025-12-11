@@ -25,11 +25,7 @@ import {
   ReviewResult,
 } from '@/features/review';
 
-const steps = [
-  { label: '스타일 분석', status: 'completed' as const },
-  { label: '리뷰 생성', status: 'current' as const },
-  { label: '수정/보관', status: 'upcoming' as const },
-];
+
 
 const emptyForm: ReviewPayload = {
   name: '',
@@ -163,7 +159,7 @@ export default function GeneratePage() {
 
   return (
     <div className="space-y-10">
-      <StepIndicator steps={steps} />
+      <StepIndicator />
 
       {/* 페이지 헤더 */}
       <GeneratePageHeader />

@@ -2,12 +2,6 @@ import Link from 'next/link';
 import { SectionCard } from '@/shared/ui/section-card';
 import { StepIndicator } from '@/shared/ui/step-indicator';
 
-const steps = [
-  { label: "스타일 분석", status: "current" as const },
-  { label: "리뷰 생성", status: "upcoming" as const },
-  { label: "수정/보관", status: "upcoming" as const },
-];
-
 const quickActions = [
   {
     title: "1단계 · 스타일 분석",
@@ -26,7 +20,7 @@ const quickActions = [
 export default function Home() {
   return (
     <div className="space-y-10">
-      <StepIndicator steps={steps} />
+      <StepIndicator />
       <section className="space-y-4">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-500">
           Setup Guide

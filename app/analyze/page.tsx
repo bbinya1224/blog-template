@@ -22,13 +22,6 @@ import {
 } from '@/features/analyze-style';
 import { PAGE_TEXTS } from '@/features/analyze-style/constants/texts';
 
-type StepStatus = 'current' | 'completed' | 'upcoming';
-
-interface Step {
-  label: string;
-  status: StepStatus;
-}
-
 export default function AnalyzePage() {
   const router = useRouter();
   const [rssUrl, setRssUrl] = useState(''); // 타입 추론 가능
@@ -63,17 +56,7 @@ export default function AnalyzePage() {
     }
   }, [isSuccess, styleProfile]);
 
-  const steps: Step[] = useMemo(
-    () => [
-      {
-        label: PAGE_TEXTS.STEP_ANALYZE,
-        status: isSuccess ? 'completed' : 'current',
-      },
-      { label: PAGE_TEXTS.STEP_GENERATE, status: 'upcoming' },
-      { label: PAGE_TEXTS.STEP_SAVE, status: 'upcoming' },
-    ],
-    [isSuccess]
-  );
+
 
   const handleSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
@@ -89,7 +72,7 @@ export default function AnalyzePage() {
 
   return (
     <div className='space-y-10'>
-      <StepIndicator steps={steps} />
+      <StepIndicator />
 
       <AnalysisPageHeader />
 
