@@ -58,3 +58,13 @@ export async function getReviewById(id: string): Promise<Review | null> {
     preview: content.slice(0, 150) + '...',
   };
 }
+
+export async function updateReview(id: string, content: string): Promise<void> {
+  const filePath = path.join(REVIEWS_DIR, `${id}.md`);
+  
+  if (!fs.existsSync(filePath)) {
+    throw new Error('Review not found');
+  }
+
+  fs.writeFileSync(filePath, content, 'utf-8');
+}

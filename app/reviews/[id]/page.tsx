@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getReviewById } from '@/entities/review/api/review-repository';
-import { SectionCard } from '@/shared/ui/section-card';
+import { ReviewDetailViewer } from '@/widgets/review-detail/ui/review-detail-viewer';
 
 interface ReviewDetailPageProps {
   params: Promise<{
@@ -33,11 +33,7 @@ export default async function ReviewDetailPage({ params }: ReviewDetailPageProps
         <p className="text-gray-500">{review.date}</p>
       </div>
 
-      <SectionCard title="리뷰 내용">
-        <div className="prose prose-blue max-w-none whitespace-pre-wrap text-gray-800">
-          {review.content}
-        </div>
-      </SectionCard>
+      <ReviewDetailViewer initialReview={review} />
     </div>
   );
 }
