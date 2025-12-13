@@ -129,24 +129,6 @@ npx tsc --noEmit
 npm run lint
 ```
 
-## 💰 비용
-
-**API 사용료** (종량제):
-- **Claude Sonnet 4.5**: $3/MTok (입력), $15/MTok (출력)
-  - 스타일 분석 1회: 약 $0.05~0.10
-- **Claude Haiku 3.0**: $0.25/MTok (입력), $1.25/MTok (출력)
-  - 리뷰 생성 1회: 약 $0.01~0.02
-- **Tavily**: 무료 1,000회/월, 이후 $0.001/검색
-
-**예상 비용**: 월 10~20개 리뷰 생성 시 약 $1~2
-
-## 📚 추가 문서
-
-- [개발 가이드](docs/development-guide.md) - 코드 컨벤션, 패턴, 폴더 구조
-- [아키텍처 상세](docs/architecture.md) - FSD 구조, 데이터 플로우
-- [PRD](docs/prd.md) - 제품 요구사항 문서
-- [UI 디자인 스펙](docs/UI-Design-Spec.md) - 디자인 가이드
-
 ## ⚠️ 제한 사항
 
 - 네이버 블로그 RSS 전용 (다른 플랫폼 미지원)
