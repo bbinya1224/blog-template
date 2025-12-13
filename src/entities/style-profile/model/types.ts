@@ -10,6 +10,7 @@ export type WritingStyle = {
 };
 
 export type StructurePattern = {
+  overall_flow: string;
   opening_style: string;
   frequent_sections: string[];
 };

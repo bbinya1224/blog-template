@@ -86,7 +86,7 @@ const StyleProfileDetails = ({ styleProfile }: { styleProfile: StyleProfile }) =
       <DetailSection
         title="글 구조 패턴"
         content={styleProfile.structure_pattern.overall_flow}
-        subContent={styleProfile.structure_pattern.paragraph_pattern}
+        subContent={styleProfile.visual_structure.paragraph_pattern}
       />
       <DetailSection title="주요 섹션">
         <div className="flex flex-wrap gap-2">

@@ -48,44 +48,6 @@ export const STYLE_USER_PROMPT = `다음은 특정 네이버 블로거가 작성
 ========================
 `;
 
-export const STYLE_PDF_USER_PROMPT = `첨부된 PDF 파일은 특정 네이버 블로거가 작성한 글과 사진이 포함된 문서이다.
-이 문서를 심층 분석하여 블로거의 페르소나를 추출해줘.
-
-분석 중점 사항:
-1. 문장 종결 어미 (예: ~해요, ~했음, ~하더라고요, ~습니다)
-2. 줄바꿈 패턴 (모바일 가독성을 위해 엔터를 자주 치는지, 문단을 꽉 채우는지)
-3. 감정 표현의 강도 (담백함 vs 이모지 남발 vs 감성적)
-4. 서론/본론/결론의 전개 방식
-5. (PDF에 포함된 경우) 사진 배치 스타일이나 캡션 스타일도 분석에 포함
-
-출력 형식(JSON):
-{
-  "writing_style": {
-    "formality": "존댓말/반말 비율 및 친밀도",
-    "tone": "전체적인 분위기 (예: 발랄한, 시니컬한, 전문적인)",
-    "emotion": "감정 표현의 강도 (예: 감성적, 건조함, 열정적)",
-    "sentence_length": "평균 문장 길이 특징 (예: 짧고 간결함, 만연체)",
-    "pacing": "글의 호흡 (예: 빠른 전개, 여유로운 묘사)",
-    "ending_patterns": ["자주 쓰는 종결어미1", "종결어미2"],
-    "habitual_phrases": ["자주 쓰는 감탄사나 연결어"],
-    "emoji_usage": "이모티콘 사용 빈도 및 스타일",
-    "style_notes": "AI가 글을 생성할 때 참고해야 할 핵심 지침"
-  },
-  "visual_structure": {
-    "line_breaks": "줄바꿈 스타일 (예: 1문장마다 엔터, 3~4줄 문단 등)",
-    "paragraph_pattern": "문단 구성 특징"
-  },
-  "structure_pattern": {
-    "opening_style": "글 시작 방식 (예: 인사말 필수, 날씨 이야기 등)",
-    "frequent_sections": ["주로 다루는 섹션 순서"]
-  },
-  "keyword_profile": {
-    "frequent_words": [],
-    "topic_bias": ""
-  }
-}
-`;
-
 export const REVIEW_ANALYSIS_PROMPT = `# Claude Haiku Instructions
 ## Goal: Generate a "Hyper-Detailed" Naver Blog Review (1500+ characters) optimized for SEO.
 
