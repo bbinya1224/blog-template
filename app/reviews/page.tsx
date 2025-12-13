@@ -1,6 +1,5 @@
 import { getReviews } from '@/entities/review/api/review-repository';
 import { ReviewList } from '@/widgets/review-list/ui/review-list';
-import { StepIndicator } from '@/shared/ui/step-indicator';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,8 +8,6 @@ export default async function ReviewsPage() {
 
   return (
     <div className="space-y-10">
-      <StepIndicator />
-
       <section className="space-y-4">
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold leading-tight text-gray-900 md:text-4xl">

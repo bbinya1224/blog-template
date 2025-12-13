@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { SectionCard } from '@/shared/ui/section-card';
-import { StepIndicator } from '@/shared/ui/step-indicator';
 
 const quickActions = [
   {
@@ -20,7 +19,6 @@ const quickActions = [
 export default function Home() {
   return (
     <div className="space-y-10">
-      <StepIndicator />
       <section className="space-y-4">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-500">
           Setup Guide

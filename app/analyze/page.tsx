@@ -9,7 +9,6 @@ import {
 } from 'react';
 import { useRouter } from 'next/navigation';
 import { SectionCard } from '@/shared/ui/section-card';
-import { StepIndicator } from '@/shared/ui/step-indicator';
 import { StatusMessage } from '@/shared/ui/status-message';
 import { StyleProfileSummary } from '@/widgets/style-profile-summary';
 import { useAsync } from '@/shared/lib/hooks/useAsync';
@@ -20,14 +19,28 @@ import {
   AnalysisPageHeader,
   AnalysisForm,
 } from '@/features/analyze-style';
+import { loadStyleProfile } from '@/features/review';
 import { PAGE_TEXTS } from '@/features/analyze-style/constants/texts';
+import type { StyleProfile } from '@/entities/style-profile/model/types';
 
 export default function AnalyzePage() {
   const router = useRouter();
-  const [rssUrl, setRssUrl] = useState(''); // 타입 추론 가능
+  const [rssUrl, setRssUrl] = useState('');
   const [maxPosts, setMaxPosts] = useState<number>(
     ANALYSIS_CONFIG.DEFAULT_MAX_POSTS
   );
+  const [existingProfile, setExistingProfile] = useState<StyleProfile | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    loadStyleProfile().then((profile) => {
+      if (profile) {
+        setExistingProfile(profile);
+      } else {
+        setShowForm(true);
+      }
+    });
+  }, []);
 
   const {
     data: styleProfile,
@@ -70,10 +83,45 @@ export default function AnalyzePage() {
     router.push('/generate');
   }, [router]);
 
+  const handleReAnalyze = useCallback(() => {
+    setShowForm(true);
+    setExistingProfile(null);
+  }, []);
+
+  if (!showForm && existingProfile) {
+    return (
+      <div className='space-y-10'>
+        <AnalysisPageHeader />
+        <SectionCard
+          title="나의 스타일 프로필"
+          description="이미 분석된 스타일 프로필이 있습니다."
+        >
+          <StyleProfileSummary
+            styleProfile={existingProfile}
+            onNextStep={handleNextStep}
+            showCTA={false}
+          />
+          <div className="mt-8 flex justify-center gap-4">
+             <button
+              onClick={handleNextStep}
+              className="rounded-xl bg-blue-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-600"
+            >
+              리뷰 생성하러 가기
+            </button>
+            <button
+              onClick={handleReAnalyze}
+              className="rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+            >
+              새로운 톤 분석하기
+            </button>
+          </div>
+        </SectionCard>
+      </div>
+    );
+  }
+
   return (
     <div className='space-y-10'>
-      <StepIndicator />
-
       <AnalysisPageHeader />
 
       <SectionCard

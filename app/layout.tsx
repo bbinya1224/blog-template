@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Inter, Noto_Sans_KR } from 'next/font/google';
 import '@/app/style/globals.css';
+import { StepIndicator } from '@/shared/ui/step-indicator';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -46,6 +47,9 @@ export default function RootLayout({
             </div>
           </header>
           <main className='mx-auto w-full max-w-5xl px-6 pb-16 pt-10 md:px-12'>
+            <div className="mb-10">
+              <StepIndicator />
+            </div>
             {children}
           </main>
         </div>
