@@ -13,7 +13,7 @@ import {
   copyToClipboard,
   GeneratePageHeader,
   StyleProfileDisplay,
-  ReviewForm,
+  ReviewWizard,
   ReviewResult,
 } from '@/features/review';
 
@@ -86,6 +86,13 @@ export default function GeneratePage() {
       },
     [],
   );
+
+  const handleAppendDraft = useCallback((text: string) => {
+    setForm((prev) => ({
+      ...prev,
+      user_draft: prev.user_draft ? `${prev.user_draft}\n${text}` : text,
+    }));
+  }, []);
 
   const handleGenerate = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -161,12 +168,13 @@ export default function GeneratePage() {
           )
         }
       >
-        <ReviewForm
+        <ReviewWizard
           form={form}
           isDisabled={isGenerateDisabled}
           isLoading={status === 'loading'}
           onChange={handleChange}
           onSubmit={handleGenerate}
+          onAppendDraft={handleAppendDraft}
         />
       </SectionCard>
 

@@ -96,6 +96,7 @@ export const generateReviewWithClaudeAPI = async (
         pros: payload.pros,
         cons: payload.cons,
         extra: payload.extra,
+        user_draft: payload.user_draft || '',
         tavily_search_result_context:
           searchContext ||
           '검색된 정보가 없습니다. 일반적인 맛집 리뷰처럼 작성해주세요.',

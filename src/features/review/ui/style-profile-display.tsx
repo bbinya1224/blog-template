@@ -48,9 +48,22 @@ export const StyleProfileDisplay = ({
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">
             구조
           </p>
-          <p className="mt-1 text-sm text-gray-700">
-            {styleProfile.structure_pattern.overall_flow}
-          </p>
+          <div className="mt-1 text-sm text-gray-700 space-y-2">
+            <p>
+              <span className="font-medium text-gray-900">도입부:</span>{' '}
+              {styleProfile.structure_pattern.opening_style}
+            </p>
+            <div>
+              <span className="font-medium text-gray-900">자주 쓰는 섹션:</span>
+              <ul className="list-disc list-inside text-gray-600 mt-1 pl-1">
+                {styleProfile.structure_pattern.frequent_sections
+                  .slice(0, 3)
+                  .map((section, index) => (
+                    <li key={index}>{section}</li>
+                  ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </SectionCard>

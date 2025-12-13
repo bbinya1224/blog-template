@@ -14,5 +14,5 @@ export {
 // UI Components
 export { GeneratePageHeader } from './ui/generate-page-header';
 export { StyleProfileDisplay } from './ui/style-profile-display';
-export { ReviewForm } from './ui/review-form';
+export { ReviewWizard } from './ui/review-wizard';
 export { ReviewResult } from './ui/review-result';
