@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.69.0",
+    "@supabase/supabase-js": "^2.89.0",
     "@tavily/core": "^0.5.13",
     "axios": "^1.13.2",
     "cheerio": "^1.1.2",
     "next": "16.0.10",
+    "next-auth": "^5.0.0-beta.30",
     "react": "19.2.1",
     "react-dom": "19.2.1"
   },
