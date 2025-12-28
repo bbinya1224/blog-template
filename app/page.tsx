@@ -8,14 +8,12 @@ export default function LandingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // 로그인한 사용자는 자동으로 /analyze로 리다이렉트
   useEffect(() => {
     if (status === 'authenticated') {
       router.push('/analyze');
     }
   }, [status, router]);
 
-  // 스크롤에 따른 헤더/요소 인터랙션 (간단한 fade-in 효과용)
   const [isVisible, setIsVisible] = useState(false);
   useEffect(() => {
     setIsVisible(true);
@@ -34,7 +32,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900 selection:bg-blue-100">
-      {/* Navigation (Transparent to White on Scroll - simplified here) */}
       <nav className="fixed left-0 top-0 z-50 w-full border-b border-transparent bg-white/80 backdrop-blur-md transition-all">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 md:px-12">
           <span className="text-xl font-bold tracking-tight text-gray-900">BlogLab</span>
@@ -53,7 +50,6 @@ export default function LandingPage() {
       </nav>
 
       <main className="pt-24">
-        {/* --- Hero Section --- */}
         <section className="relative overflow-hidden px-6 pb-20 pt-16 md:pt-32">
           <div className={`mx-auto max-w-4xl text-center transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
             <h1 className="mb-6 text-5xl font-extrabold leading-tight tracking-tight text-gray-900 md:text-7xl">
@@ -93,7 +89,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* --- Empathy / Problem Section --- */}
         <section className="bg-gray-50 px-6 py-24 md:py-32">
           <div className="mx-auto max-w-5xl">
             <div className="mb-16 md:text-center">
@@ -147,7 +142,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* --- Features Section --- */}
         <section className="px-6 py-24 md:py-32">
           <div className="mx-auto max-w-5xl">
             <h2 className="mb-16 text-3xl font-bold leading-tight text-gray-900 md:text-center md:text-5xl">
@@ -183,7 +177,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* --- Detailed Pricing Section --- */}
         <section className="bg-gray-900 px-6 py-24 text-white md:py-32">
           <div className="mx-auto max-w-4xl text-center">
             <h2 className="mb-6 text-3xl font-bold md:text-5xl">
