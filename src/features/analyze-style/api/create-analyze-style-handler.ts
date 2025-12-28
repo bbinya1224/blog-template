@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../../../auth';
 import type { StyleProfile } from '@/entities/style-profile/model/types';
 import { AppError, NotFoundError } from '@/shared/lib/errors';
 
 type AnalyzeStyleDeps = {
-  readBlogPosts: () => Promise<string>;
+  readBlogPosts: (email: string) => Promise<string>;
   generateStyleProfile: (blogText: string) => Promise<StyleProfile>;
-  saveStyleProfile: (profile: StyleProfile) => Promise<void>;
+  saveStyleProfile: (email: string, profile: StyleProfile) => Promise<void>;
 };
 
 export const createAnalyzeStyleHandler = ({
@@ -15,7 +17,16 @@ export const createAnalyzeStyleHandler = ({
 }: AnalyzeStyleDeps) => {
   return async () => {
     try {
-      const blogText = await readBlogPosts();
+      const session = await getServerSession(authOptions);
+      if (!session?.user?.email) {
+        return NextResponse.json(
+          { error: '인증이 필요합니다.' },
+          { status: 401 },
+        );
+      }
+      const email = session.user.email;
+
+      const blogText = await readBlogPosts(email);
 
       if (!blogText || blogText.trim().length === 0) {
         throw new NotFoundError(
@@ -24,7 +35,7 @@ export const createAnalyzeStyleHandler = ({
       }
 
       const styleProfile = await generateStyleProfile(blogText);
-      await saveStyleProfile(styleProfile);
+      await saveStyleProfile(email, styleProfile);
 
       return NextResponse.json({
         styleProfile,
