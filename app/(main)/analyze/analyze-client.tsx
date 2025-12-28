@@ -22,8 +22,13 @@ import {
 import { loadStyleProfile } from '@/features/review';
 import { PAGE_TEXTS } from '@/features/analyze-style/constants/texts';
 import type { StyleProfile } from '@/entities/style-profile/model/types';
+import type { Session } from 'next-auth';
 
-export default function AnalyzePage() {
+interface AnalyzeClientPageProps {
+  user: Session['user'];
+}
+
+export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
   const router = useRouter();
   const [rssUrl, setRssUrl] = useState('');
   const [maxPosts, setMaxPosts] = useState<number>(
@@ -92,6 +97,12 @@ export default function AnalyzePage() {
     return (
       <div className='space-y-10'>
         <AnalysisPageHeader />
+        <div className="bg-blue-50 p-4 rounded-lg mb-4">
+          <p className="text-sm text-blue-800">
+            안녕하세요, <span className="font-bold">{user?.name}</span>님! 
+            내 블로그의 톤을 분석하여 맞춤형 리뷰를 생성해보세요.
+          </p>
+        </div>
         <SectionCard
           title="나의 스타일 프로필"
           description="이미 분석된 스타일 프로필이 있습니다."
@@ -123,6 +134,12 @@ export default function AnalyzePage() {
   return (
     <div className='space-y-10'>
       <AnalysisPageHeader />
+      <div className="bg-blue-50 p-4 rounded-lg mb-4">
+          <p className="text-sm text-blue-800">
+            안녕하세요, <span className="font-bold">{user?.name}</span>님! 
+            내 블로그의 톤을 분석하여 맞춤형 리뷰를 생성해보세요.
+          </p>
+        </div>
 
       <SectionCard
         title={PAGE_TEXTS.RSS_FORM_TITLE}

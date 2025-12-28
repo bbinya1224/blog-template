@@ -19,7 +19,7 @@ export const supabaseAdmin = createClient(
   }
 );
 
-// 타입 정의
+
 export type ApprovedUser = {
   id: string;
   email: string;
