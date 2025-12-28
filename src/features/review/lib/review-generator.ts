@@ -1,4 +1,3 @@
-import fs from 'fs/promises';
 import type { ReviewPayload } from '@/entities/review/model/types';
 import type { StyleProfile } from '@/entities/style-profile/model/types';
 import { formatKoreanDate } from '@/shared/lib/utils';
@@ -12,19 +11,12 @@ import {
   REVIEW_EDIT_PROMPT,
 } from '@/shared/config/prompts';
 import { AppError } from '@/shared/lib/errors';
-import { BLOG_SAMPLES_PATH } from '@/shared/api/data-files';
+import { readBlogSamples } from '@/shared/api/data-files';
 import { searchStoreInfo } from '@/shared/lib/search'; // Tavily 검색 유틸
 
-const getRandomWritingSamples = async (count: number = 3): Promise<string> => {
+const getRandomWritingSamples = async (email: string, count: number = 3): Promise<string> => {
   try {
-    const data = await fs.readFile(BLOG_SAMPLES_PATH, 'utf-8');
-    let samples: string[];
-
-    try {
-      samples = JSON.parse(data);
-    } catch {
-      return '';
-    }
+    const samples = await readBlogSamples(email);
 
     if (!Array.isArray(samples) || samples.length === 0) return '';
 
@@ -33,14 +25,15 @@ const getRandomWritingSamples = async (count: number = 3): Promise<string> => {
       .slice(0, count)
       .join('\n\n[Reference Sample]\n\n');
   } catch (error) {
-    console.warn(`샘플 로드 실패 (${BLOG_SAMPLES_PATH}):`, error);
+    console.warn(`샘플 로드 실패 (DB):`, error);
     return '';
   }
 };
 
 export const generateReviewWithClaudeAPI = async (
   payload: ReviewPayload,
-  styleProfile: StyleProfile
+  styleProfile: StyleProfile,
+  email?: string
 ): Promise<string> => {
   try {
     const styleProfileJson = JSON.stringify(styleProfile, null, 2);
@@ -53,7 +46,7 @@ export const generateReviewWithClaudeAPI = async (
         console.error('❌ Tavily 검색 실패:', err.message || err);
         return '';
       }),
-      getRandomWritingSamples(3),
+      email ? getRandomWritingSamples(email, 3) : Promise.resolve(''),
     ]);
 
     console.log(

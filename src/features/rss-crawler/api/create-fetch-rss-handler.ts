@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../../../auth';
 
 type FetchRssPayload = {
   rssUrl: string;
@@ -18,10 +20,8 @@ type FetchRssDeps = {
     options?: { debug?: boolean }
   ) => Promise<CrawlResult>;
 
-  saveBlogPosts: (content: string) => Promise<void>;
-  saveBlogSamples: (samples: string[]) => Promise<void>;
-
-  blogPostsPath: string;
+  saveBlogPosts: (email: string, content: string) => Promise<void>;
+  saveBlogSamples: (email: string, samples: string[]) => Promise<void>;
 };
 
 const isValidFetchRssPayload = (body: unknown): body is FetchRssPayload => {
@@ -48,10 +48,18 @@ export const createFetchRssHandler = ({
   crawlBlogRss,
   saveBlogPosts,
   saveBlogSamples,
-  blogPostsPath,
 }: FetchRssDeps) => {
   return async (req: NextRequest) => {
     try {
+      const session = await getServerSession(authOptions);
+      if (!session?.user?.email) {
+        return NextResponse.json(
+          { error: '인증이 필요합니다.' },
+          { status: 401 }
+        );
+      }
+      const email = session.user.email;
+
       const body: unknown = await req.json();
 
       if (!isValidFetchRssPayload(body)) {
@@ -67,12 +75,14 @@ export const createFetchRssHandler = ({
         debug,
       });
 
-      await Promise.all([saveBlogPosts(mergedText), saveBlogSamples(samples)]);
+      await Promise.all([
+          saveBlogPosts(email, mergedText), 
+          saveBlogSamples(email, samples)
+      ]);
 
       return NextResponse.json({
         success: true,
-        message: 'RSS 크롤링, 스타일 분석 데이터 및 샘플 저장 완료',
-        savedPath: blogPostsPath,
+        message: 'RSS 크롤링, 스타일 분석 데이터 및 샘플 저장 완료 (DB)',
         sampleCount: samples.length,
         length: mergedText.length,
       });
