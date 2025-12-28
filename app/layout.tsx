@@ -16,13 +16,14 @@ const notoSans = Noto_Sans_KR({
 
 export const metadata: Metadata = {
   title: 'Blog Tone Lab',
-  description: '내 블로그의 말투로 리뷰를 자동 생성하는 AI 도구',
+  description: 'AI blog review generator',
   icons: {
     icon: '/favicon.ico',
   },
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://my-blog-tone-lab.vercel.app'),
   openGraph: {
-    title: 'Blog Tone Lab - 블로그 리뷰 생성기',
-    description: '내 블로그 말투를 분석해서 3초 만에 리뷰를 써줍니다.',
+    title: 'Blog Tone Lab',
+    description: 'AI-powered blog review generator',
     siteName: 'Blog Tone Lab',
     locale: 'ko_KR',
     type: 'website',
