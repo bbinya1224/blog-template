@@ -15,8 +15,18 @@ const notoSans = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: '~A~U~F~F ~D~K ~P~D ~A~H',
-  description: '~B ~B~H~F~F ~D~K~W~B~@ ~P~D~A ~F~A~T ~B~^~D~T~K ~A~H~C ~A~D ~C~D~A~M~T~B~H',
+  title: 'Blog Tone Lab',
+  description: '내 블로그의 말투로 리뷰를 자동 생성하는 AI 도구',
+  icons: {
+    icon: '/favicon.ico',
+  },
+  openGraph: {
+    title: 'Blog Tone Lab - 블로그 리뷰 생성기',
+    description: '내 블로그 말투를 분석해서 3초 만에 리뷰를 써줍니다.',
+    siteName: 'Blog Tone Lab',
+    locale: 'ko_KR',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
