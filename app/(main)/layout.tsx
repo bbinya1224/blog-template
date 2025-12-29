@@ -11,7 +11,7 @@ export default function MainLayout({
     <div className='min-h-screen bg-slate-50'>
       <header className='border-b border-gray-200 bg-white'>
         <div className='mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5 md:px-12'>
-          <Link href='/'>
+          <Link href='/dashboard'>
             <p className='text-xs font-semibold uppercase tracking-[0.2em] text-blue-500'>
               Blog Tone Lab
             </p>

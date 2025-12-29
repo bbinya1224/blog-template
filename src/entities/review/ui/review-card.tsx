@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Review } from '../model/review';
+import { Review } from '@/entities/review/model/review';
 
 interface ReviewCardProps {
   review: Review;

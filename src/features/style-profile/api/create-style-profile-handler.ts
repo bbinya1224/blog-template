@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../auth';
+import { authOptions } from '@/auth';
 import type { StyleProfile } from '@/entities/style-profile/model/types';
 
 type StyleProfileHandlerDeps = {

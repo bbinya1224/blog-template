@@ -1,70 +1,104 @@
-import fs from 'fs';
-import path from 'path';
-import { Review } from '../model/review';
+import { supabaseAdmin } from '@/shared/lib/supabase';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
+import { Review } from '@/entities/review/model/review';
 
-const REVIEWS_DIR = path.join(process.cwd(), 'data/reviews');
-
+/**
+ * 현재 로그인한 사용자의 리뷰 목록 조회
+ */
 export async function getReviews(): Promise<Review[]> {
-  if (!fs.existsSync(REVIEWS_DIR)) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.email) {
+      return [];
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('user_reviews')
+      .select('*')
+      .eq('user_email', session.user.email)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('리뷰 조회 실패:', error);
+      return [];
+    }
+
+    return (data || []).map((review) => ({
+      id: review.id,
+      storeName: review.restaurant_name,
+      date: review.visit_date || review.created_at.split('T')[0],
+      content: review.review_content,
+      preview: review.review_content.slice(0, 150) + '...',
+    }));
+  } catch (error) {
+    console.error('리뷰 조회 중 오류:', error);
     return [];
   }
+}
 
-  const files = fs.readdirSync(REVIEWS_DIR).filter((file) => file.endsWith('.md'));
+/**
+ * ID로 특정 리뷰 조회
+ */
+export async function getReviewById(id: string): Promise<Review | null> {
+  try {
+    const session = await getServerSession(authOptions);
 
-  const reviews = files.map((file) => {
-    const filePath = path.join(REVIEWS_DIR, file);
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const id = file.replace('.md', '');
-    
-    // Filename format: StoreName_YYYY-MM-DD.md
-    // We need to handle cases where StoreName might contain underscores, 
-    // but usually the date is at the end.
-    // Let's split by '_' and take the last part as date, rest as store name.
-    const parts = id.split('_');
-    const date = parts.pop() || '';
-    const storeName = parts.join('_');
+    if (!session?.user?.email) {
+      return null;
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('user_reviews')
+      .select('*')
+      .eq('id', id)
+      .eq('user_email', session.user.email)
+      .single();
+
+    if (error || !data) {
+      console.error('리뷰 조회 실패:', error);
+      return null;
+    }
 
     return {
-      id,
-      storeName,
-      date,
-      content,
-      preview: content.slice(0, 150) + '...',
+      id: data.id,
+      storeName: data.restaurant_name,
+      date: data.visit_date || data.created_at.split('T')[0],
+      content: data.review_content,
+      preview: data.review_content.slice(0, 150) + '...',
     };
-  });
-
-  // Sort by date descending
-  return reviews.sort((a, b) => (a.date < b.date ? 1 : -1));
-}
-
-export async function getReviewById(id: string): Promise<Review | null> {
-  const filePath = path.join(REVIEWS_DIR, `${id}.md`);
-  
-  if (!fs.existsSync(filePath)) {
+  } catch (error) {
+    console.error('리뷰 조회 중 오류:', error);
     return null;
   }
-
-  const content = fs.readFileSync(filePath, 'utf-8');
-  
-  const parts = id.split('_');
-  const date = parts.pop() || '';
-  const storeName = parts.join('_');
-
-  return {
-    id,
-    storeName,
-    date,
-    content,
-    preview: content.slice(0, 150) + '...',
-  };
 }
 
+/**
+ * 리뷰 내용 수정
+ */
 export async function updateReview(id: string, content: string): Promise<void> {
-  const filePath = path.join(REVIEWS_DIR, `${id}.md`);
-  
-  if (!fs.existsSync(filePath)) {
-    throw new Error('Review not found');
-  }
+  try {
+    const session = await getServerSession(authOptions);
 
-  fs.writeFileSync(filePath, content, 'utf-8');
+    if (!session?.user?.email) {
+      throw new Error('인증 필요');
+    }
+
+    const { error } = await supabaseAdmin
+      .from('user_reviews')
+      .update({
+        review_content: content,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .eq('user_email', session.user.email);
+
+    if (error) {
+      throw new Error('리뷰 수정 실패: ' + error.message);
+    }
+  } catch (error) {
+    console.error('리뷰 수정 중 오류:', error);
+    throw error;
+  }
 }
