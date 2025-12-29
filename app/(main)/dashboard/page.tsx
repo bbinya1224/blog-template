@@ -35,7 +35,7 @@ export default async function DashboardPage() {
         </p>
         <div className="space-y-3">
           <h1 className="text-3xl font-semibold leading-tight text-gray-900 md:text-4xl">
-            안녕하세요, {session.user.name}님!
+            안녕하세요, {session.user?.name || '블로거'}님!
           </h1>
           <p className="text-lg text-gray-600">
             내 블로그 톤 그대로 리뷰를 자동으로 만들어보세요.
