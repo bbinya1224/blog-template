@@ -11,27 +11,43 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user }) {
       if (!user.email) {
         return false;
       }
 
       try {
-        const { data, error } = await supabaseAdmin
+        // 1. 사용자 존재 여부 확인
+        const { data: existingUser } = await supabaseAdmin
           .from('approved_users')
           .select('email')
           .eq('email', user.email)
           .single();
 
-        if (error || !data) {
-          console.log(`로그인 거부: ${user.email} (화이트리스트에 없음)`);
+        if (existingUser) {
+          console.log(`로그인 성공 (기존 유저): ${user.email}`);
+          return true;
+        }
+
+        // 2. 사용자가 없으면 Preview 모드로 자동 등록
+        const { error: insertError } = await supabaseAdmin
+          .from('approved_users')
+          .insert({
+            email: user.email,
+            is_preview: true,
+            usage_count: 0,
+            created_at: new Date().toISOString(),
+          });
+
+        if (insertError) {
+          console.error('신규 유저 등록 실패:', insertError);
           return false;
         }
 
-        console.log(`로그인 성공: ${user.email}`);
+        console.log(`로그인 성공 (신규 Preview 유저): ${user.email}`);
         return true;
       } catch (error) {
-        console.error('화이트리스트 확인 중 오류:', error);
+        console.error('로그인 처리 중 오류:', error);
         return false;
       }
     },

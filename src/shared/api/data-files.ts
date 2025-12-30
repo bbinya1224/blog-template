@@ -119,10 +119,7 @@ export const saveReviewToDB = async (
 };
 
 // 하위 호환성을 위해 남겨둠 (하지만 쓰지 않는 것을 권장)
-export const saveReviewToFile = async (
-    review: string,
-    payload: ReviewPayload
-  ): Promise<string> => {
+export const saveReviewToFile = async (): Promise<string> => {
     throw new Error('saveReviewToFile is deprecated. Use saveReviewToDB instead.');
 };
 
@@ -133,7 +130,7 @@ export const saveBlogSamples = async (email: string, samples: string[]) => {
 
   const rows = samples.map((sample) => {
      let title = 'Sample';
-     let content = sample;
+     const content = sample;
      if (sample.length > 200) {
          // Try to extract title from first line
          const firstLine = sample.split('\n')[0];
@@ -165,4 +162,44 @@ export const readBlogSamples = async (email: string): Promise<string[]> => {
         .limit(20);
         
     return data ? data.map(d => d.content) : [];
-}
+};
+
+/**
+ * 사용자 상태(Preview 여부) 및 사용량 조회
+ */
+export const getUserStatus = async (email: string) => {
+  if (!email) return null;
+
+  const { data, error } = await supabaseAdmin
+    .from('approved_users')
+    .select('email, is_preview, usage_count')
+    .eq('email', email)
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return data;
+};
+
+/**
+ * 사용자 사용량 증가
+ */
+export const incrementUsageCount = async (email: string) => {
+  if (!email) return;
+
+  const { data } = await supabaseAdmin
+    .from('approved_users')
+    .select('usage_count')
+    .eq('email', email)
+    .single();
+    
+  if (data) {
+    const currentCount = data.usage_count || 0;
+    await supabaseAdmin
+      .from('approved_users')
+      .update({ usage_count: currentCount + 1 })
+      .eq('email', email);
+  }
+};

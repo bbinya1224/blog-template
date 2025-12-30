@@ -14,6 +14,8 @@ type GenerateReviewDeps = {
     email?: string
   ) => Promise<string>;
   saveReviewToDB: (email: string, review: string, payload: ReviewPayload) => Promise<string>;
+  getUserStatus: (email: string) => Promise<{ is_preview: boolean | null; usage_count: number | null } | null>;
+  incrementUsageCount: (email: string) => Promise<void>;
 };
 
 export const createGenerateReviewHandler = ({
@@ -21,6 +23,8 @@ export const createGenerateReviewHandler = ({
   readStyleProfile,
   generateReview,
   saveReviewToDB,
+  getUserStatus,
+  incrementUsageCount,
 }: GenerateReviewDeps) => {
   return async (request: Request) => {
     try {
@@ -32,6 +36,15 @@ export const createGenerateReviewHandler = ({
         );
       }
       const email = session.user.email;
+
+      // 1. Check Usage Quota
+      const status = await getUserStatus(email);
+      if (status?.is_preview && (status.usage_count || 0) >= 2) {
+         return NextResponse.json(
+          { error: 'QUOTA_EXCEEDED: 무료 체험 횟수가 만료되었습니다. 후원 후 계속 이용해주세요!' },
+          { status: 403 },
+        );
+      }
 
       const body: unknown = await request.json();
 
@@ -50,6 +63,9 @@ export const createGenerateReviewHandler = ({
 
       const review = await generateReview(payload, styleProfile, email);
       const savedId = await saveReviewToDB(email, review, payload);
+      
+      // 2. Increment Usage Count
+      await incrementUsageCount(email);
 
       return NextResponse.json({
         review,

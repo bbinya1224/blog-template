@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function LandingPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -14,9 +15,10 @@ export default function LandingPage() {
     }
   }, [status, router]);
 
-  const [isVisible, setIsVisible] = useState(false);
   useEffect(() => {
-    setIsVisible(true);
+    // 애니메이션을 위한 상태 변경을 setTimeout으로 비동기 처리
+    const timer = setTimeout(() => setIsVisible(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
   if (status === 'loading') {
@@ -96,7 +98,7 @@ export default function LandingPage() {
                 왜 BlogLab인가요?
               </span>
               <h2 className="text-3xl font-bold leading-tight text-gray-900 md:text-5xl">
-                매번 "1,500자 채우기"<br />
+                매번 &quot;1,500자 채우기&quot;<br />
                 너무 힘들지 않으셨나요?
               </h2>
             </div>

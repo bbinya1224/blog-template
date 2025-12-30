@@ -13,6 +13,7 @@ const REQUIRED_ENV_VARS = [
 /**
  * 선택적 환경 변수 목록 (미래 확장용)
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const OPTIONAL_ENV_VARS = [] as const;
 
 /**

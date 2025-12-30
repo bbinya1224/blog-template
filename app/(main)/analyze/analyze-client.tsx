@@ -34,7 +34,9 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
   const [maxPosts, setMaxPosts] = useState<number>(
     ANALYSIS_CONFIG.DEFAULT_MAX_POSTS
   );
-  const [existingProfile, setExistingProfile] = useState<StyleProfile | null>(null);
+  const [existingProfile, setExistingProfile] = useState<StyleProfile | null>(
+    null
+  );
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
@@ -74,8 +76,6 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
     }
   }, [isSuccess, styleProfile]);
 
-
-
   const handleSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -97,31 +97,31 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
     return (
       <div className='space-y-10'>
         <AnalysisPageHeader />
-        <div className="bg-blue-50 p-4 rounded-lg mb-4">
-          <p className="text-sm text-blue-800">
-            안녕하세요, <span className="font-bold">{user?.name}</span>님! 
-            내 블로그의 톤을 분석하여 맞춤형 리뷰를 생성해보세요.
+        <div className='bg-blue-50 p-4 rounded-lg mb-4'>
+          <p className='text-sm text-blue-800'>
+            안녕하세요, <span className='font-bold'>{user?.name}</span>님! 내
+            블로그의 톤을 분석하여 맞춤형 리뷰를 생성해보세요.
           </p>
         </div>
         <SectionCard
-          title="나의 스타일 프로필"
-          description="이미 분석된 스타일 프로필이 있습니다."
+          title='나의 스타일 프로필'
+          description='이미 분석된 스타일 프로필이 있습니다.'
         >
           <StyleProfileSummary
             styleProfile={existingProfile}
             onNextStep={handleNextStep}
             showCTA={false}
           />
-          <div className="mt-8 flex justify-center gap-4">
-             <button
+          <div className='mt-8 flex justify-center gap-4'>
+            <button
               onClick={handleNextStep}
-              className="rounded-xl bg-blue-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-600"
+              className='rounded-xl bg-blue-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-600'
             >
               리뷰 생성하러 가기
             </button>
             <button
               onClick={handleReAnalyze}
-              className="rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              className='rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50'
             >
               새로운 톤 분석하기
             </button>
@@ -134,12 +134,12 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
   return (
     <div className='space-y-10'>
       <AnalysisPageHeader />
-      <div className="bg-blue-50 p-4 rounded-lg mb-4">
-          <p className="text-sm text-blue-800">
-            안녕하세요, <span className="font-bold">{user?.name}</span>님! 
-            내 블로그의 톤을 분석하여 맞춤형 리뷰를 생성해보세요.
-          </p>
-        </div>
+      <div className='bg-blue-50 p-4 rounded-lg mb-4'>
+        <p className='text-sm text-blue-800'>
+          안녕하세요, <span className='font-bold'>{user?.name}</span>님! 내
+          블로그의 톤을 분석하여 맞춤형 리뷰를 생성해보세요.
+        </p>
+      </div>
 
       <SectionCard
         title={PAGE_TEXTS.RSS_FORM_TITLE}
@@ -159,12 +159,6 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
           onMaxPostsChange={setMaxPosts}
           onSubmit={handleSubmit}
         />
-        <div className="mt-4 text-center text-sm text-gray-500">
-          혹시 RSS가 안 되시나요?
-          <a href="/analyze/pdf" className="text-blue-500 hover:underline">
-            PDF로 분석하기
-          </a>
-        </div>
       </SectionCard>
 
       {styleProfile && (

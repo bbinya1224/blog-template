@@ -2,11 +2,20 @@ import Link from 'next/link';
 import { StepIndicator } from '@/shared/ui/step-indicator';
 import { UserProfile } from '@/entities/user/ui/user-profile';
 
-export default function MainLayout({
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
+import { getUserStatus } from '@/shared/api/data-files';
+
+export default async function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
+  const userStatus = session?.user?.email ? await getUserStatus(session.user.email) : null;
+  const isPreview = userStatus?.is_preview ?? false;
+  const usageCount = userStatus?.usage_count || 0;
+
   return (
     <div className='min-h-screen bg-slate-50'>
       <header className='border-b border-gray-200 bg-white'>
@@ -20,6 +29,17 @@ export default function MainLayout({
             </p>
           </Link>
           <div className="flex items-center gap-4">
+            {isPreview && (
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-bold ${
+                  usageCount >= 2
+                    ? 'bg-red-100 text-red-600'
+                    : 'bg-blue-100 text-blue-600'
+                }`}
+              >
+                무료 체험 중 ({usageCount}/2)
+              </span>
+            )}
             <UserProfile />
           </div>
         </div>

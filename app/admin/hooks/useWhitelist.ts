@@ -7,6 +7,8 @@ export type ApprovedUser = {
   bmac_transaction_id: string | null;
   notes: string | null;
   created_at: string;
+  is_preview: boolean | null;
+  usage_count: number | null;
 };
 
 export function useWhitelist(password: string) {
@@ -33,7 +35,7 @@ export function useWhitelist(password: string) {
 
       const data = await response.json();
       setUsers(data.users);
-    } catch (err) {
+    } catch {
       setError('화이트리스트를 불러올 수 없습니다');
     } finally {
       setLoading(false);
@@ -67,11 +69,42 @@ export function useWhitelist(password: string) {
 
       await fetchUsers(); // 목록 갱신
       return true;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '추가 실패');
       return false;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateUserStatus = async (email: string, updates: { is_preview?: boolean; usage_count?: number }) => {
+    setLoading(true);
+    setError('');
+
+    try {
+        const response = await fetch('/api/admin/whitelist', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Admin-Password': password,
+            },
+            body: JSON.stringify({
+                email,
+                ...updates,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error('업데이트 실패');
+        }
+
+        await fetchUsers(); // 목록 갱신
+        return true;
+    } catch {
+        setError('업데이트할 수 없습니다');
+        return false;
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -99,7 +132,7 @@ export function useWhitelist(password: string) {
 
       await fetchUsers(); // 목록 갱신
       return true;
-    } catch (err) {
+    } catch {
       setError('삭제할 수 없습니다');
       return false;
     } finally {
@@ -113,6 +146,7 @@ export function useWhitelist(password: string) {
     error,
     fetchUsers,
     addUser,
+    updateUserStatus,
     deleteUser,
   };
 }

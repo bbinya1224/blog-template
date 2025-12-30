@@ -33,7 +33,7 @@ export type UserStyle = {
   id: string;
   user_email: string;
   blog_name: string | null;
-  style_data: Record<string, any>;
+  style_data: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 };
@@ -45,7 +45,7 @@ export type UserReview = {
   location: string | null;
   visit_date: string | null;
   review_content: string;
-  metadata: Record<string, any> | null;
+  metadata: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 };

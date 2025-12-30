@@ -34,8 +34,8 @@ export function useAdminAuth() {
 
       setIsAuthenticated(true);
       return true; // 성공 시그널 반환
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '인증 실패');
       setPassword('');
       return false;
     } finally {

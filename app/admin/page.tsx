@@ -24,6 +24,7 @@ export default function AdminPage() {
     error: listError, 
     fetchUsers, 
     addUser, 
+    updateUserStatus,
     deleteUser 
   } = useWhitelist(password);
 
@@ -70,7 +71,8 @@ export default function AdminPage() {
           users={users} 
           loading={listLoading} 
           onRefresh={fetchUsers} 
-          onDelete={deleteUser} 
+          onDelete={deleteUser}
+          onUpdateStatus={updateUserStatus}
         />
       </div>
     </div>

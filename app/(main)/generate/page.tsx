@@ -164,7 +164,28 @@ export default function GeneratePage() {
         description="필수 값만 입력하면 나머지는 AI가 자연스럽게 채워줍니다."
         footer={
           statusMessage && (
-            <StatusMessage message={statusMessage} isError={status === 'error'} />
+            <div className="space-y-4">
+              <StatusMessage message={statusMessage} isError={status === 'error'} />
+              {statusMessage.includes('QUOTA_EXCEEDED') && (
+                <div className="flex flex-col items-center justify-center rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center">
+                  <p className="mb-4 font-bold text-yellow-800">
+                    ☕️ 더 많은 리뷰를 생성하려면 후원이 필요합니다
+                  </p>
+                  <a
+                    href="https://www.buymeacoffee.com/bbinya"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:opacity-90 transition-opacity"
+                  >
+                    <img
+                      src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+                      alt="Buy Me A Coffee"
+                      style={{ height: '50px', width: 'auto' }}
+                    />
+                  </a>
+                </div>
+              )}
+            </div>
           )
         }
       >
