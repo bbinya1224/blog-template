@@ -1,9 +1,13 @@
+import { requireAuth } from '@/shared/lib/auth-utils';
 import { getReviews } from '@/entities/review/api/review-repository';
 import { ReviewList } from '@/widgets/review-list/ui/review-list';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ReviewsPage() {
+  // 인증 체크 - 로그인하지 않은 경우 자동 리다이렉트
+  await requireAuth();
+
   const reviews = await getReviews();
 
   return (
