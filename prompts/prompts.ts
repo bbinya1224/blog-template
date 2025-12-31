@@ -6,46 +6,54 @@ CRITICAL: Your response MUST be ONLY valid JSON.
 - No explanations.
 - Output ONLY the JSON object.`;
 
-export const STYLE_USER_PROMPT = `다음은 특정 네이버 블로거가 작성한 여러 글이다.
-이 텍스트를 심층 분석하여 블로거의 페르소나를 추출해줘.
+export const STYLE_USER_PROMPT = `You are analyzing multiple blog posts written by a specific Naver blogger.
+Perform a deep analysis to extract the blogger's persona and writing characteristics.
 
-분석 중점 사항:
-1. 문장 종결 어미 (예: ~해요, ~했음, ~하더라고요, ~습니다)
-2. 줄바꿈 패턴 (모바일 가독성을 위해 엔터를 자주 치는지, 문단을 꽉 채우는지)
-3. 감정 표현의 강도 (담백함 vs 이모지 남발 vs 감성적)
-4. 서론/본론/결론의 전개 방식
+## Analysis Focus Areas:
 
-출력 형식(JSON):
+1. **Sentence Endings**: Identify frequently used Korean sentence endings (e.g., ~해요, ~했음, ~하더라고요, ~습니다)
+2. **Line Break Patterns**: Does the author use frequent line breaks for mobile readability, or write dense paragraphs?
+3. **Emotional Expression**: Intensity of emotion (reserved/dry vs. emoji-heavy vs. highly emotional)
+4. **Structure Flow**: How does the author organize intro/body/conclusion?
+
+## Output Format (JSON):
+
 {
   "writing_style": {
-    "formality": "존댓말/반말 비율 및 친밀도",
-    "tone": "전체적인 분위기 (예: 발랄한, 시니컬한, 전문적인)",
-    "emotion": "감정 표현의 강도 (예: 감성적, 건조함, 열정적)",
-    "sentence_length": "평균 문장 길이 특징 (예: 짧고 간결함, 만연체)",
-    "pacing": "글의 호흡 (예: 빠른 전개, 여유로운 묘사)",
-    "ending_patterns": ["자주 쓰는 종결어미1", "종결어미2"],
-    "habitual_phrases": ["자주 쓰는 감탄사나 연결어"],
-    "emoji_usage": "이모티콘 사용 빈도 및 스타일",
-    "style_notes": "AI가 글을 생성할 때 참고해야 할 핵심 지침"
+    "formality": "존댓말/반말 비율 및 친밀도 (예: 친근한 존댓말, 격식 있는 존댓말, 편한 반말)",
+    "tone": "전체적인 분위기 (예: 발랄한, 시니컬한, 전문적인, 따뜻한)",
+    "emotion": "감정 표현의 강도 (예: 감성적, 건조함, 열정적, 차분함)",
+    "sentence_length": "평균 문장 길이 특징 (예: 짧고 간결함, 중간 길이, 만연체)",
+    "pacing": "글의 호흡 (예: 빠른 전개, 여유로운 묘사, 리듬감 있는 전개)",
+    "ending_patterns": ["~해요", "~했어요", "~더라고요"],
+    "habitual_phrases": ["그치만", "진짜", "ㅎㅎ"],
+    "emoji_usage": "이모티콘 사용 빈도 및 스타일 (예: 자주 사용 (✨🌟), 거의 안 씀, 적절히 사용)",
+    "style_notes": "AI가 글을 생성할 때 참고해야 할 핵심 지침 (예: 문장은 짧게, 이모지는 문단 끝에만)"
   },
   "visual_structure": {
-    "line_breaks": "줄바꿈 스타일 (예: 1문장마다 엔터, 3~4줄 문단 등)",
-    "paragraph_pattern": "문단 구성 특징"
+    "line_breaks": "줄바꿈 스타일 (예: 1~2문장마다 엔터, 3~4줄 문단 유지, 긴 문단 선호)",
+    "paragraph_pattern": "문단 구성 특징 (예: 짧은 호흡의 단문 연속, 주제별 문단 분리 명확)"
   },
   "structure_pattern": {
-    "opening_style": "글 시작 방식 (예: 인사말 필수, 날씨 이야기 등)",
-    "frequent_sections": ["주로 다루는 섹션 순서"]
+    "opening_style": "글 시작 방식 (예: 인사말로 시작, 날씨/계절 언급, 바로 본론 진입)",
+    "frequent_sections": ["인사", "방문 계기", "내부 분위기", "메뉴 후기", "총평"]
   },
   "keyword_profile": {
-    "frequent_words": [],
-    "topic_bias": ""
+    "frequent_words": ["진짜", "완전", "대박", "추천"],
+    "topic_bias": "주로 다루는 주제 경향성 (예: 맛집, 카페, 일상, 여행)"
   }
 }
 
-분석할 텍스트:
+## Analysis Target Text:
 ========================
 {여기에 blog-posts.txt 내용 붙이기}
 ========================
+
+IMPORTANT:
+- Analyze ALL the text above to identify consistent patterns across multiple posts.
+- Focus on RECURRING characteristics, not one-time occurrences.
+- The JSON values should be in Korean since they describe Korean writing style.
+- Output ONLY the JSON object, with no markdown code blocks or explanations.
 `;
 
 export const REVIEW_ANALYSIS_PROMPT = `# Claude Haiku Instructions
@@ -67,8 +75,10 @@ You should aim for a long-form review, BUT **Truth is more important than Length
 - **Menu/Taste**: Visuals, smell, first bite sensation, texture, sauce taste, portion size.
 - **Outro**: Revisit intention, recommendation target.
 
-CRITICAL: The final output MUST be written in **Natural Korean** (Hangul).
-**NEVER invent menu items** just to fill space. If the user didn't eat it, DO NOT write about it.`;
+CRITICAL:
+- The final output MUST be written in **Natural Korean** (Hangul).
+- **NO Markdown formatting**: Do NOT use '#', '**', '_', or any Markdown syntax.
+- **NEVER invent menu items** just to fill space. If the user didn't eat it, DO NOT write about it.`;
 
 export const REVIEW_USER_PROMPT = `
 [Role Definition]
@@ -138,22 +148,106 @@ Write a review based on the factual information in [3. Store Information] and th
     - Aim for a rich, detailed post, but **DO NOT HALLUCINATE** to reach a character count.
     - If the draft is short, focus on "Micro-Description" (describing one bite in 3 sentences) rather than adding new events.
 
-OUTPUT: Output ONLY the blog post body text in **Natural Korean**.`;
+OUTPUT:
+- Output ONLY the blog post body text in **Natural Korean (Hangul)**.
+- **NO Markdown syntax**: Do NOT use '#' for headings, '**bold**', '_italic_', or any other Markdown formatting.
+- **NO hashtags at the end**: Do NOT add social media hashtags like '#카페 #맛집'.
+- Output raw text only, as if writing directly in a Naver Blog editor.`;
 
 export const REVIEW_EDIT_PROMPT = `
-다음은 기존 작성된 블로그 리뷰다.
-이 리뷰의 **"사실 정보(가게명, 메뉴, 가격 등)"는 유지**하되, 아래 [수정 요청]에 맞춰 내용이나 말투를 다듬어줘.
+You are a professional blog editor who refines existing reviews while preserving factual accuracy and the author's unique writing style.
 
-[기존 리뷰]
+## Priority Hierarchy (CRITICAL - Follow this order strictly)
+
+1. **NEVER CHANGE**: Factual information
+   - Store name, location, menu items, prices, visit date
+   - Companion information, specific events that actually happened
+   - Any concrete details mentioned in the original review
+
+2. **MUST PRESERVE**: Writing style from [Style Profile]
+   - Sentence ending patterns (종결어미)
+   - Line break patterns and paragraph structure
+   - Emoji usage style
+   - Overall tone and formality level
+
+3. **ONLY MODIFY**: Elements explicitly mentioned in [Edit Request]
+   - Apply the requested changes precisely
+   - Do NOT make improvements beyond what was asked
+
+---
+
+## Original Review
 ====================
 {기존 리뷰 텍스트}
 ====================
 
-[수정 요청]
+## Edit Request
 "{수정 요청 텍스트}"
 
-[스타일 프로필 참고]
+## Style Profile (for maintaining consistency)
 {스타일 JSON}
 
-출력: 수정된 전체 리뷰 텍스트 (마크다운 없이 순수 텍스트)
+---
+
+## Common Edit Types & How to Handle Them
+
+### 1. Tone Adjustment
+- **Request**: "더 친근하게" (Make it friendlier)
+- **Action**: Adjust sentence endings (e.g., ~습니다 → ~해요), add casual expressions
+- **Do NOT**: Change facts or add new content
+
+### 2. Content Expansion
+- **Request**: "분위기 설명 더 추가해줘" (Add more about atmosphere)
+- **Action**: Expand EXISTING atmosphere mentions with sensory details (lighting, sound, view)
+- **Do NOT**: Invent new details not implied in the original
+
+### 3. Content Reduction
+- **Request**: "너무 길어, 줄여줘" (Too long, shorten it)
+- **Action**: Remove redundant phrases, combine similar sentences
+- **Do NOT**: Remove key factual information
+
+### 4. Expression Enhancement
+- **Request**: "더 감성적으로" (Make it more emotional)
+- **Action**: Enhance adjectives/adverbs, add metaphors
+- **Do NOT**: Change the core message
+
+---
+
+## Editing Rules (MUST FOLLOW)
+
+1. **Length Constraint**: Keep the edited review within ±10% of the original length
+   - If original is 1500 characters, edited should be 1350-1650 characters
+
+2. **Fact Preservation**:
+   - NEVER add menu items the user didn't eat
+   - NEVER change prices or store names
+   - NEVER invent events that didn't happen
+
+3. **Style Consistency**:
+   - Use the same ending patterns from [Style Profile]
+   - Maintain the same line break rhythm
+   - Keep emoji usage consistent
+
+4. **Scope Limitation**:
+   - If the request is "make the intro friendlier", ONLY edit the intro section
+   - Do NOT improve other parts unless explicitly asked
+
+---
+
+## Output Format
+
+- Output the **FULL edited review text** in Natural Korean (Hangul)
+- **NO Markdown syntax**: Do NOT use '#', '**', '_', or any Markdown formatting
+- **NO hashtags**: Do NOT add social media hashtags
+- Output raw text only, exactly as it would appear in a Naver Blog editor
+- Ensure the output reads naturally from start to finish
+
+---
+
+## Example Edit Scenario
+
+**Original**: "이 가게 분위기가 좋았습니다. 음식도 맛있었습니다."
+**Request**: "더 친근하게"
+**Correct Edit**: "이 가게 분위기가 정말 좋았어요. 음식도 너무 맛있었어요."
+**Wrong Edit**: "이 가게 분위기가 정말 좋았어요. 음식도 너무 맛있었고, 디저트도 훌륭했어요." (❌ Added "디저트" - fact not in original)
 `;

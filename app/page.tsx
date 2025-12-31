@@ -29,7 +29,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white text-gray-900 selection:bg-blue-100">
       <nav className="fixed left-0 top-0 z-50 w-full border-b border-transparent bg-white/80 backdrop-blur-md transition-all">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 md:px-12">
-          <span className="text-xl font-bold tracking-tight text-gray-900">BlogLab</span>
+          <span className="text-xl font-bold tracking-tight text-gray-900">BlogToneLab</span>
           <div className="flex items-center gap-4">
             <a href="https://www.buymeacoffee.com/bbinya" target="_blank" rel="noreferrer" className="text-sm font-medium text-gray-600 hover:text-gray-900">
               후원하기
@@ -48,12 +48,12 @@ export default function LandingPage() {
         <section className="relative overflow-hidden px-6 pb-20 pt-16 md:pt-32">
           <div className="mx-auto max-w-4xl text-center animate-fade-in-up">
             <h1 className="mb-6 text-5xl font-extrabold leading-tight tracking-tight text-gray-900 md:text-7xl">
-              블로그 포스팅,<br />
-              <span className="text-blue-600">AI</span>에게 맡기세요.
+              경험은 당신이,<br />
+              글쓰기는 <span className="text-blue-600">AI</span>가.
             </h1>
             <p className="mx-auto mb-10 max-w-2xl text-xl font-medium leading-relaxed text-gray-500 md:text-2xl">
-              내 말투를 완벽하게 학습한 AI가<br className="md:hidden lg:block" />
-              1,500자 리뷰를 3초 만에 완성해드립니다.
+              내 말투를 꼭 닮은 AI 유령작가가<br className="md:hidden lg:block" />
+              당신의 경험을 완벽한 포스팅으로 만들어드립니다.
             </p>
 
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -88,7 +88,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-5xl">
             <div className="mb-16 md:text-center">
               <span className="mb-4 inline-block rounded-full bg-blue-100 px-4 py-1.5 text-sm font-bold text-blue-600">
-                왜 BlogLab인가요?
+                왜 BlogToneLab인가요?
               </span>
               <h2 className="text-3xl font-bold leading-tight text-gray-900 md:text-5xl">
                 매번 &quot;1,500자 채우기&quot;<br />
@@ -121,7 +121,7 @@ export default function LandingPage() {
                 <ul className="space-y-3 text-lg text-blue-100">
                   <li className="flex items-center gap-2">
                     <span className="rounded-full bg-blue-500 p-1 text-xs text-white">✓</span>
-                    키워드만 넣으면 끝
+                    경험(메모)만 입력하면 끝
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="rounded-full bg-blue-500 p-1 text-xs text-white">✓</span>
@@ -129,7 +129,7 @@ export default function LandingPage() {
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="rounded-full bg-blue-500 p-1 text-xs text-white">✓</span>
-                    작성 시간 단 3초
+                    작성 시간 10배 단축
                   </li>
                 </ul>
               </div>
@@ -239,7 +239,7 @@ export default function LandingPage() {
 
       <footer className="border-t border-gray-100 bg-white py-12">
         <div className="container mx-auto px-6 text-center text-gray-400">
-          <p className="mb-2 text-sm">© 2025 BlogLab. All rights reserved.</p>
+          <p className="mb-2 text-sm">© 2025 BlogToneLab. All rights reserved.</p>
           <p className='mb-4 text-sm hover:text-amber-500'><a href="https://bbinya1224.github.io/blog" target='_blank'>Bbinya&apos;s Blog</a></p>
         </div>
       </footer>
