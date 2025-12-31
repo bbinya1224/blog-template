@@ -70,9 +70,8 @@ export default function GenerateClient() {
       status === 'loading' ||
       !form.name.trim() ||
       !form.location.trim() ||
-      !form.date ||
       !form.menu.trim() ||
-      !form.summary.trim()
+      !(form.user_draft && form.user_draft.trim())
     );
   }, [status, form]);
 

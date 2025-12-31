@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import type { ReviewPayload } from '@/entities/review/model/types';
 import { StepContext } from './wizard-steps/step-context';
+import { StepMenu } from './wizard-steps/step-menu';
 import { StepExperience } from './wizard-steps/step-experience';
 import { StepRefinement } from './wizard-steps/step-refinement';
 
@@ -26,16 +27,58 @@ export const ReviewWizard = ({
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
-    { title: '기본 정보', component: StepContext },
+    { title: '장소 정보', component: StepContext },
+    { title: '동행인 & 메뉴', component: StepMenu },
     { title: '경험 작성', component: StepExperience },
-    { title: '마무리', component: StepRefinement },
+    { title: '평가 및 요약', component: StepRefinement },
   ];
 
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === steps.length - 1;
 
+  // 각 스텝별 필수 필드 검증
+  const canProceedToNextStep = (): boolean => {
+    switch (currentStep) {
+      case 0: // 장소 정보
+        return !!(
+          form.name.trim() &&
+          form.location.trim()
+        );
+      case 1: // 동행인 & 메뉴
+        return !!form.menu.trim();
+      case 2: // 경험 작성 (필수!)
+        return !!(form.user_draft && form.user_draft.trim());
+      case 3: // 평가 및 요약
+        return true;
+      default:
+        return true;
+    }
+  };
+
+  // 미완성 필드 메시지
+  const getMissingFieldsMessage = (): string => {
+    switch (currentStep) {
+      case 0:
+        const missing0 = [];
+        if (!form.name.trim()) missing0.push('가게 이름');
+        if (!form.location.trim()) missing0.push('위치');
+        return missing0.length > 0 ? `${missing0.join(', ')}을(를) 입력해주세요` : '';
+      case 1:
+        return !form.menu.trim() ? '메뉴를 입력해주세요' : '';
+      case 2:
+        return !(form.user_draft && form.user_draft.trim()) ? '경험을 작성해주세요 (리뷰의 핵심입니다!)' : '';
+      default:
+        return '';
+    }
+  };
+
+  const isNextDisabled = !canProceedToNextStep();
+  const missingFieldsMsg = getMissingFieldsMessage();
+
   const handleNext = () => {
-    if (!isLastStep) setCurrentStep((prev) => prev + 1);
+    if (!isLastStep && canProceedToNextStep()) {
+      setCurrentStep((prev) => prev + 1);
+    }
   };
 
   const handlePrev = () => {
@@ -127,13 +170,25 @@ export const ReviewWizard = ({
             )}
           </button>
         ) : (
-          <button
-            type="button"
-            onClick={handleNext}
-            className="px-8 py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-200"
-          >
-            다음 단계로
-          </button>
+          <div className="flex flex-col items-end gap-2">
+            {missingFieldsMsg && (
+              <p className="text-sm text-red-500 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
+                ⚠️ {missingFieldsMsg}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={isNextDisabled}
+              className={`px-8 py-3 rounded-xl font-bold transition-all shadow-lg ${
+                isNextDisabled
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-gray-100'
+                  : 'bg-gray-900 text-white hover:bg-gray-800 shadow-gray-200'
+              }`}
+            >
+              다음 단계로
+            </button>
+          </div>
         )}
       </div>
     </form>

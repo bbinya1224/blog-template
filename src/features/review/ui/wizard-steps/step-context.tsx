@@ -23,7 +23,7 @@ export const StepContext = ({ form, onChange }: StepContextProps) => {
       <div className="space-y-6">
         <div className="space-y-2">
           <label htmlFor="name" className="block text-lg font-medium text-gray-700">
-            가게 이름이 뭔가요?
+            가게 이름이 뭔가요? <span className="text-red-500">*</span>
           </label>
           <input
             id="name"
@@ -37,7 +37,7 @@ export const StepContext = ({ form, onChange }: StepContextProps) => {
 
         <div className="space-y-2">
           <label htmlFor="location" className="block text-lg font-medium text-gray-700">
-            어느 지역에 있나요?
+            어느 지역에 있나요? <span className="text-red-500">*</span>
           </label>
           <input
             id="location"
@@ -48,31 +48,20 @@ export const StepContext = ({ form, onChange }: StepContextProps) => {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label htmlFor="date" className="block text-lg font-medium text-gray-700">
-              언제 가셨나요?
-            </label>
-            <input
-              id="date"
-              type="date"
-              value={form.date}
-              onChange={onChange('date')}
-              className="w-full p-4 text-xl border-b-2 border-gray-200 bg-transparent focus:border-blue-500 focus:outline-none transition-colors"
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="companion" className="block text-lg font-medium text-gray-700">
-              누구와 함께였나요?
-            </label>
-            <input
-              id="companion"
-              value={form.companion}
-              onChange={onChange('companion')}
-              placeholder="예: 친구, 연인, 가족"
-              className="w-full p-4 text-xl border-b-2 border-gray-200 bg-transparent focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-300"
-            />
-          </div>
+        <div className="space-y-2">
+          <label htmlFor="date" className="block text-lg font-medium text-gray-700">
+            언제 가셨나요? <span className="text-gray-400 text-sm">(선택)</span>
+          </label>
+          <input
+            id="date"
+            type="date"
+            value={form.date}
+            onChange={onChange('date')}
+            className="w-full p-4 text-xl border-b-2 border-gray-200 bg-transparent focus:border-blue-500 focus:outline-none transition-colors"
+          />
+          <p className="text-sm text-gray-500">
+            💡 날짜를 입력하면 더 생생한 리뷰가 되지만, 비워두셔도 괜찮아요.
+          </p>
         </div>
       </div>
     </div>
