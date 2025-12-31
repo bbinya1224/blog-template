@@ -1,7 +1,3 @@
-/**
- * 리뷰 생성 페이지 헤더
- */
-
 export const GeneratePageHeader = () => (
   <section className="space-y-3">
     <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-500">

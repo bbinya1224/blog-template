@@ -103,9 +103,10 @@ BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SET search_path = pg_catalog, public;
 
-COMMENT ON FUNCTION update_updated_at_column() IS '테이블의 updated_at 컬럼을 자동으로 업데이트';
+COMMENT ON FUNCTION update_updated_at_column() IS '테이블의 updated_at 컬럼을 자동으로 업데이트 (보안 강화됨)';
 
 -- user_styles 테이블에 트리거 적용
 CREATE TRIGGER update_user_styles_updated_at
