@@ -2,24 +2,17 @@
 
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { FAQ_ITEMS } from '@/shared/config/constants';
 
 export default function LandingPage() {
   const { status } = useSession();
   const router = useRouter();
-  const [isVisible, setIsVisible] = useState(false);
-
   useEffect(() => {
     if (status === 'authenticated') {
       router.push('/dashboard');
     }
   }, [status, router]);
-
-  useEffect(() => {
-    // 애니메이션을 위한 상태 변경을 setTimeout으로 비동기 처리
-    const timer = setTimeout(() => setIsVisible(true), 0);
-    return () => clearTimeout(timer);
-  }, []);
 
   if (status === 'loading') {
     return (
@@ -53,13 +46,13 @@ export default function LandingPage() {
 
       <main className="pt-24">
         <section className="relative overflow-hidden px-6 pb-20 pt-16 md:pt-32">
-          <div className={`mx-auto max-w-4xl text-center transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+          <div className="mx-auto max-w-4xl text-center animate-fade-in-up">
             <h1 className="mb-6 text-5xl font-extrabold leading-tight tracking-tight text-gray-900 md:text-7xl">
               블로그 포스팅,<br />
               <span className="text-blue-600">AI</span>에게 맡기세요.
             </h1>
             <p className="mx-auto mb-10 max-w-2xl text-xl font-medium leading-relaxed text-gray-500 md:text-2xl">
-              내 말투를 완벽하게 학습한 AI가<br className="md:hidden" />
+              내 말투를 완벽하게 학습한 AI가<br className="md:hidden lg:block" />
               1,500자 리뷰를 3초 만에 완성해드립니다.
             </p>
 
@@ -233,10 +226,7 @@ export default function LandingPage() {
               자주 묻는 질문
             </h2>
             <div className="space-y-4">
-              {[
-                { q: "정말 $3만 내면 끝인가요?", a: "네, 맞습니다. 서버 비용은 제가 부담합니다. 커피 한 잔만 사주세요!" },
-                { q: "어떻게 시작하나요?", a: "Buy Me a Coffee로 $3를 후원하면서 메시지에 이메일을 남겨주시면, 제가 확인 후 1~2시간 내로 승인해드립니다." },
-              ].map((item, i) => (
+              {FAQ_ITEMS.map((item, i) => (
                 <div key={i} className="rounded-2xl border border-gray-100 bg-gray-50 p-6 transition hover:bg-white hover:shadow-md">
                   <h3 className="mb-2 text-lg font-bold text-gray-900">Q. {item.q}</h3>
                   <p className="text-gray-600">A. {item.a}</p>
@@ -249,7 +239,8 @@ export default function LandingPage() {
 
       <footer className="border-t border-gray-100 bg-white py-12">
         <div className="container mx-auto px-6 text-center text-gray-400">
-          <p className="mb-4 text-sm">© 2025 BlogLab. All rights reserved.</p>
+          <p className="mb-2 text-sm">© 2025 BlogLab. All rights reserved.</p>
+          <p className='mb-4 text-sm hover:text-amber-500'><a href="https://bbinya1224.github.io/blog" target='_blank'>Bbinya&apos;s Blog</a></p>
         </div>
       </footer>
     </div>

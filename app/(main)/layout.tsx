@@ -1,9 +1,7 @@
 import Link from 'next/link';
 import { StepIndicator } from '@/shared/ui/step-indicator';
 import { UserProfile } from '@/entities/user/ui/user-profile';
-
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/auth';
+import { requireAuth } from '@/shared/lib/auth-utils';
 import { getUserStatus } from '@/shared/api/data-files';
 
 export default async function MainLayout({
@@ -11,7 +9,8 @@ export default async function MainLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions);
+  const session = await requireAuth();
+
   const userStatus = session?.user?.email ? await getUserStatus(session.user.email) : null;
   const isPreview = userStatus?.is_preview ?? false;
   const usageCount = userStatus?.usage_count || 0;

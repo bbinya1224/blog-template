@@ -40,3 +40,15 @@ export const STATUS_MESSAGES = {
   EDITING_REVIEW: '리뷰를 수정하는 중입니다…',
   EDIT_COMPLETE: '리뷰가 수정되었습니다!',
 } as const;
+
+// FAQ 목록
+export const FAQ_ITEMS = [
+  {
+    q: '정말 $3만 내면 끝인가요?',
+    a: '네, 맞습니다. 서버 비용은 제가 부담합니다. 커피 한 잔만 사주세요!',
+  },
+  {
+    q: '어떻게 시작하나요?',
+    a: 'Buy Me a Coffee로 $3를 후원하면서 메시지에 이메일을 남겨주시면, 제가 확인 후 1~2시간 내로 승인해드립니다.',
+  },
+] as const;
