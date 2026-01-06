@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
-import { SectionCard } from '@/shared/ui/section-card';
+import { SectionCard } from '@/shared/ui/SectionCard';
 
 
 const quickActions = [

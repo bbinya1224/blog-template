@@ -8,8 +8,9 @@ import {
   type FormEvent,
 } from 'react';
 import { useRouter } from 'next/navigation';
-import { SectionCard } from '@/shared/ui/section-card';
-import { StatusMessage } from '@/shared/ui/status-message';
+import { SectionCard } from '@/shared/ui/SectionCard';
+import { StatusMessage } from '@/shared/ui/StatusMessage';
+import { Loading } from '@/shared/ui/Loading';
 import { StyleProfileSummary } from '@/widgets/style-profile-summary';
 import { useAsync } from '@/shared/lib/hooks/useAsync';
 import { ANALYSIS_CONFIG, STATUS_MESSAGES } from '@/shared/config/constants';
@@ -73,6 +74,13 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
   useEffect(() => {
     if (isSuccess && styleProfile) {
       saveStyleProfileToStorage(styleProfile);
+      import('canvas-confetti').then((confetti) => {
+        confetti.default({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      });
     }
   }, [isSuccess, styleProfile]);
 
@@ -133,6 +141,7 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
 
   return (
     <div className='space-y-10'>
+      <Loading isVisible={isLoading} message={STATUS_MESSAGES.ANALYZING_STYLE} />
       <AnalysisPageHeader />
       <div className='bg-blue-50 p-4 rounded-lg mb-4'>
         <p className='text-sm text-blue-800'>

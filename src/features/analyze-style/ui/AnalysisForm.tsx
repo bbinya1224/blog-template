@@ -1,5 +1,5 @@
 import type { FormEvent } from 'react';
-import { UrlInput, NumberInput } from '@/shared/ui/input';
+import { UrlInput, NumberInput } from '@/shared/ui/Input';
 import { ANALYSIS_CONFIG } from '@/shared/config/constants';
 
 const UI_CLASSES = {

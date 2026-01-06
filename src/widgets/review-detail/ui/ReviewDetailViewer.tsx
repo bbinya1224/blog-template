@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Review } from '@/entities/review/model/review';
-import { SectionCard } from '@/shared/ui/section-card';
+import { SectionCard } from '@/shared/ui/SectionCard';
 import { editReview, copyToClipboard } from '@/features/review';
 
 interface ReviewDetailViewerProps {

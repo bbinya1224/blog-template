@@ -2,8 +2,9 @@
 
 import type { ChangeEvent, FormEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { SectionCard } from '@/shared/ui/section-card';
-import { StatusMessage } from '@/shared/ui/status-message';
+import { SectionCard } from '@/shared/ui/SectionCard';
+import { StatusMessage } from '@/shared/ui/StatusMessage';
+import { Loading } from '@/shared/ui/Loading';
 import type { ReviewPayload } from '@/entities/review/model/types';
 import type { StyleProfile } from '@/entities/style-profile/model/types';
 import {
@@ -104,6 +105,15 @@ export default function GenerateClient() {
         setReview(data.review);
         setStatus('ready');
         setStatusMessage(data.message);
+        
+        // Trigger confetti on success
+        import('canvas-confetti').then((confetti) => {
+          confetti.default({
+            particleCount: 150,
+            spread: 80,
+            origin: { y: 0.6 },
+          });
+        });
       } catch (error) {
         setStatus('error');
         setStatusMessage(
@@ -154,6 +164,7 @@ export default function GenerateClient() {
 
   return (
     <div className="space-y-10">
+      <Loading isVisible={status === 'loading'} message={statusMessage} />
       <GeneratePageHeader />
 
       <StyleProfileDisplay styleProfile={styleProfile} />

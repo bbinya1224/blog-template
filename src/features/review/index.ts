@@ -12,7 +12,7 @@ export {
 } from './api/review-api';
 
 // UI Components
-export { GeneratePageHeader } from './ui/generate-page-header';
-export { StyleProfileDisplay } from './ui/style-profile-display';
-export { ReviewWizard } from './ui/review-wizard';
-export { ReviewResult } from './ui/review-result';
+export { GeneratePageHeader } from './ui/GeneratePageHeader';
+export { StyleProfileDisplay } from './ui/StyleProfileDisplay';
+export { ReviewWizard } from './ui/ReviewWizard';
+export { ReviewResult } from './ui/ReviewResult';

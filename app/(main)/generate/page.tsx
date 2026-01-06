@@ -1,4 +1,4 @@
-import GenerateClient from './generate-client';
+import GenerateClient from './GenerateClient';
 
 export default async function GeneratePage() {
   return <GenerateClient />;

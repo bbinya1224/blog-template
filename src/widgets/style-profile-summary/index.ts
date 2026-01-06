@@ -1,1 +1,1 @@
-export { StyleProfileSummary } from './ui/style-profile-summary';
+export { StyleProfileSummary } from './ui/StyleProfileSummary';
