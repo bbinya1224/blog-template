@@ -4,7 +4,8 @@ import type { ChangeEvent, FormEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SectionCard } from '@/shared/ui/SectionCard';
 import { StatusMessage } from '@/shared/ui/StatusMessage';
-import { Loading } from '@/shared/ui/Loading';
+import { DynamicMessage } from '@/shared/ui/DynamicMessage';
+import { ReviewResultSkeleton } from '@/features/review/ui/ReviewResultSkeleton';
 import type { ReviewPayload } from '@/entities/review/model/types';
 import type { StyleProfile } from '@/entities/style-profile/model/types';
 import {
@@ -17,8 +18,6 @@ import {
   ReviewWizard,
   ReviewResult,
 } from '@/features/review';
-
-
 
 const emptyForm: ReviewPayload = {
   name: '',
@@ -52,14 +51,12 @@ export default function GenerateClient() {
           setStatusMessage('✅ 저장된 스타일 프로필을 불러왔습니다.');
         } else {
           setStatusMessage(
-            '⚠️ 스타일 프로필이 없습니다. 먼저 스타일 분석을 진행해주세요.',
+            '⚠️ 스타일 프로필이 없습니다. 먼저 스타일 분석을 진행해주세요.'
           );
         }
       } catch (error) {
         console.warn(error);
-        setStatusMessage(
-          '⚠️ 스타일 프로필을 불러오지 못했습니다.',
-        );
+        setStatusMessage('⚠️ 스타일 프로필을 불러오지 못했습니다.');
       }
     };
 
@@ -84,7 +81,7 @@ export default function GenerateClient() {
           [field]: event.target.value,
         }));
       },
-    [],
+    []
   );
 
   const handleAppendDraft = useCallback((text: string) => {
@@ -105,7 +102,7 @@ export default function GenerateClient() {
         setReview(data.review);
         setStatus('ready');
         setStatusMessage(data.message);
-        
+
         // Trigger confetti on success
         import('canvas-confetti').then((confetti) => {
           confetti.default({
@@ -119,11 +116,11 @@ export default function GenerateClient() {
         setStatusMessage(
           error instanceof Error
             ? error.message
-            : '리뷰 생성 중 오류가 발생했습니다.',
+            : '리뷰 생성 중 오류가 발생했습니다.'
         );
       }
     },
-    [form],
+    [form]
   );
 
   const handleEdit = useCallback(async () => {
@@ -144,7 +141,7 @@ export default function GenerateClient() {
       setStatusMessage(
         error instanceof Error
           ? error.message
-          : '리뷰 수정 중 오류가 발생했습니다.',
+          : '리뷰 수정 중 오류가 발생했습니다.'
       );
     }
   }, [review, editRequest]);
@@ -163,33 +160,35 @@ export default function GenerateClient() {
   }, [review]);
 
   return (
-    <div className="space-y-10">
-      <Loading isVisible={status === 'loading'} message={statusMessage} />
+    <div className='space-y-10'>
       <GeneratePageHeader />
 
       <StyleProfileDisplay styleProfile={styleProfile} />
 
       <SectionCard
-        title="리뷰 생성 폼"
-        description="필수 값만 입력하면 나머지는 AI가 자연스럽게 채워줍니다."
+        title='리뷰 생성 폼'
+        description='필수 값만 입력하면 나머지는 AI가 자연스럽게 채워줍니다.'
         footer={
           statusMessage && (
-            <div className="space-y-4">
-              <StatusMessage message={statusMessage} isError={status === 'error'} />
+            <div className='space-y-4'>
+              <StatusMessage
+                message={statusMessage}
+                isError={status === 'error'}
+              />
               {statusMessage.includes('QUOTA_EXCEEDED') && (
-                <div className="flex flex-col items-center justify-center rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center">
-                  <p className="mb-4 font-bold text-yellow-800">
+                <div className='flex flex-col items-center justify-center rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center'>
+                  <p className='mb-4 font-bold text-yellow-800'>
                     ☕️ 더 많은 리뷰를 생성하려면 후원이 필요합니다
                   </p>
                   <a
-                    href="https://www.buymeacoffee.com/bbinya"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:opacity-90 transition-opacity"
+                    href='https://www.buymeacoffee.com/bbinya'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='hover:opacity-90 transition-opacity'
                   >
                     <img
-                      src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
-                      alt="Buy Me A Coffee"
+                      src='https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png'
+                      alt='Buy Me A Coffee'
                       style={{ height: '50px', width: 'auto' }}
                     />
                   </a>
@@ -209,16 +208,36 @@ export default function GenerateClient() {
         />
       </SectionCard>
 
-      {review && (
+      {/* Loading Skeleton & Dynamic Message */}
+      {status === 'loading' && (
         <SectionCard
-          title="생성된 리뷰"
-          description="아래 내용을 그대로 복사해서 블로그에 붙여넣을 수 있습니다."
+          title='리뷰 생성 중...'
+          description='최고의 리뷰를 위해 AI가 열심히 글을 쓰고 있어요! ✍️'
+        >
+          <div className='space-y-8 py-4'>
+            <DynamicMessage
+              messages={[
+                '작성해주신 초안을 읽고 있어요... 👀',
+                '블로그 스타일에 맞춰 톤을 조정 중입니다... 🎨',
+                '매력적인 문장을 다듬고 있어요... ✨',
+                '거의 다 됐어요! 🚀',
+              ]}
+            />
+            <ReviewResultSkeleton />
+          </div>
+        </SectionCard>
+      )}
+
+      {review && status !== 'loading' && (
+        <SectionCard
+          title='생성된 리뷰'
+          description='아래 내용을 그대로 복사해서 블로그에 붙여넣을 수 있습니다.'
         >
           <ReviewResult
             review={review}
             editRequest={editRequest}
             isCopying={isCopying}
-            isEditing={status === 'loading'}
+            isEditing={false}
             onEditRequestChange={setEditRequest}
             onCopy={handleCopy}
             onEdit={handleEdit}

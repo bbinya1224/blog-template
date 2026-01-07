@@ -1,0 +1,1 @@
+export { DynamicMessage } from './DynamicMessage';

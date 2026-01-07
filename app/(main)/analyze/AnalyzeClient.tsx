@@ -10,8 +10,9 @@ import {
 import { useRouter } from 'next/navigation';
 import { SectionCard } from '@/shared/ui/SectionCard';
 import { StatusMessage } from '@/shared/ui/StatusMessage';
-import { Loading } from '@/shared/ui/Loading';
+import { DynamicMessage } from '@/shared/ui/DynamicMessage';
 import { StyleProfileSummary } from '@/widgets/style-profile-summary';
+import { StyleProfileSkeleton } from '@/widgets/style-profile-summary/ui/StyleProfileSkeleton';
 import { useAsync } from '@/shared/lib/hooks/useAsync';
 import { ANALYSIS_CONFIG, STATUS_MESSAGES } from '@/shared/config/constants';
 import {
@@ -141,7 +142,6 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
 
   return (
     <div className='space-y-10'>
-      <Loading isVisible={isLoading} message={STATUS_MESSAGES.ANALYZING_STYLE} />
       <AnalysisPageHeader />
       <div className='bg-blue-50 p-4 rounded-lg mb-4'>
         <p className='text-sm text-blue-800'>
@@ -170,7 +170,27 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
         />
       </SectionCard>
 
-      {styleProfile && (
+      {/* Loading Skeleton & Dynamic Message */}
+      {isLoading && (
+        <SectionCard
+          title={PAGE_TEXTS.RESULT_CARD_TITLE}
+          description='스타일 분석 결과를 기다리는 중입니다...'
+        >
+          <div className='space-y-8 py-4'>
+            <DynamicMessage
+              messages={[
+                '블로그의 최근 글을 읽어오고 있어요 📖',
+                '작성된 글의 스타일과 톤을 분석 중입니다 🧐',
+                '거의 다 분석했어요! 조금만 더 기다려주세요 🚀',
+              ]}
+            />
+            <StyleProfileSkeleton />
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Success Result */}
+      {styleProfile && !isLoading && (
         <SectionCard
           title={PAGE_TEXTS.RESULT_CARD_TITLE}
           description={PAGE_TEXTS.RESULT_CARD_DESCRIPTION}
