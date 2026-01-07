@@ -1,5 +1,5 @@
 import { Review } from '@/entities/review/model/review';
-import { ReviewCard } from '@/entities/review/ui/review-card';
+import { ReviewCard } from '@/entities/review/ui/ReviewCard';
 
 interface ReviewListProps {
   reviews: Review[];

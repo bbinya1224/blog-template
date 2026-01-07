@@ -1,9 +1,9 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import type { ReviewPayload } from '@/entities/review/model/types';
-import { StepContext } from './wizard-steps/step-context';
-import { StepMenu } from './wizard-steps/step-menu';
-import { StepExperience } from './wizard-steps/step-experience';
-import { StepRefinement } from './wizard-steps/step-refinement';
+import { StepContext } from './wizard-steps/StepContext';
+import { StepMenu } from './wizard-steps/StepMenu';
+import { StepExperience } from './wizard-steps/StepExperience';
+import { StepRefinement } from './wizard-steps/StepRefinement';
 
 interface ReviewWizardProps {
   form: ReviewPayload;

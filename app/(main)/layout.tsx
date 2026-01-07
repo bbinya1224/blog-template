@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { StepIndicator } from '@/shared/ui/step-indicator';
-import { UserProfile } from '@/entities/user/ui/user-profile';
+import { StepIndicator } from '@/shared/ui/StepIndicator';
+import { UserProfile } from '@/entities/user/ui/UserProfile';
 import { requireAuth } from '@/shared/lib/auth-utils';
 import { getUserStatus } from '@/shared/api/data-files';
 

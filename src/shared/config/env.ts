@@ -1,14 +1,7 @@
 /**
- * 환경 변수 검증 및 관리
- */
-
-/**
  * 필수 환경 변수 목록
  */
-const REQUIRED_ENV_VARS = [
-  'ANTHROPIC_API_KEY',
-  'TAVILY_API_KEY',
-] as const;
+const REQUIRED_ENV_VARS = ['ANTHROPIC_API_KEY', 'TAVILY_API_KEY'] as const;
 
 /**
  * 선택적 환경 변수 목록 (미래 확장용)
@@ -48,7 +41,9 @@ export const validateRequiredEnv = (): EnvValidationResult => {
     return {
       success: false,
       missing,
-      message: `필수 환경 변수가 설정되지 않았습니다: ${missing.join(', ')}\n.env.local 파일을 확인해주세요.`,
+      message: `필수 환경 변수가 설정되지 않았습니다: ${missing.join(
+        ', '
+      )}\n.env.local 파일을 확인해주세요.`,
     };
   }
 

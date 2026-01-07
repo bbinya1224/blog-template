@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getReviewById } from '@/entities/review/api/review-repository';
-import { ReviewDetailViewer } from '@/widgets/review-detail/ui/review-detail-viewer';
+import { ReviewDetailViewer } from '@/widgets/review-detail/ui/ReviewDetailViewer';
 
 interface ReviewDetailPageProps {
   params: Promise<{

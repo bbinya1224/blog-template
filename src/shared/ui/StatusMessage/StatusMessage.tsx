@@ -10,7 +10,7 @@ interface StatusMessageProps {
 
 export const StatusMessage = ({
   message,
-  isError = false
+  isError = false,
 }: StatusMessageProps) => (
   <p className={`text-sm ${isError ? 'text-red-600' : 'text-blue-600'}`}>
     {message}

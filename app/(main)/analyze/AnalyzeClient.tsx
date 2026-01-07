@@ -8,9 +8,11 @@ import {
   type FormEvent,
 } from 'react';
 import { useRouter } from 'next/navigation';
-import { SectionCard } from '@/shared/ui/section-card';
-import { StatusMessage } from '@/shared/ui/status-message';
+import { SectionCard } from '@/shared/ui/SectionCard';
+import { StatusMessage } from '@/shared/ui/StatusMessage';
+import { DynamicMessage } from '@/shared/ui/DynamicMessage';
 import { StyleProfileSummary } from '@/widgets/style-profile-summary';
+import { StyleProfileSkeleton } from '@/widgets/style-profile-summary/ui/StyleProfileSkeleton';
 import { useAsync } from '@/shared/lib/hooks/useAsync';
 import { ANALYSIS_CONFIG, STATUS_MESSAGES } from '@/shared/config/constants';
 import {
@@ -73,6 +75,13 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
   useEffect(() => {
     if (isSuccess && styleProfile) {
       saveStyleProfileToStorage(styleProfile);
+      import('canvas-confetti').then((confetti) => {
+        confetti.default({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      });
     }
   }, [isSuccess, styleProfile]);
 
@@ -161,7 +170,27 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
         />
       </SectionCard>
 
-      {styleProfile && (
+      {/* Loading Skeleton & Dynamic Message */}
+      {isLoading && (
+        <SectionCard
+          title={PAGE_TEXTS.RESULT_CARD_TITLE}
+          description='스타일 분석 결과를 기다리는 중입니다...'
+        >
+          <div className='space-y-8 py-4'>
+            <DynamicMessage
+              messages={[
+                '블로그의 최근 글을 읽어오고 있어요 📖',
+                '작성된 글의 스타일과 톤을 분석 중입니다 🧐',
+                '거의 다 분석했어요! 조금만 더 기다려주세요 🚀',
+              ]}
+            />
+            <StyleProfileSkeleton />
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Success Result */}
+      {styleProfile && !isLoading && (
         <SectionCard
           title={PAGE_TEXTS.RESULT_CARD_TITLE}
           description={PAGE_TEXTS.RESULT_CARD_DESCRIPTION}

@@ -1,5 +1,5 @@
 import { getReviews } from '@/entities/review/api/review-repository';
-import { ReviewList } from '@/widgets/review-list/ui/review-list';
+import { ReviewList } from '@/widgets/review-list/ui/ReviewList';
 
 export const dynamic = 'force-dynamic';
 

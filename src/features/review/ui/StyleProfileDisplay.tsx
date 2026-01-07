@@ -3,7 +3,7 @@
  * - 현재 적용된 스타일 프로필을 요약해서 보여줌
  */
 
-import { SectionCard } from '@/shared/ui/section-card';
+import { SectionCard } from '@/shared/ui/SectionCard';
 import type { StyleProfile } from '@/entities/style-profile/model/types';
 
 interface StyleProfileDisplayProps {
