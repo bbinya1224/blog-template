@@ -7,7 +7,10 @@ const REQUIRED_ENV_VARS = ['ANTHROPIC_API_KEY', 'TAVILY_API_KEY'] as const;
  * 선택적 환경 변수 목록 (미래 확장용)
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const OPTIONAL_ENV_VARS = [] as const;
+const OPTIONAL_ENV_VARS = [
+  'NAVER_CLIENT_ID',
+  'NAVER_CLIENT_SECRET',
+] as const;
 
 /**
  * 환경 변수 타입 정의

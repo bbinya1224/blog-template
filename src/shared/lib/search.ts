@@ -1,5 +1,10 @@
 import { tavily } from '@tavily/core';
 import { AppError } from '@/shared/lib/errors';
+import {
+  searchNaverPlace,
+  formatNaverPlaceInfo,
+  type NaverPlaceInfo,
+} from './naver-search';
 
 // Lazy initialization으로 빌드 시 에러 방지
 let tavilyClient: ReturnType<typeof tavily> | null = null;
@@ -22,7 +27,18 @@ const getTavilyClient = () => {
   return tavilyClient;
 };
 
-export async function searchStoreInfo(query: string) {
+/**
+ * 통합 검색 결과 타입
+ */
+export interface SearchResult {
+  naverPlace: NaverPlaceInfo | null;
+  tavilyContext: string;
+}
+
+/**
+ * Tavily 검색 (블로그 리뷰 컨텍스트)
+ */
+async function searchTavilyContext(query: string): Promise<string> {
   try {
     console.log(`\n[Tavily] 검색 시작: "${query}"`);
     const client = getTavilyClient();
@@ -51,6 +67,53 @@ export async function searchStoreInfo(query: string) {
     return context;
   } catch (error) {
     console.error('❌ [Tavily] 검색 실패:', error);
-    return ''; // 검색 실패 시 빈 문자열 반환 (리뷰 생성은 진행)
+    return ''; // 검색 실패 시 빈 문자열 반환
   }
+}
+
+/**
+ * 통합 검색: 네이버 지역 정보 + Tavily 블로그 컨텍스트
+ * 
+ * @param query - 검색 쿼리 (예: "성수동 대림창고")
+ * @returns 네이버 장소 정보와 Tavily 컨텍스트를 포함한 검색 결과
+ */
+export async function searchStoreInfo(query: string): Promise<SearchResult> {
+  console.log(`\n=== 통합 검색 시작: "${query}" ===`);
+
+  // 네이버 + Tavily 병렬 검색
+  const [naverPlace, tavilyContext] = await Promise.all([
+    searchNaverPlace(query),
+    searchTavilyContext(query),
+  ]);
+
+  console.log('\n=== 통합 검색 완료 ===');
+  console.log(
+    `- 네이버: ${naverPlace ? naverPlace.name : '결과 없음'}`
+  );
+  console.log(`- Tavily: ${tavilyContext ? `${tavilyContext.length}자` : '결과 없음'}\n`);
+
+  return {
+    naverPlace,
+    tavilyContext,
+  };
+}
+
+/**
+ * 검색 결과를 문자열로 포맷팅 (하위 호환성)
+ * @deprecated 대신 searchStoreInfo()를 사용하고 구조화된 결과를 활용하세요
+ */
+export async function searchStoreInfoLegacy(query: string): Promise<string> {
+  const result = await searchStoreInfo(query);
+  
+  const parts: string[] = [];
+  
+  if (result.naverPlace) {
+    parts.push('## 네이버 지역 정보\n' + formatNaverPlaceInfo(result.naverPlace));
+  }
+  
+  if (result.tavilyContext) {
+    parts.push('## 블로그 리뷰\n' + result.tavilyContext);
+  }
+  
+  return parts.join('\n\n') || '검색 결과가 없습니다.';
 }

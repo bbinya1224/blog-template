@@ -12,7 +12,8 @@ import {
 } from '@/shared/config/prompts';
 import { AppError } from '@/shared/lib/errors';
 import { readBlogSamples } from '@/shared/api/data-files';
-import { searchStoreInfo } from '@/shared/lib/search'; // Tavily 검색 유틸
+import { searchStoreInfo } from '@/shared/lib/search';
+import { formatNaverPlaceInfo } from '@/shared/lib/naver-search';
 
 const getRandomWritingSamples = async (email: string, count: number = 3): Promise<string> => {
   try {
@@ -38,31 +39,38 @@ export const generateReviewWithClaudeAPI = async (
   try {
     const styleProfileJson = JSON.stringify(styleProfile, null, 2);
 
-    const searchQuery = `${payload.location} ${payload.name} 메뉴 가격 분위기 솔직 후기`;
-    console.log(`\n[Review Gen] Tavily 검색 시작: "${searchQuery}"`);
+    const searchQuery = `${payload.location} ${payload.name}`;
+    console.log(`\n[Review Gen] 통합 검색 시작: "${searchQuery}"`);
 
-    const [searchContext, writingSamples] = await Promise.all([
+    const [searchResult, writingSamples] = await Promise.all([
       searchStoreInfo(searchQuery).catch((err) => {
-        console.error('❌ Tavily 검색 실패:', err.message || err);
-        return '';
+        console.error('❌ 통합 검색 실패:', err.message || err);
+        return { naverPlace: null, tavilyContext: '' };
       }),
       email ? getRandomWritingSamples(email, 3) : Promise.resolve(''),
     ]);
 
+    // 네이버 정보 포맷팅
+    const naverPlaceFormatted = searchResult.naverPlace
+      ? formatNaverPlaceInfo(searchResult.naverPlace)
+      : '네이버 검색 결과 없음';
+
+    const tavilyContext = searchResult.tavilyContext || '';
+
     console.log(
-      `\n[Review Gen] 검색 결과: ${searchContext.length}자, 샘플: ${writingSamples.length}자`
+      `\n[Review Gen] 검색 결과:\n- 네이버: ${searchResult.naverPlace ? searchResult.naverPlace.name : '없음'}\n- Tavily: ${tavilyContext.length}자\n- 샘플: ${writingSamples.length}자`
     );
 
-    if (searchContext.length > 0) {
+    if (tavilyContext.length > 0) {
       console.log(
-        `\n[Review Gen] Tavily 검색 내용 (첫 200자):\n${searchContext.substring(
+        `\n[Review Gen] Tavily 검색 내용 (첫 200자):\n${tavilyContext.substring(
           0,
           200
         )}...`
       );
     } else {
       console.warn(
-        '⚠️ [Review Gen] Tavily 검색 결과가 비어있습니다. 일반적인 리뷰로 생성됩니다.'
+        '⚠️ [Review Gen] Tavily 검색 결과가 비어있습니다.'
       );
     }
 
@@ -90,8 +98,9 @@ export const generateReviewWithClaudeAPI = async (
         cons: payload.cons,
         extra: payload.extra,
         user_draft: payload.user_draft || '',
+        naver_place_info: naverPlaceFormatted,
         tavily_search_result_context:
-          searchContext ||
+          tavilyContext ||
           '검색된 정보가 없습니다. 일반적인 맛집 리뷰처럼 작성해주세요.',
         writing_samples:
           writingSamples ||
