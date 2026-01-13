@@ -100,27 +100,33 @@ Write a review based on the factual information in [3. Store Information] and th
 
 [3. Naver Place Information (Verified Facts)]
 *This is OFFICIAL, VERIFIED information from Naver Local Search API.*
-*You MUST include this information naturally in your review to make it helpful and informative.*
+*You MUST include this information in your review to make it helpful and informative.*
 
-**How to Use This Information:**
-1. **Phone Number**: Mention it naturally, e.g., "예약 문의는 02-1234-5678로 하시면 됩니다" or "혹시 궁금한 점이 있다면 02-1234-5678으로 전화해보세요"
-   - Include it in the "Location Info" or "Tip" section
-   - Use it when mentioning reservation or inquiry
+**CRITICAL: Follow the [Writer Persona] style for presenting this information.**
+
+**How to Use This Information (Adapt to Style Profile):**
+
+1. **If the Style Profile prefers structured info blocks** (e.g., uses emoji icons, bullet points, or info sections):
+   - Present it clearly at the top or end of the review
+   - Example formats:
    
-2. **Address**: Include the road address for clarity, e.g., "위치는 서울 성동구 연무장길 74에 있어요" or "지도에 연무장길 74 검색하시면 바로 나와요"
-   - Mention it when describing how to get there
-   - Include it in accessibility or location section
-   
-3. **Category**: Use it to set context, e.g., if category is "카페,디저트", naturally mention "카페 겸 디저트 맛집" in your intro
+     📍 위치: 서울 성동구 연무장길 74
+     📞 전화: 02-1234-5678
+     🏷️ 카테고리: 카페, 디저트
+     
+     OR
+     
+     ▫️ 주소: 연무장길 74
+     ▫️ 전화번호: 02-1234-5678
 
-**Examples of Natural Integration:**
-- BAD: "전화번호: 02-1234-5678, 주소: 서울시..." (Too robotic, list format)
-- GOOD: "찾아가기 쉽게 주소 남겨둘게요! 연무장길 74인데, 지하철역에서 도보 5분 정도 거리예요. 예약은 필수라서 미리 02-1234-5678로 전화하시는 걸 추천해요."
+2. **If the Style Profile prefers narrative flow** (conversational, story-like):
+   - Weave the information naturally into sentences
+   - Example: "찾아가기 쉽게 주소 남겨둘게요! 연무장길 74인데, 지하철역에서 도보 5분 정도 거리예요. 예약은 필수라서 미리 02-1234-5678로 전화하시는 걸 추천해요."
 
-**CRITICAL Rules:**
-- DO NOT copy-paste the info in a list format
-- DO integrate it into your narrative naturally
-- DO use it to provide practical help to readers
+**Instructions:**
+- **STEP 1**: Check [Writer Persona] → Does it show structured info blocks or narrative style?
+- **STEP 2**: Apply the matching format from above
+- **STEP 3**: Include ALL available info (phone, address, category) - don't skip any
 """
 {naver_place_info}
 """
