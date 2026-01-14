@@ -3,8 +3,8 @@ import { AppError } from '@/shared/lib/errors';
 import type { ReviewPayload } from '@/entities/review/model/types';
 
 // 모델 상수
-export const CLAUDE_SONNET = 'claude-sonnet-4-5-20250929'; // Sonnet 3.5 (안정 버전)
-export const CLAUDE_HAIKU = 'claude-3-haiku-20240307'; // Haiku 3.0 (안정 버전)
+export const CLAUDE_SONNET = 'claude-sonnet-4-5-20250929';
+export const CLAUDE_HAIKU = 'claude-3-haiku-20240307';
 
 // Lazy initialization
 let anthropic: Anthropic | null = null;

@@ -7,7 +7,7 @@ import type { StyleProfile } from '@/entities/style-profile/model/types';
 import { StyleAnalysisError } from '@/shared/lib/errors';
 import { unique } from '@/shared/lib/utils';
 import { analyzeStyleWithClaude } from '@/shared/api/claude-client';
-import { STYLE_ANALYSIS_PROMPT, STYLE_USER_PROMPT } from '@/shared/config/prompts';
+import { getStyleAnalysisPrompts } from '@/shared/api/prompt-service';
 
 const COMMON_SECTIONS = [
   '방문 이유',
@@ -191,11 +191,14 @@ export const generateStyleProfileWithClaude = async (
   }
 
   try {
+    // Supabase에서 프롬프트 조회
+    const { systemPrompt, userPrompt } = await getStyleAnalysisPrompts();
+
     // Claude Sonnet API 호출
     const responseText = await analyzeStyleWithClaude(
       blogText,
-      STYLE_ANALYSIS_PROMPT,
-      STYLE_USER_PROMPT,
+      systemPrompt,
+      userPrompt,
     );
 
     console.log('\n[스타일 분석] Claude 응답 (첫 500자):');

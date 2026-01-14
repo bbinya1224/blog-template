@@ -6,10 +6,9 @@ import {
   editReviewWithClaude,
 } from '@/shared/api/claude-client';
 import {
-  REVIEW_ANALYSIS_PROMPT,
-  REVIEW_USER_PROMPT,
-  REVIEW_EDIT_PROMPT,
-} from '@/shared/config/prompts';
+  getReviewGenerationPrompts,
+  getReviewEditPrompt,
+} from '@/shared/api/prompt-service';
 import { AppError } from '@/shared/lib/errors';
 import { readBlogSamples } from '@/shared/api/data-files';
 import { searchStoreInfo } from '@/shared/lib/search';
@@ -42,12 +41,13 @@ export const generateReviewWithClaudeAPI = async (
     const searchQuery = `${payload.location} ${payload.name}`;
     console.log(`\n[Review Gen] 통합 검색 시작: "${searchQuery}"`);
 
-    const [searchResult, writingSamples] = await Promise.all([
+    const [searchResult, writingSamples, prompts] = await Promise.all([
       searchStoreInfo(searchQuery).catch((err) => {
         console.error('❌ 통합 검색 실패:', err.message || err);
         return { naverPlace: null, tavilyContext: '' };
       }),
       email ? getRandomWritingSamples(email, 3) : Promise.resolve(''),
+      getReviewGenerationPrompts(),
     ]);
 
     // 네이버 정보 포맷팅
@@ -106,8 +106,8 @@ export const generateReviewWithClaudeAPI = async (
           writingSamples ||
           '샘플 데이터가 없습니다. 스타일 프로필을 참고해주세요.',
       },
-      REVIEW_ANALYSIS_PROMPT,
-      REVIEW_USER_PROMPT
+      prompts.systemPrompt,
+      prompts.userPrompt
     );
 
     const trimmedReview = review.trim();
@@ -138,12 +138,16 @@ export const editReviewWithClaudeAPI = async (
   styleProfile: StyleProfile
 ): Promise<string> => {
   try {
-    const styleProfileJson = JSON.stringify(styleProfile, null, 2);
+    const [styleProfileJson, editPrompt] = await Promise.all([
+      Promise.resolve(JSON.stringify(styleProfile, null, 2)),
+      getReviewEditPrompt(),
+    ]);
+
     const editedReview = await editReviewWithClaude(
       originalReview,
       editRequest,
       styleProfileJson,
-      REVIEW_EDIT_PROMPT
+      editPrompt
     );
     return editedReview.trim();
   } catch (error) {
