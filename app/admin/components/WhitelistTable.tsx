@@ -31,7 +31,7 @@ export function WhitelistTable({ users, loading, onRefresh, onDelete, onUpdateSt
     <div className="rounded-lg bg-white p-6 shadow">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-semibold">
-          승인된 사용자 ({users.length}명)
+          승인된 사용자 ({users?.length || 0}명)
         </h2>
         <button
           onClick={onRefresh}
@@ -42,7 +42,7 @@ export function WhitelistTable({ users, loading, onRefresh, onDelete, onUpdateSt
         </button>
       </div>
 
-      {users.length === 0 ? (
+      {!users || users.length === 0 ? (
         <p className="py-8 text-center text-gray-500">
           아직 승인된 사용자가 없습니다
         </p>

@@ -34,7 +34,7 @@ export function useWhitelist(password: string) {
       }
 
       const data = await response.json();
-      setUsers(data.users);
+      setUsers(data.users || []);
     } catch {
       setError('화이트리스트를 불러올 수 없습니다');
     } finally {
