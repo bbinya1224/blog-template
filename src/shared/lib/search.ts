@@ -1,10 +1,10 @@
 import { tavily } from '@tavily/core';
 import { AppError } from '@/shared/lib/errors';
 import {
-  searchNaverPlace,
-  formatNaverPlaceInfo,
-  type NaverPlaceInfo,
-} from './naver-search';
+  searchKakaoPlace,
+  formatKakaoPlaceInfo,
+  type KakaoPlaceInfo,
+} from './kakao-local';
 
 // Lazy initialization으로 빌드 시 에러 방지
 let tavilyClient: ReturnType<typeof tavily> | null = null;
@@ -31,7 +31,7 @@ const getTavilyClient = () => {
  * 통합 검색 결과 타입
  */
 export interface SearchResult {
-  naverPlace: NaverPlaceInfo | null;
+  kakaoPlace: KakaoPlaceInfo | null;
   tavilyContext: string;
 }
 
@@ -72,28 +72,28 @@ async function searchTavilyContext(query: string): Promise<string> {
 }
 
 /**
- * 통합 검색: 네이버 지역 정보 + Tavily 블로그 컨텍스트
+ * 통합 검색: 카카오 지역 정보 + Tavily 블로그 컨텍스트
  * 
  * @param query - 검색 쿼리 (예: "성수동 대림창고")
- * @returns 네이버 장소 정보와 Tavily 컨텍스트를 포함한 검색 결과
+ * @returns 카카오 장소 정보와 Tavily 컨텍스트를 포함한 검색 결과
  */
 export async function searchStoreInfo(query: string): Promise<SearchResult> {
   console.log(`\n=== 통합 검색 시작: "${query}" ===`);
 
-  // 네이버 + Tavily 병렬 검색
-  const [naverPlace, tavilyContext] = await Promise.all([
-    searchNaverPlace(query),
+  // 카카오 + Tavily 병렬 검색
+  const [kakaoPlace, tavilyContext] = await Promise.all([
+    searchKakaoPlace(query),
     searchTavilyContext(query),
   ]);
 
   console.log('\n=== 통합 검색 완료 ===');
   console.log(
-    `- 네이버: ${naverPlace ? naverPlace.name : '결과 없음'}`
+    `- 카카오: ${kakaoPlace ? kakaoPlace.name : '결과 없음'}`
   );
   console.log(`- Tavily: ${tavilyContext ? `${tavilyContext.length}자` : '결과 없음'}\n`);
 
   return {
-    naverPlace,
+    kakaoPlace,
     tavilyContext,
   };
 }
@@ -107,8 +107,8 @@ export async function searchStoreInfoLegacy(query: string): Promise<string> {
   
   const parts: string[] = [];
   
-  if (result.naverPlace) {
-    parts.push('## 네이버 지역 정보\n' + formatNaverPlaceInfo(result.naverPlace));
+  if (result.kakaoPlace) {
+    parts.push('## 카카오 지역 정보\n' + formatKakaoPlaceInfo(result.kakaoPlace));
   }
   
   if (result.tavilyContext) {

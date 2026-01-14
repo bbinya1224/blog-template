@@ -1,22 +1,22 @@
 # 블로그 톤 기반 리뷰 자동 생성 도구
 
-내 블로그 문체를 학습해 **1500자 이상**의 리뷰를 자동으로 만들어주는 로컬 전용 Next.js 앱입니다.  
+내 블로그 문체를 학습해 **1500자 이상**의 리뷰를 자동으로 만들어주는 AI 기반 웹 서비스입니다.  
 맛집 전용 리뷰로 작업하고있어요. 🤭
 
-## 📢 Release Note (2026.01.13)
-> 네이버 지역 검색 API 통합! 이제 전화번호, 주소 등 공식 정보가 자동으로 리뷰에 포함됩니다. 개발 환경에서는 검색 결과를 브라우저 콘솔에서 실시간 확인 가능합니다.
+## 📢 Release Note (2026.01.14)
+> 카카오 로컬 API 추가! 상업적 이용이 가능한 카카오 로컬 검색으로 전화번호, 주소 등 공식 정보가 자동으로 리뷰에 포함됩니다.
 >
 > 👉 [자세한 변경사항 보기 (CHANGELOG)](./CHANGELOG.md)
 
 ## ✨ 주요 기능
 
 - 📝 네이버 블로그 RSS 분석으로 나만의 문체 학습
-- 🔍 **네이버 지역 검색 + Tavily로 실제 가게 정보 자동 수집**
+- 🔍 **카카오 로컬 검색 + Tavily로 실제 가게 정보 자동 수집**
   - 📍 전화번호, 주소, 카테고리 등 구조화된 정보
   - 🌐 블로그 리뷰 및 추가 컨텍스트
 - 🤖 Claude AI로 내 말투를 흉내낸 1500~2000자 리뷰 생성
 - 🎨 생성된 리뷰 실시간 수정 및 복사
-- 💾 모든 데이터 로컬 저장 (프라이버시 보장)
+- ☁️ Vercel에 배포된 웹 서비스
 
 ## 🚀 빠른 시작
 
@@ -42,8 +42,7 @@ ANTHROPIC_API_KEY=your_anthropic_api_key_here
 TAVILY_API_KEY=your_tavily_api_key_here
 
 # 선택 API 키 (한국 로컬 비즈니스 정보 강화)
-NAVER_CLIENT_ID=your_naver_client_id_here
-NAVER_CLIENT_SECRET=your_naver_client_secret_here
+KAKAO_REST_API_KEY=your_kakao_rest_api_key_here
 ```
 
 **API 키 발급**:
@@ -52,9 +51,9 @@ NAVER_CLIENT_SECRET=your_naver_client_secret_here
 - **Tavily** (검색): https://tavily.com/
   - 용도: 블로그 리뷰 및 일반 가게 정보 검색
   - 무료: 월 1,000회
-- **Naver** (선택, 지역 검색): https://developers.naver.com/apps/#/register
+- **Kakao** (선택, 로컬 검색): https://developers.kakao.com/
   - 용도: 한국 로컬 비즈니스 정보 (전화번호, 주소, 카테고리)
-  - 무료: 일 25,000회
+  - 무료: 월 300,000회
   - ⚠️ 없어도 앱은 정상 동작 (Tavily만 사용)
 
 ### 3. 개발 서버 실행
@@ -67,18 +66,27 @@ npm run dev
 
 ## 📖 사용 방법
 
-### 1단계: 스타일 분석 (`/analyze`)
+### 로컬 개발 환경
+
+#### 1단계: 스타일 분석 (`/analyze`)
 1. 네이버 블로그 RSS URL 입력 (예: `https://rss.blog.naver.com/YOUR_BLOG.xml`)
 2. 분석할 최근 글 개수 선택 (권장: 10~20개)
 3. 크롤링 및 분석 완료 대기
 4. 생성된 스타일 프로필 확인
 
-### 2단계: 리뷰 생성 (`/generate`)
+#### 2단계: 리뷰 생성 (`/generate`)
 1. **기본 정보**: 가게명, 위치, 방문 날짜
 2. **개인 경험**: 주문한 메뉴(필수), 동행인
 3. **평가**: 한줄평, 장점, 단점, 추가 팁
 4. 생성 버튼 클릭 → 1500~2000자 리뷰 자동 생성
 5. 리뷰 복사 또는 수정 요청
+
+### Vercel 배포 환경
+
+웹 브라우저를 통해 바로 접근 가능합니다:
+1. 배포된 URL로 접속
+2. 위와 동일한 방법으로 사용
+3. 모든 기능이 서버리스 환경에서 실행됨
 
 ## 🏗️ 기술 스택
 
@@ -92,42 +100,29 @@ npm run dev
   - Sonnet 4.5: 스타일 분석
   - Haiku 3.0: 리뷰 생성 및 수정
 - **검색 API** (병렬 실행)
-  - **Naver 지역 검색**: 한국 로컬 비즈니스 정보 (전화번호, 주소)
+  - **Kakao 로컬 검색**: 한국 로컬 비즈니스 정보 (전화번호, 주소, 카테고리)
   - **Tavily**: 블로그 리뷰 및 일반 가게 정보
 - **Axios + Cheerio**: RSS 크롤링
+
+### 데이터베이스 & 데이터 저장
+- **Supabase** (PostgreSQL): 사용자 데이터, 스타일 프로필, 리뷰 저장
+- **NextAuth.js**: 인증 관리
+
+### 배포 & 호스팅
+- **Vercel**: 서버리스 배포 플랫폼
+- **Edge Functions**: API 라우트 최적화
 
 ### 아키텍처
 - **FSD (Feature-Sliced Design)**: 계층형 구조
 - **함수형 프로그래밍**: 순수 함수 중심
 - **타입 안전성**: Strict TypeScript + 런타임 검증
 
-## 📁 프로젝트 구조
 
-```
-blog-template/
-├── app/                    # Next.js App Router 페이지 및 API
-│   ├── analyze/           # 스타일 분석 페이지
-│   ├── generate/          # 리뷰 생성 페이지
-│   └── api/               # API 라우트
-├── src/
-│   ├── entities/          # 도메인 엔티티 (types)
-│   ├── features/          # 기능 모듈 (analyze, review, rss-crawler)
-│   ├── shared/            # 공유 유틸리티
-│   └── widgets/           # 복합 UI 컴포넌트
-├── prompts/               # Claude API 프롬프트 템플릿
-├── data/                  # 런타임 데이터 (생성됨, git ignore)
-│   ├── rss-content/       # 크롤링된 블로그 글
-│   ├── styles/            # 스타일 프로필
-│   └── reviews/           # 생성된 리뷰
-└── docs/                  # 개발 문서
-```
-
-## 🔧 주요 명령어
+## 🔧 주요 명령어 (로컬 개발)
 
 ```bash
 # 개발 서버 실행 (디버그 모드)
 npm run dev
-# 개발자 도구 > 콘솔에서 네이버/Tavily 검색 결과 확인 가능
 
 # 프로덕션 빌드
 npm run build

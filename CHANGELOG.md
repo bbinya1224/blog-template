@@ -2,26 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2026.01.13] - Naver Search API Integration & Debug Mode
+## [2026.01.14] - Kakao Local API Migration
 
 ### 🚀 Highlights
-- **네이버 지역 검색 API 통합**: 한국 로컬 비즈니스 정보 자동 수집
-- **개발 환경 디버그 모드**: 검색 결과를 브라우저 콘솔에서 실시간 확인
+- **카카오 로컬 API로 전환**
+- **향상된 무료 할당량**: 일 25,000건 → 월 300,000건
 
 ### ✨ New Features
-- **Naver Local Search API**: 전화번호, 주소, 카테고리 등 구조화된 정보 자동 수집
-  - 무료 할당량: 일 25,000건
-  - 네이버 + Tavily 병렬 검색으로 빠른 응답 시간
+- **Kakao Local Search API**: 키워드 기반 장소 검색 통합
+  - 무료 할당량: 월 300,000건
+  - 카카오맵 URL 제공
+  - 좌표 정보 (경도/위도)
 
-### 🛠️ Improvements
-- **Prompt Engineering**: 스타일 프로필에 따라 정보 표시 방식 자동 조정
-  - 구조화된 정보 블록 스타일 (예: 📍 위치, 📞 전화)
-  - 서사적 흐름 스타일 (자연스러운 문단)
-- **Type Safety**: `ReviewGenerationResult` 타입 추가로 타입 안전성 강화
-- **Error Handling**: 검색 API 실패 시에도 리뷰 생성 계속 진행
+### 🔄 Migration
+- **통합 검색 유지**: 카카오 + Tavily 병렬 검색으로 성능 유지
 
-### 📦 New Files
-- `src/shared/lib/naver-search.ts`: 네이버 지역 검색 API 클라이언트
+### 📦 Files Changed
+- **New**: `src/shared/lib/kakao-local.ts` (카카오 로컬 API 클라이언트)
+- **Modified**: 
+  - `src/shared/lib/search.ts`
+  - `src/features/review/lib/review-generator.ts`
+  - `src/shared/api/claude-client.ts`
+  - `src/shared/config/env.ts`
 
 ---
 

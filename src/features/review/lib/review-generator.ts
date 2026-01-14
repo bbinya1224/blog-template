@@ -12,7 +12,7 @@ import {
 import { AppError } from '@/shared/lib/errors';
 import { readBlogSamples } from '@/shared/api/data-files';
 import { searchStoreInfo } from '@/shared/lib/search';
-import { formatNaverPlaceInfo } from '@/shared/lib/naver-search';
+import { formatKakaoPlaceInfo } from '@/shared/lib/kakao-local';
 
 const getRandomWritingSamples = async (email: string, count: number = 3): Promise<string> => {
   try {
@@ -44,21 +44,21 @@ export const generateReviewWithClaudeAPI = async (
     const [searchResult, writingSamples, prompts] = await Promise.all([
       searchStoreInfo(searchQuery).catch((err) => {
         console.error('❌ 통합 검색 실패:', err.message || err);
-        return { naverPlace: null, tavilyContext: '' };
+        return { kakaoPlace: null, tavilyContext: '' };
       }),
       email ? getRandomWritingSamples(email, 3) : Promise.resolve(''),
       getReviewGenerationPrompts(),
     ]);
 
-    // 네이버 정보 포맷팅
-    const naverPlaceFormatted = searchResult.naverPlace
-      ? formatNaverPlaceInfo(searchResult.naverPlace)
-      : '네이버 검색 결과 없음';
+    // 카카오 정보 포맷팅
+    const kakaoPlaceFormatted = searchResult.kakaoPlace
+      ? formatKakaoPlaceInfo(searchResult.kakaoPlace)
+      : '카카오 검색 결과 없음';
 
     const tavilyContext = searchResult.tavilyContext || '';
 
     console.log(
-      `\n[Review Gen] 검색 결과:\n- 네이버: ${searchResult.naverPlace ? searchResult.naverPlace.name : '없음'}\n- Tavily: ${tavilyContext.length}자\n- 샘플: ${writingSamples.length}자`
+      `\n[Review Gen] 검색 결과:\n- 카카오: ${searchResult.kakaoPlace ? searchResult.kakaoPlace.name : '없음'}\n- Tavily: ${tavilyContext.length}자\n- 샘플: ${writingSamples.length}자`
     );
 
     if (tavilyContext.length > 0) {
@@ -98,7 +98,7 @@ export const generateReviewWithClaudeAPI = async (
         cons: payload.cons,
         extra: payload.extra,
         user_draft: payload.user_draft || '',
-        naver_place_info: naverPlaceFormatted,
+        kakao_place_info: kakaoPlaceFormatted,
         tavily_search_result_context:
           tavilyContext ||
           '검색된 정보가 없습니다. 일반적인 맛집 리뷰처럼 작성해주세요.',

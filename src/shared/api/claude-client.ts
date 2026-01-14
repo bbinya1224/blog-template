@@ -120,7 +120,7 @@ export const analyzeStyleWithClaude = async (
  * ReviewPayload를 확장하여 타입 중복 제거
  */
 export interface ReviewGenerationData extends ReviewPayload {
-  naver_place_info?: string;
+  kakao_place_info?: string;
   tavily_search_result_context?: string;
   writing_samples?: string;
 }
@@ -146,8 +146,8 @@ export const generateReviewWithClaude = async (
     .replace('{cons}', reviewData.cons || '')
     .replace('{extra}', reviewData.extra || '')
     .replace(
-      '{naver_place_info}',
-      reviewData.naver_place_info || '네이버 정보 없음'
+      '{kakao_place_info}',
+      reviewData.kakao_place_info || '카카오 정보 없음'
     )
     .replace(
       '{tavily_search_result_context}',
