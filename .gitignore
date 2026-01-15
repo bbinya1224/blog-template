@@ -45,7 +45,6 @@ next-env.d.ts
 
 /docs
 
-
 *storybook.log
 storybook-static
 

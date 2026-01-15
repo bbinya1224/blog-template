@@ -45,6 +45,17 @@ reviews:
     - **Strict Import Rule:** A layer can ONLY import from layers strictly below it.
       - ❌ Prohibited: `features` importing from `widgets`.
       - ❌ Prohibited: Cross-imports between slices in the same layer.
+    
+    - **Public API Pattern (Barrel Exports):**
+      - **Features/Entities/Widgets:** Each segment MUST have `index.ts` at the segment root to define its public API.
+        - Example: `src/features/admin/index.ts` exports from `model/`, `ui/`, and re-exports types.
+        - ✅ Good: `import { useWhitelist } from '@/features/admin'`
+        - ❌ Bad: `import { useWhitelist } from '@/features/admin/model/useWhitelist'`
+      - **Shared Layer:** Each component/utility group has its own `index.ts` at the component/group level.
+        - Example: `src/shared/ui/Input/index.ts` exports the Input component.
+        - ✅ Good: `import { Input } from '@/shared/ui/Input'`
+        - ❌ Bad: `import { Input } from '@/shared/ui/Input/Input'`
+      - **Benefits:** Encapsulation, better refactorability, clear API boundaries, optimal tree-shaking.
 
     **3. Predictability & Reliability**
     - **Return Types:** Hooks and functions must have consistent return types.
