@@ -34,8 +34,11 @@ export function useWhitelist(password: string) {
       }
 
       const data = await response.json();
-      setUsers(data.users || []);
-    } catch {
+ 
+      const usersArray = data.data?.users || [];
+      setUsers(usersArray);
+    } catch (error) {
+      console.error('[useWhitelist] 에러 발생:', error);
       setError('화이트리스트를 불러올 수 없습니다');
     } finally {
       setLoading(false);
