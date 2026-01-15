@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAdminAuth } from './hooks/useAdminAuth';
-import { useWhitelist } from './hooks/useWhitelist';
-import { usePrompts } from './hooks/usePrompts';
-import { AdminLoginForm } from './components/AdminLoginForm';
-import { AddEmailForm } from './components/AddEmailForm';
-import { WhitelistTable } from './components/WhitelistTable';
-import { PromptList } from './components/PromptList';
+import { useAdminAuth, useWhitelist, usePrompts } from '@/features/admin/model';
+import {
+  AdminLoginForm,
+  AddEmailForm,
+  WhitelistTable,
+  PromptList,
+} from '@/features/admin/ui';
 
 type Tab = 'whitelist' | 'prompts';
 

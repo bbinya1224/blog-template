@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Prompt, PromptCategory } from '../lib/usePrompts';
+import type { Prompt, PromptCategory } from '../model/usePrompts';
 import { PromptEditor } from './PromptEditor';
 
 type Props = {
