@@ -108,10 +108,6 @@ export const isValidReviewPayload = (
     );
   }
 
-  if (!isNonEmptyString(p.summary)) {
-    throw new ValidationError('한줄평은 필수 입력 항목입니다.');
-  }
-
   return true;
 };
 

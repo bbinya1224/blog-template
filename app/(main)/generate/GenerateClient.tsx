@@ -25,7 +25,6 @@ const emptyForm: ReviewPayload = {
   date: '',
   menu: '',
   companion: '',
-  summary: '',
   pros: '',
   cons: '',
   extra: '',

@@ -129,27 +129,6 @@ export const StepRefinement = ({ form, onChange }: StepRefinementProps) => {
           />
         </div>
 
-        {/* Summary */}
-        <div className='space-y-2 pt-4 border-t border-gray-100'>
-          <label
-            htmlFor='summary'
-            className='block text-lg font-medium text-gray-700'
-          >
-            한 줄로 요약한다면?{' '}
-            <span className='text-gray-400 text-sm'>(선택)</span>
-          </label>
-          <p className='text-sm text-gray-500 mb-2'>
-            비워두면 AI가 자동으로 제목을 만들어드려요
-          </p>
-          <input
-            id='summary'
-            value={form.summary}
-            onChange={onChange('summary')}
-            placeholder='예: 분위기 깡패, 데이트 코스로 강추!'
-            className='w-full p-4 text-xl border-b-2 border-gray-200 bg-transparent focus:border-blue-500 focus:outline-none transition-colors placeholder:text-gray-300'
-          />
-        </div>
-
         {/* Extra */}
         <div className='space-y-2'>
           <label

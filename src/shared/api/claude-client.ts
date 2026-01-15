@@ -141,7 +141,6 @@ export const generateReviewWithClaude = async (
     .replace('{date}', reviewData.date)
     .replace('{menu}', reviewData.menu)
     .replace('{companion}', reviewData.companion)
-    .replace('{summary}', reviewData.summary)
     .replace('{pros}', reviewData.pros || '')
     .replace('{cons}', reviewData.cons || '')
     .replace('{extra}', reviewData.extra || '')

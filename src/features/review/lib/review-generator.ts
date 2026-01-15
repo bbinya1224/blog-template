@@ -93,7 +93,6 @@ export const generateReviewWithClaudeAPI = async (
         date: formatKoreanDate(payload.date),
         companion: payload.companion,
         menu: payload.menu,
-        summary: payload.summary,
         pros: payload.pros,
         cons: payload.cons,
         extra: payload.extra,
