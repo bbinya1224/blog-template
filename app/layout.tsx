@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Inter, Noto_Sans_KR } from 'next/font/google';
 import '@/app/style/globals.css';
 import { SessionProvider } from '@/shared/providers/SessionProvider';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -43,6 +45,8 @@ export default function RootLayout({
         <SessionProvider>
           {children}
         </SessionProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
