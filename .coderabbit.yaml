@@ -1,9 +1,9 @@
-version: "0.1"
-language: "ko-KR"
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: 'ko-KR'
 
 early_access: true
 reviews:
-  profile: "chill"
+  profile: 'chill'
   request_changes_workflow: false
   high_level_summary: true
   poem: false
@@ -45,7 +45,7 @@ reviews:
     - **Strict Import Rule:** A layer can ONLY import from layers strictly below it.
       - ❌ Prohibited: `features` importing from `widgets`.
       - ❌ Prohibited: Cross-imports between slices in the same layer.
-    
+
     - **Public API Pattern (Barrel Exports):**
       - **Features/Entities/Widgets:** Each segment MUST have `index.ts` at the segment root to define its public API.
         - Example: `src/features/admin/index.ts` exports from `model/`, `ui/`, and re-exports types.
@@ -68,7 +68,7 @@ reviews:
     - **Decoupling:** Prefer code duplication over tight coupling if use cases might diverge.
 
     ---
-    
+
     If you find code that violates these rules, specifically specifically mention which readability/maintainability principle is broken and suggest a refactored code example in Korean.
 
 chat:
