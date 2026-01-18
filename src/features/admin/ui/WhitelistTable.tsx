@@ -1,6 +1,6 @@
 'use client';
 
-import type { ApprovedUser } from '../lib/useWhitelist';
+import type { ApprovedUser } from '../model/useWhitelist';
 
 type Props = {
   users: ApprovedUser[];

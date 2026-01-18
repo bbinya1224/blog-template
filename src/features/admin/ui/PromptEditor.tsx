@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Prompt } from '../lib/usePrompts';
+import type { Prompt } from '../model/usePrompts';
 
 type Props = {
   prompt: Prompt;
