@@ -1,10 +1,10 @@
 import type { FormEvent } from 'react';
 import { UrlInput, NumberInput } from '@/shared/ui/Input';
+import { Button } from '@/shared/ui/Button';
 import { ANALYSIS_CONFIG } from '@/shared/config/constants';
 
 const UI_CLASSES = {
   INPUT: 'input-base',
-  BUTTON: 'btn-primary w-full',
   LABEL: 'text-sm font-medium text-gray-700',
   DESCRIPTION: 'mt-2 text-sm text-gray-500',
 };
@@ -59,8 +59,14 @@ export const AnalysisForm = ({
       />
     </div>
 
-    <button type='submit' disabled={isDisabled} className={UI_CLASSES.BUTTON}>
+    <Button
+      type='submit'
+      disabled={isDisabled}
+      isLoading={isLoading}
+      variant='primary'
+      className='w-full'
+    >
       {isLoading ? FORM_TEXTS.SUBMIT_BUTTON_LOADING : FORM_TEXTS.SUBMIT_BUTTON}
-    </button>
+    </Button>
   </form>
 );

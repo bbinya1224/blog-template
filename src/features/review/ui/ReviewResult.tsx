@@ -5,6 +5,8 @@
  * - 수정 요청 기능
  */
 
+import { Button } from '@/shared/ui/Button';
+
 interface ReviewResultProps {
   review: string;
   editRequest: string;
@@ -34,22 +36,26 @@ export const ReviewResult = ({
 
     {/* 액션 버튼 */}
     <div className='flex flex-wrap gap-3'>
-      <button
+      <Button
         type='button'
         onClick={onCopy}
         disabled={isCopying}
-        className='inline-flex flex-1 items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed'
+        isLoading={isCopying}
+        variant='secondary'
+        className='flex-1'
       >
         {isCopying ? '복사 중…' : '복사하기'}
-      </button>
-      <button
+      </Button>
+      <Button
         type='button'
         onClick={onEdit}
         disabled={!editRequest.trim() || isEditing}
-        className='inline-flex flex-1 items-center justify-center rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-blue-200'
+        isLoading={isEditing}
+        variant='primary'
+        className='flex-1'
       >
         {isEditing ? '수정 중…' : '수정 반영하기'}
-      </button>
+      </Button>
     </div>
 
     {/* 수정 요청 입력 */}

@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import type { ReviewPayload } from '@/entities/review/model/types';
+import { Button } from '@/shared/ui/Button';
 import { StepContext } from './wizard-steps/StepContext';
 import { StepMenu } from './wizard-steps/StepMenu';
 import { StepExperience } from './wizard-steps/StepExperience';
@@ -122,53 +123,25 @@ export const ReviewWizard = ({
 
       {/* Navigation Buttons */}
       <div className="flex justify-between items-center pt-6 border-t border-gray-100">
-        <button
+        <Button
           type="button"
           onClick={handlePrev}
           disabled={isFirstStep}
-          className={`px-6 py-3 rounded-xl font-medium transition-colors ${
-            isFirstStep
-              ? 'text-gray-300 cursor-not-allowed'
-              : 'text-gray-600 hover:bg-gray-50'
-          }`}
+          variant="ghost"
         >
           이전
-        </button>
+        </Button>
 
         {isLastStep ? (
-          <button
+          <Button
             type="submit"
             disabled={isDisabled}
-            className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            isLoading={isLoading}
+            variant="primary"
+            className="px-8 py-3 shadow-lg shadow-blue-200"
           >
-            {isLoading ? (
-              <>
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                생성 중...
-              </>
-            ) : (
-              '리뷰 생성하기 ✨'
-            )}
-          </button>
+            {isLoading ? '생성 중...' : '리뷰 생성하기 ✨'}
+          </Button>
         ) : (
           <div className="flex flex-col items-end gap-2">
             {missingFieldsMsg && (
@@ -176,18 +149,15 @@ export const ReviewWizard = ({
                 ⚠️ {missingFieldsMsg}
               </p>
             )}
-            <button
+            <Button
               type="button"
               onClick={handleNext}
               disabled={isNextDisabled}
-              className={`px-8 py-3 rounded-xl font-bold transition-all shadow-lg ${
-                isNextDisabled
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-gray-100'
-                  : 'bg-gray-900 text-white hover:bg-gray-800 shadow-gray-200'
-              }`}
+              variant="primary"
+              className="px-8 py-3 bg-gray-900 hover:bg-gray-800 shadow-lg shadow-gray-200"
             >
               다음 단계로
-            </button>
+            </Button>
           </div>
         )}
       </div>

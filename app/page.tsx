@@ -4,25 +4,20 @@ import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { FAQ_ITEMS } from '@/shared/config/constants';
+import { LandingPageSkeleton } from '@/shared/ui/Skeleton';
 
 export default function LandingPage() {
   const { status } = useSession();
   const router = useRouter();
+
   useEffect(() => {
     if (status === 'authenticated') {
       router.push('/dashboard');
     }
   }, [status, router]);
 
-  if (status === 'loading') {
-    return (
-      <div className='flex min-h-screen items-center justify-center bg-white'>
-        <div className='flex flex-col items-center gap-4'>
-          <div className='h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500' />
-          <p className='text-gray-500'>로딩 중...</p>
-        </div>
-      </div>
-    );
+  if (status === 'loading' || status === 'authenticated') {
+    return <LandingPageSkeleton />;
   }
 
   return (
