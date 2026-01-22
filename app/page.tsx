@@ -6,20 +6,19 @@ import { useEffect } from 'react';
 import { FAQ_ITEMS } from '@/shared/config/constants';
 import { LandingPageSkeleton } from '@/shared/ui/Skeleton';
 
-
 export default function LandingPage() {
   const { status } = useSession();
   const router = useRouter();
+
   useEffect(() => {
     if (status === 'authenticated') {
       router.push('/dashboard');
     }
   }, [status, router]);
 
-  if (status === 'loading') {
+  if (status === 'loading' || status === 'authenticated') {
     return <LandingPageSkeleton />;
   }
-
 
   return (
     <div className='min-h-screen bg-white text-gray-900 selection:bg-blue-100'>

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { DashboardSkeleton } from './DashboardSkeleton';
-import { StepIndicator } from '@/shared/ui/StepIndicator';
 
 const meta = {
   title: 'Shared/Skeleton/DashboardSkeleton',
@@ -13,6 +12,32 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+// Mock StepIndicator for Storybook (avoiding Next.js routing dependencies)
+const MockStepIndicator = () => (
+  <ol className='flex flex-wrap gap-3 text-sm font-medium text-gray-500'>
+    <li className='flex items-center text-sm'>
+      <span className='mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-xs font-semibold text-white'>
+        1
+      </span>
+      <span className='text-gray-900'>스타일 분석</span>
+      <span className='mx-3 text-gray-300'>—</span>
+    </li>
+    <li className='flex items-center text-sm'>
+      <span className='mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500'>
+        2
+      </span>
+      <span>리뷰 생성</span>
+      <span className='mx-3 text-gray-300'>—</span>
+    </li>
+    <li className='flex items-center text-sm'>
+      <span className='mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500'>
+        3
+      </span>
+      <span>수정/보관</span>
+    </li>
+  </ol>
+);
 
 export const Default: Story = {};
 
@@ -39,7 +64,7 @@ export const WithLayout: Story = {
       {/* Main Content */}
       <main className='mx-auto w-full max-w-5xl px-6 pb-16 pt-10 md:px-12'>
         <div className='mb-10'>
-          <StepIndicator />
+          <MockStepIndicator />
         </div>
         <DashboardSkeleton />
       </main>
@@ -81,7 +106,7 @@ export const Comparison: Story = {
             </header>
             <main className='mx-auto w-full max-w-5xl px-6 pb-16 pt-10 md:px-12'>
               <div className='mb-10'>
-                <StepIndicator />
+                <MockStepIndicator />
               </div>
               <DashboardSkeleton />
             </main>
@@ -98,4 +123,3 @@ export const Comparison: Story = {
     </div>
   ),
 };
-

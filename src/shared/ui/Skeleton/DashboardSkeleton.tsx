@@ -2,7 +2,7 @@ import { Skeleton } from '@/shared/ui/Skeleton/Skeleton';
 
 export function DashboardSkeleton() {
   return (
-    <div className='mx-auto max-w-6xl space-y-10 px-6 py-8'>
+    <div className='space-y-10'>
       {/* Header Section */}
       <section className='space-y-4'>
         <div className='flex items-center justify-between'>
@@ -26,7 +26,8 @@ export function DashboardSkeleton() {
             <Skeleton className='mb-2 h-4 w-full' /> {/* Body line 1 */}
             <Skeleton className='mb-2 h-4 w-full' /> {/* Body line 2 */}
             <Skeleton className='mb-4 h-4 w-3/4' /> {/* Body line 3 */}
-            <Skeleton className='mt-4 h-10 w-full rounded-lg' /> {/* CTA button */}
+            <Skeleton className='mt-4 h-10 w-full rounded-lg' />{' '}
+            {/* CTA button */}
           </div>
         ))}
       </div>
