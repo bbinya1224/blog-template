@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { DashboardSkeleton } from './DashboardSkeleton';
 
 const meta = {
-  title: 'Shared/Skeleton/DashboardSkeleton',
+  title: 'Skeleton/Dashboard',
   component: DashboardSkeleton,
   parameters: {
     layout: 'fullscreen',
