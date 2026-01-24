@@ -10,14 +10,13 @@ import type { ReviewPayload } from '@/entities/review/model/types';
 import type { StyleProfile } from '@/entities/style-profile/model/types';
 import {
   loadStyleProfile,
-  generateReview as generateReviewAPI,
-  editReview as editReviewAPI,
   copyToClipboard,
   GeneratePageHeader,
   StyleProfileDisplay,
   ReviewWizard,
   ReviewResult,
 } from '@/features/review';
+import { trpc } from '@/shared/api/trpc';
 
 const emptyForm: ReviewPayload = {
   name: '',
@@ -30,16 +29,56 @@ const emptyForm: ReviewPayload = {
   extra: '',
 };
 
-type ReviewState = 'idle' | 'loading' | 'error' | 'ready';
-
 export default function GenerateClient() {
   const [styleProfile, setStyleProfile] = useState<StyleProfile | null>(null);
   const [form, setForm] = useState<ReviewPayload>(emptyForm);
   const [review, setReview] = useState('');
-  const [status, setStatus] = useState<ReviewState>('idle');
   const [statusMessage, setStatusMessage] = useState('');
   const [editRequest, setEditRequest] = useState('');
   const [isCopying, setIsCopying] = useState(false);
+
+  const generateMutation = trpc.review.generate.useMutation({
+    onMutate: async () => {
+      setStatusMessage('리뷰를 생성하는 중입니다…');
+    },
+    onSuccess: (data) => {
+      setReview(data.review);
+      setStatusMessage(data.message);
+
+      import('canvas-confetti').then((confetti) => {
+        confetti.default({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 },
+        });
+      });
+    },
+    onError: (error) => {
+      setStatusMessage(error.message);
+    },
+  });
+
+  const editMutation = trpc.review.edit.useMutation({
+    onMutate: async (variables) => {
+      setReview(
+        (prev) =>
+          `${prev}\n\n🤖 AI가 "${variables.request}" 요청을 처리 중입니다...`,
+      );
+      setStatusMessage('수정 요청을 반영하는 중입니다…');
+    },
+    onSuccess: (data) => {
+      setReview(data.review);
+      setEditRequest('');
+      setStatusMessage('수정 반영이 완료되었습니다.');
+    },
+    onError: (error, _variables, context) => {
+      // 에러 시 원래대로 복구
+      if (context) {
+        setReview(review);
+      }
+      setStatusMessage(error.message);
+    },
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -50,7 +89,7 @@ export default function GenerateClient() {
           setStatusMessage('✅ 저장된 스타일 프로필을 불러왔습니다.');
         } else {
           setStatusMessage(
-            '⚠️ 스타일 프로필이 없습니다. 먼저 스타일 분석을 진행해주세요.'
+            '⚠️ 스타일 프로필이 없습니다. 먼저 스타일 분석을 진행해주세요.',
           );
         }
       } catch (error) {
@@ -64,13 +103,14 @@ export default function GenerateClient() {
 
   const isGenerateDisabled = useMemo(() => {
     return (
-      status === 'loading' ||
+      generateMutation.isPending ||
+      editMutation.isPending ||
       !form.name.trim() ||
       !form.location.trim() ||
       !form.menu.trim() ||
       !(form.user_draft && form.user_draft.trim())
     );
-  }, [status, form]);
+  }, [generateMutation.isPending, editMutation.isPending, form]);
 
   const handleChange = useCallback(
     (field: keyof ReviewPayload) =>
@@ -80,7 +120,7 @@ export default function GenerateClient() {
           [field]: event.target.value,
         }));
       },
-    []
+    [],
   );
 
   const handleAppendDraft = useCallback((text: string) => {
@@ -91,59 +131,22 @@ export default function GenerateClient() {
   }, []);
 
   const handleGenerate = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
+    (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      setStatus('loading');
-      setStatusMessage('리뷰를 생성하는 중입니다…');
-
-      try {
-        const data = await generateReviewAPI(form);
-        setReview(data.review);
-        setStatus('ready');
-        setStatusMessage(data.message);
-
-        // Trigger confetti on success
-        import('canvas-confetti').then((confetti) => {
-          confetti.default({
-            particleCount: 150,
-            spread: 80,
-            origin: { y: 0.6 },
-          });
-        });
-      } catch (error) {
-        setStatus('error');
-        setStatusMessage(
-          error instanceof Error
-            ? error.message
-            : '리뷰 생성 중 오류가 발생했습니다.'
-        );
-      }
+      generateMutation.mutate(form);
     },
-    [form]
+    [form, generateMutation],
   );
 
-  const handleEdit = useCallback(async () => {
+  const handleEdit = useCallback(() => {
     if (!review.trim() || !editRequest.trim()) {
       return;
     }
-    setStatus('loading');
-    setStatusMessage('수정 요청을 반영하는 중입니다…');
-
-    try {
-      const editedReview = await editReviewAPI(review, editRequest);
-      setReview(editedReview);
-      setEditRequest('');
-      setStatus('ready');
-      setStatusMessage('수정 반영이 완료되었습니다.');
-    } catch (error) {
-      setStatus('error');
-      setStatusMessage(
-        error instanceof Error
-          ? error.message
-          : '리뷰 수정 중 오류가 발생했습니다.'
-      );
-    }
-  }, [review, editRequest]);
+    editMutation.mutate({
+      review,
+      request: editRequest,
+    });
+  }, [review, editRequest, editMutation]);
 
   const handleCopy = useCallback(async () => {
     if (!review) return;
@@ -172,7 +175,7 @@ export default function GenerateClient() {
             <div className='space-y-4'>
               <StatusMessage
                 message={statusMessage}
-                isError={status === 'error'}
+                isError={generateMutation.isError || editMutation.isError}
               />
               {statusMessage.includes('QUOTA_EXCEEDED') && (
                 <div className='flex flex-col items-center justify-center rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center'>
@@ -200,7 +203,7 @@ export default function GenerateClient() {
         <ReviewWizard
           form={form}
           isDisabled={isGenerateDisabled}
-          isLoading={status === 'loading'}
+          isLoading={generateMutation.isPending || editMutation.isPending}
           onChange={handleChange}
           onSubmit={handleGenerate}
           onAppendDraft={handleAppendDraft}
@@ -208,7 +211,7 @@ export default function GenerateClient() {
       </SectionCard>
 
       {/* Loading Skeleton & Dynamic Message */}
-      {status === 'loading' && (
+      {(generateMutation.isPending || editMutation.isPending) && (
         <SectionCard
           title='리뷰 생성 중...'
           description='최고의 리뷰를 위해 AI가 열심히 글을 쓰고 있어요! ✍️'
@@ -227,7 +230,7 @@ export default function GenerateClient() {
         </SectionCard>
       )}
 
-      {review && status !== 'loading' && (
+      {review && !generateMutation.isPending && !editMutation.isPending && (
         <SectionCard
           title='생성된 리뷰'
           description='아래 내용을 그대로 복사해서 블로그에 붙여넣을 수 있습니다.'
