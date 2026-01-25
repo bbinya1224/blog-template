@@ -60,11 +60,16 @@ export default function GenerateClient() {
 
   const editMutation = trpc.review.edit.useMutation({
     onMutate: async (variables) => {
+      // 이전 상태를 context에 저장
+      const previousReview = review;
+
       setReview(
         (prev) =>
           `${prev}\n\n🤖 AI가 "${variables.request}" 요청을 처리 중입니다...`,
       );
       setStatusMessage('수정 요청을 반영하는 중입니다…');
+
+      return { previousReview };
     },
     onSuccess: (data) => {
       setReview(data.review);
@@ -73,8 +78,8 @@ export default function GenerateClient() {
     },
     onError: (error, _variables, context) => {
       // 에러 시 원래대로 복구
-      if (context) {
-        setReview(review);
+      if (context?.previousReview) {
+        setReview(context.previousReview);
       }
       setStatusMessage(error.message);
     },

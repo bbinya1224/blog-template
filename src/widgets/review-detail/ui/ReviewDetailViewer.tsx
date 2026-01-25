@@ -18,23 +18,25 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
   const [editRequest, setEditRequest] = useState('');
   const [isCopying, setIsCopying] = useState(false);
 
-  // ✅ tRPC Mutations
   const editMutation = trpc.review.edit.useMutation({
     onMutate: async (variables) => {
-      // Optimistic Update: 즉시 UI 업데이트
+      const previousContent = content;
+
       setContent(
         (prev) =>
           `${prev}\n\n🤖 AI가 "${variables.request}" 요청을 처리 중입니다...`,
       );
+
+      return { previousContent };
     },
     onSuccess: (data) => {
-      // 실제 결과로 교체
       setContent(data.review);
       setEditRequest('');
     },
-    onError: (error) => {
-      // 에러 시 원래대로 복구
-      setContent(content);
+    onError: (error, _variables, context) => {
+      if (context?.previousContent) {
+        setContent(context.previousContent);
+      }
       alert(`수정 요청 중 오류: ${error.message}`);
     },
   });

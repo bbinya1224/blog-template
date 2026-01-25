@@ -11,6 +11,7 @@ import {
   saveStyleProfile,
   readStyleProfile,
 } from '@/shared/api/data-files';
+import { StyleAnalysisError } from '@/shared/lib/errors';
 
 export const styleRouter = router({
   analyze: quotaProtectedProcedure.mutation(async ({ ctx }) => {
@@ -25,14 +26,31 @@ export const styleRouter = router({
       });
     }
 
-    const styleProfile = await generateStyleProfileWithClaude(blogText);
+    try {
+      const styleProfile = await generateStyleProfileWithClaude(blogText);
 
-    await saveStyleProfile(email, styleProfile);
+      await saveStyleProfile(email, styleProfile);
 
-    return {
-      styleProfile,
-      message: 'Claude API를 통한 스타일 분석이 완료되었습니다.',
-    };
+      return {
+        styleProfile,
+        message: 'Claude API를 통한 스타일 분석이 완료되었습니다.',
+      };
+    } catch (error) {
+      if (error instanceof StyleAnalysisError) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: error.message,
+        });
+      }
+
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message:
+          error instanceof Error
+            ? error.message
+            : '스타일 분석 중 알 수 없는 오류가 발생했습니다.',
+      });
+    }
   }),
 
   getProfile: protectedProcedure.query(async ({ ctx }) => {
