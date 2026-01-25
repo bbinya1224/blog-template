@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Noto_Sans_KR } from 'next/font/google';
 import '@/app/style/globals.css';
 import { SessionProvider } from '@/shared/providers/SessionProvider';
+import { TRPCProvider } from '@/shared/api/trpc';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
@@ -22,7 +23,9 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
   },
-  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://my-blog-tone-lab.vercel.app'),
+  metadataBase: new URL(
+    process.env.NEXTAUTH_URL || 'https://my-blog-tone-lab.vercel.app',
+  ),
   openGraph: {
     title: 'Blog Tone Lab',
     description: 'AI-powered blog review generator',
@@ -43,7 +46,7 @@ export default function RootLayout({
         className={`${inter.variable} ${notoSans.variable} bg-slate-50 text-gray-900 antialiased`}
       >
         <SessionProvider>
-          {children}
+          <TRPCProvider>{children}</TRPCProvider>
         </SessionProvider>
         <Analytics />
         <SpeedInsights />

@@ -13,10 +13,8 @@ import { StatusMessage } from '@/shared/ui/StatusMessage';
 import { DynamicMessage } from '@/shared/ui/DynamicMessage';
 import { StyleProfileSummary } from '@/widgets/style-profile-summary';
 import { StyleProfileSkeleton } from '@/widgets/style-profile-summary/ui/StyleProfileSkeleton';
-import { useAsync } from '@/shared/lib/hooks/useAsync';
 import { ANALYSIS_CONFIG, STATUS_MESSAGES } from '@/shared/config/constants';
 import {
-  analyzeStyle,
   saveStyleProfileToStorage,
   AnalysisPageHeader,
   AnalysisForm,
@@ -25,6 +23,7 @@ import { loadStyleProfile } from '@/features/review';
 import { PAGE_TEXTS } from '@/features/analyze-style/constants/texts';
 import type { StyleProfile } from '@/entities/style-profile/model/types';
 import type { Session } from 'next-auth';
+import { trpc } from '@/shared/api/trpc';
 
 interface AnalyzeClientPageProps {
   user: Session['user'];
@@ -34,12 +33,13 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
   const router = useRouter();
   const [rssUrl, setRssUrl] = useState('');
   const [maxPosts, setMaxPosts] = useState<number>(
-    ANALYSIS_CONFIG.DEFAULT_MAX_POSTS
+    ANALYSIS_CONFIG.DEFAULT_MAX_POSTS,
   );
   const [existingProfile, setExistingProfile] = useState<StyleProfile | null>(
-    null
+    null,
   );
   const [showForm, setShowForm] = useState(false);
+  const [styleProfile, setStyleProfile] = useState<StyleProfile | null>(null);
 
   useEffect(() => {
     loadStyleProfile().then((profile) => {
@@ -51,18 +51,32 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
     });
   }, []);
 
-  const {
-    data: styleProfile,
-    execute: executeAnalysis,
-    isLoading,
-    isSuccess,
-    isError,
-    error,
-  } = useAsync(analyzeStyle);
+  const fetchRssMutation = trpc.rss.fetch.useMutation();
+  const analyzeStyleMutation = trpc.style.analyze.useMutation({
+    onSuccess: (data) => {
+      setStyleProfile(data.styleProfile);
+      saveStyleProfileToStorage(data.styleProfile);
+
+      import('canvas-confetti').then((confetti) => {
+        confetti.default({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      });
+    },
+  });
+
+  const isLoading =
+    fetchRssMutation.isPending || analyzeStyleMutation.isPending;
+  const isError = fetchRssMutation.isError || analyzeStyleMutation.isError;
+  const isSuccess = analyzeStyleMutation.isSuccess;
+  const error =
+    fetchRssMutation.error?.message || analyzeStyleMutation.error?.message;
 
   const isDisabled = useMemo(
     () => isLoading || !rssUrl.trim(),
-    [isLoading, rssUrl]
+    [isLoading, rssUrl],
   );
 
   const statusMessage = useMemo(() => {
@@ -72,25 +86,22 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
     return '';
   }, [isLoading, isError, isSuccess, error]);
 
-  useEffect(() => {
-    if (isSuccess && styleProfile) {
-      saveStyleProfileToStorage(styleProfile);
-      import('canvas-confetti').then((confetti) => {
-        confetti.default({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
-      });
-    }
-  }, [isSuccess, styleProfile]);
-
   const handleSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
+    async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      executeAnalysis(rssUrl, maxPosts);
+
+      try {
+        await fetchRssMutation.mutateAsync({
+          rssUrl,
+          maxPosts,
+        });
+
+        await analyzeStyleMutation.mutateAsync();
+      } catch (error) {
+        console.error('Analysis failed:', error);
+      }
     },
-    [rssUrl, maxPosts, executeAnalysis]
+    [rssUrl, maxPosts, fetchRssMutation, analyzeStyleMutation],
   );
 
   const handleNextStep = useCallback(() => {
