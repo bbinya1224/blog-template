@@ -45,13 +45,17 @@ export default function GenerateClient() {
       setReview(data.review);
       setStatusMessage(data.message);
 
-      import('canvas-confetti').then((confetti) => {
-        confetti.default({
-          particleCount: 150,
-          spread: 80,
-          origin: { y: 0.6 },
+      import('canvas-confetti')
+        .then((confetti) => {
+          confetti.default({
+            particleCount: 150,
+            spread: 80,
+            origin: { y: 0.6 },
+          });
+        })
+        .catch((error) => {
+          console.warn('canvas-confetti 로드 실패:', error);
         });
-      });
     },
     onError: (error) => {
       setStatusMessage(error.message);
