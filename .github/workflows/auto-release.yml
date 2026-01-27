@@ -91,31 +91,83 @@ jobs:
 
           해당 섹션에 내용이 없으면 생략하고, 마크다운 형식으로 깔끔하게 작성해주세요."
 
-          # Gemini API 호출
-          RESPONSE=$(curl -s -X POST \
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=$GEMINI_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"contents\": [{
-                \"parts\": [{
-                  \"text\": $(echo "$PROMPT" | jq -Rs .)
-                }]
-              }],
-              \"generationConfig\": {
-                \"temperature\": 0.3,
-                \"topK\": 40,
-                \"topP\": 0.95,
-                \"maxOutputTokens\": 2048
-              }
-            }")
+          # Fallback CHANGELOG 함수 (AI 실패 시 사용)
+          generate_fallback_changelog() {
+            echo "## [$NEW_TAG] - $(date +%Y.%m.%d)"
+            echo ""
+            echo "### 📝 변경사항"
+            echo ""
+            echo "$COMMITS"
+          }
 
-          # Gemini 응답에서 텍스트 추출
-          CHANGELOG=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text')
+          # 재시도 로직 (최대 3회, exponential backoff)
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          SUCCESS=false
 
-          if [ -z "$CHANGELOG" ] || [ "$CHANGELOG" = "null" ]; then
-            echo "Error: Gemini API 응답이 비어있습니다"
-            echo "API Response: $RESPONSE"
-            exit 1
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SUCCESS" = "false" ]; do
+            echo "Gemini API 호출 시도 $((RETRY_COUNT + 1))/$MAX_RETRIES..."
+
+            # Gemini API 호출 (더 안정적인 gemini-1.5-flash 모델 사용)
+            RESPONSE=$(curl -s -X POST \
+              "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$GEMINI_API_KEY" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"contents\": [{
+                  \"parts\": [{
+                    \"text\": $(echo "$PROMPT" | jq -Rs .)
+                  }]
+                }],
+                \"generationConfig\": {
+                  \"temperature\": 0.3,
+                  \"topK\": 40,
+                  \"topP\": 0.95,
+                  \"maxOutputTokens\": 2048
+                }
+              }")
+
+            # 에러 체크
+            ERROR_CODE=$(echo "$RESPONSE" | jq -r '.error.code // empty')
+
+            if [ -n "$ERROR_CODE" ]; then
+              echo "Gemini API 에러 발생: $ERROR_CODE"
+              ERROR_MESSAGE=$(echo "$RESPONSE" | jq -r '.error.message')
+              echo "에러 메시지: $ERROR_MESSAGE"
+
+              # 429 (Rate Limit) 또는 503 (Service Unavailable) 에러는 재시도
+              if [ "$ERROR_CODE" = "429" ] || [ "$ERROR_CODE" = "503" ]; then
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  WAIT_TIME=$((2 ** RETRY_COUNT))  # Exponential backoff: 2, 4, 8초
+                  echo "⏳ ${WAIT_TIME}초 후 재시도합니다..."
+                  sleep $WAIT_TIME
+                fi
+              else
+                # 다른 에러는 즉시 fallback
+                echo "⚠️  복구 불가능한 에러. Fallback CHANGELOG 사용"
+                break
+              fi
+            else
+              # 성공: 응답 파싱
+              CHANGELOG=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text // empty')
+
+              if [ -n "$CHANGELOG" ] && [ "$CHANGELOG" != "null" ]; then
+                echo "✅ Gemini AI로 CHANGELOG 생성 성공"
+                SUCCESS=true
+              else
+                echo "⚠️  응답은 받았으나 내용이 비어있음"
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  sleep 2
+                fi
+              fi
+            fi
+          done
+
+          # 최종 실패 시 Fallback 사용
+          if [ "$SUCCESS" = "false" ]; then
+            echo "❌ Gemini API 호출 실패. Fallback CHANGELOG 생성 중..."
+            CHANGELOG=$(generate_fallback_changelog)
           fi
 
           # 여러 줄 출력을 위해 EOF 사용
