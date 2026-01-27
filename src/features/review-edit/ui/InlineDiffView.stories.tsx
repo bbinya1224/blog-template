@@ -17,6 +17,11 @@ const meta = {
     onRetry: { action: 'onRetry' },
     onCancel: { action: 'onCancel' },
   },
+  args: {
+    onApply: () => {},
+    onRetry: () => {},
+    onCancel: () => {},
+  },
 } satisfies Meta<typeof InlineDiffView>;
 
 export default meta;
@@ -122,11 +127,11 @@ export const FullScenario: Story = {
     editRequest: '감성적인 말투로 바꿔줘',
   },
   render: (args) => (
-    <div className="space-y-4">
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 className="text-lg font-bold mb-4">리뷰 내용</h3>
-        <div className="bg-slate-50 rounded-lg p-4 text-sm">
-          <pre className="whitespace-pre-wrap font-sans">
+    <div className='space-y-4'>
+      <div className='bg-white rounded-xl border border-gray-200 p-6'>
+        <h3 className='text-lg font-bold mb-4'>리뷰 내용</h3>
+        <div className='bg-slate-50 rounded-lg p-4 text-sm'>
+          <pre className='whitespace-pre-wrap font-sans'>
             {args.originalContent}
           </pre>
         </div>
