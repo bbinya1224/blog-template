@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Review } from '@/entities/review/model/review';
 import { SectionCard } from '@/shared/ui/SectionCard';
 import { copyToClipboard } from '@/features/review';
+import { InlineDiffView } from '@/features/review-edit';
 import { trpc } from '@/shared/api/trpc';
 
 interface ReviewDetailViewerProps {
@@ -17,26 +18,15 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
   const [originalContent, setOriginalContent] = useState(initialReview.content);
   const [editRequest, setEditRequest] = useState('');
   const [isCopying, setIsCopying] = useState(false);
+  const [editedContent, setEditedContent] = useState('');
+  const [showDiff, setShowDiff] = useState(false);
 
   const editMutation = trpc.review.edit.useMutation({
-    onMutate: async (variables) => {
-      const previousContent = content;
-
-      setContent(
-        (prev) =>
-          `${prev}\n\n🤖 AI가 "${variables.request}" 요청을 처리 중입니다...`,
-      );
-
-      return { previousContent };
-    },
     onSuccess: (data) => {
-      setContent(data.review);
-      setEditRequest('');
+      setEditedContent(data.review);
+      setShowDiff(true);
     },
-    onError: (error, _variables, context) => {
-      if (context?.previousContent) {
-        setContent(context.previousContent);
-      }
+    onError: (error) => {
       alert(`수정 요청 중 오류: ${error.message}`);
     },
   });
@@ -54,33 +44,53 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
 
   const hasChanges = content !== originalContent;
 
-  const handleRequestEdit = useCallback(async () => {
+  const handleRequestEdit = async () => {
     if (!editRequest.trim()) return;
 
     editMutation.mutate({
       review: content,
       request: editRequest,
     });
-  }, [content, editRequest, editMutation]);
+  };
 
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     updateMutation.mutate({
       id: initialReview.id,
       content,
     });
-  }, [content, initialReview.id, updateMutation]);
+  };
 
-  const handleCancel = useCallback(() => {
+  const handleCancel = () => {
     if (confirm('수정 사항을 취소하고 원래대로 되돌리시겠습니까?')) {
       setContent(originalContent);
     }
-  }, [originalContent]);
+  };
 
-  const handleCopy = useCallback(async () => {
+  const handleCopy = async () => {
     await copyToClipboard(content);
     setIsCopying(true);
     setTimeout(() => setIsCopying(false), 2000);
-  }, [content]);
+  };
+
+  const handleApplyEdit = () => {
+    setContent(editedContent);
+    setShowDiff(false);
+    setEditedContent('');
+    setEditRequest('');
+  };
+
+  const handleRetryEdit = () => {
+    if (!editRequest.trim()) return;
+    editMutation.mutate({
+      review: content,
+      request: editRequest,
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setShowDiff(false);
+    setEditedContent('');
+  };
 
   return (
     <div className='space-y-8'>
@@ -164,14 +174,25 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
             placeholder='ex. 조금 더 감성적인 말투로 바꿔줘, 메뉴 설명을 더 자세히 해줘'
             className='w-full rounded-xl border border-gray-200 p-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
             rows={3}
+            disabled={showDiff}
           />
           <button
             onClick={handleRequestEdit}
-            disabled={!editRequest.trim() || editMutation.isPending}
+            disabled={!editRequest.trim() || editMutation.isPending || showDiff}
             className='w-full rounded-xl bg-gray-900 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:bg-gray-400'
           >
             {editMutation.isPending ? '수정 중...' : '수정 요청하기'}
           </button>
+
+          <InlineDiffView
+            show={showDiff}
+            originalContent={content}
+            editedContent={editedContent}
+            editRequest={editRequest}
+            onApply={handleApplyEdit}
+            onRetry={handleRetryEdit}
+            onCancel={handleCancelEdit}
+          />
         </div>
       </SectionCard>
     </div>

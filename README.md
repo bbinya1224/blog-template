@@ -160,5 +160,74 @@ npm run lint
 2026-01-15 기준으로 피드백 받은 사항들을 정리합니다!
 
 1. 관리자 페이지 에서 작성하는 공지사항 CRUD - 🟡 Medium
-2. 리뷰 수정시 원본 리뷰와 수정 리뷰와 함께 비교할 수 있도록 반영 - 🔴 HIGH
-3. 리뷰 작성시 사용자가 가장 처음에 적은 초안 (draft)과 생성한 리뷰 서로 비교할 수 있도록 반영 - 🔴 HIGH
+2. 리뷰 수정시 원본 리뷰와 수정 리뷰와 함께 비교할 수 있도록 반영 - 🔴 HIGH  
+   ~~3. 리뷰 작성시 사용자가 가장 처음에 적은 초안 (draft)과 생성한 리뷰 서로 비교할 수 있도록 반영 - 🔴 HIGH~~
+
+## 개선해야 할 점
+
+코드 분석을 통해 발견한 기술적 개선사항입니다.
+
+### 1. **재시도 로직 및 에러 복원력 강화** - 🔴 HIGH
+
+**현재 상황:**
+
+- 외부 API 호출(Claude, Kakao, Tavily, RSS)에서 일시적 네트워크 오류 발생 시 재시도 없이 즉시 실패
+- 타임아웃(20초) 후 사용자에게 바로 에러 메시지 표시
+- Rate Limiting(429) 감지는 있으나 지수 백오프(exponential backoff) 미적용
+
+**개선 효과:**
+
+- 일시적 네트워크 장애 자동 복구로 사용자 경험 개선
+- API 요금 절약 (불필요한 재요청 방지)
+- 예측 가능한 실패 처리
+
+**영향받는 파일:**
+
+- `src/shared/lib/search.ts` (Tavily 검색)
+- `src/features/rss-crawler/lib/rss-crawler.ts` (RSS 크롤링)
+- `src/shared/api/claude-client.ts` (Claude API)
+
+---
+
+### 2. **테스트 커버리지 확보** - 🔴 HIGH
+
+**현재 상황:**
+
+- Vitest 설정은 있으나 테스트 파일 0개
+- 8,822줄의 핵심 비즈니스 로직이 테스트되지 않음
+- 코드 변경 시 회귀 버그 위험 존재
+
+**우선순위 테스트 대상:**
+
+1. 리뷰 생성 로직 (`src/features/review/lib/review-generator.ts`)
+2. 검증 함수들 (`src/shared/lib/validators.ts`)
+3. RSS 크롤링 (`src/features/rss-crawler/lib/rss-crawler.ts`)
+4. DB 작업 (`src/shared/api/data-files.ts`)
+
+**개선 효과:**
+
+- CI/CD에서 버그 조기 발견
+- 리팩토링 시 기존 기능 보장
+- 유지보수 비용 50% 이상 절감
+
+---
+
+### 3. **API 핸들러 중복 코드 제거** - 🟡 MEDIUM
+
+**현재 상황:**
+
+- 8개 API 핸들러가 동일한 try-catch 패턴 반복 (~120-150줄 중복)
+- 에러 처리, 유효성 검증, 로깅 로직이 핸들러마다 다름
+- 공통 fetch 패턴이 `review-api.ts`, `analyze-style-api.ts`에 중복
+
+**개선 방향:**
+
+- 공통 핸들러 팩토리 함수 생성 (`createSafeHandler`)
+- 유효성 검증 미들웨어 통합
+- 일관된 에러 응답 형식
+
+**개선 효과:**
+
+- 코드 라인 50% 감소
+- 에러 처리 로직 변경 시 한 곳만 수정
+- 버그 발생 가능성 감소
