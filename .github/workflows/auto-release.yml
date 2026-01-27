@@ -1,0 +1,173 @@
+name: Auto Release with Gemini AI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 전체 히스토리 가져오기
+
+      - name: Get latest release tag
+        id: get_tag
+        run: |
+          # 최신 릴리즈 태그 가져오기
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+          # 버전 증가 (v1.0.x -> v1.0.(x+1))
+          if [[ $LATEST_TAG =~ v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            NEW_PATCH=$((PATCH + 1))
+            NEW_TAG="v${MAJOR}.${MINOR}.${NEW_PATCH}"
+          else
+            NEW_TAG="v1.0.1"
+          fi
+
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "Latest tag: $LATEST_TAG"
+          echo "New tag: $NEW_TAG"
+
+      - name: Get commit messages since last release
+        id: get_commits
+        run: |
+          LATEST_TAG="${{ steps.get_tag.outputs.latest_tag }}"
+
+          # 최신 태그 이후의 커밋 메시지 가져오기
+          if git rev-parse "$LATEST_TAG" >/dev/null 2>&1; then
+            COMMITS=$(git log $LATEST_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          else
+            # 태그가 없으면 최근 10개 커밋
+            COMMITS=$(git log -10 --pretty=format:"- %s (%h)" --no-merges)
+          fi
+
+          # 여러 줄 출력을 위해 EOF 사용
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog with Gemini AI
+        id: generate_changelog
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          NEW_TAG="${{ steps.get_tag.outputs.new_tag }}"
+          COMMITS="${{ steps.get_commits.outputs.commits }}"
+
+          # Gemini API 프롬프트 생성
+          PROMPT="다음은 GitHub 저장소의 최근 커밋 메시지입니다:
+
+          $COMMITS
+
+          위 커밋 내용을 분석하여 다음 형식으로 한국어 CHANGELOG를 작성해주세요:
+
+          ## [$NEW_TAG] - $(date +%Y.%m.%d)
+
+          ### 🚀 주요 변경사항
+          (핵심 변경사항 2-3줄 요약)
+
+          ### ✨ 새로운 기능
+          (추가된 기능들)
+
+          ### 🐛 버그 수정
+          (수정된 버그들)
+
+          ### 🛠️ 개선사항
+          (개선된 부분들)
+
+          ### 📦 변경된 파일
+          (주요 변경 파일들)
+
+          해당 섹션에 내용이 없으면 생략하고, 마크다운 형식으로 깔끔하게 작성해주세요."
+
+          # Gemini API 호출
+          RESPONSE=$(curl -s -X POST \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=$GEMINI_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"contents\": [{
+                \"parts\": [{
+                  \"text\": $(echo "$PROMPT" | jq -Rs .)
+                }]
+              }],
+              \"generationConfig\": {
+                \"temperature\": 0.3,
+                \"topK\": 40,
+                \"topP\": 0.95,
+                \"maxOutputTokens\": 2048
+              }
+            }")
+
+          # Gemini 응답에서 텍스트 추출
+          CHANGELOG=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text')
+
+          if [ -z "$CHANGELOG" ] || [ "$CHANGELOG" = "null" ]; then
+            echo "Error: Gemini API 응답이 비어있습니다"
+            echo "API Response: $RESPONSE"
+            exit 1
+          fi
+
+          # 여러 줄 출력을 위해 EOF 사용
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update CHANGELOG.md
+        run: |
+          CHANGELOG="${{ steps.generate_changelog.outputs.changelog }}"
+
+          # CHANGELOG.md 백업
+          cp CHANGELOG.md CHANGELOG.md.bak
+
+          # 새 내용을 임시 파일에 작성
+          echo "# Changelog" > CHANGELOG.new.md
+          echo "" >> CHANGELOG.new.md
+          echo "All notable changes to this project will be documented in this file." >> CHANGELOG.new.md
+          echo "" >> CHANGELOG.new.md
+          echo "$CHANGELOG" >> CHANGELOG.new.md
+          echo "" >> CHANGELOG.new.md
+          echo "---" >> CHANGELOG.new.md
+          echo "" >> CHANGELOG.new.md
+
+          # 기존 CHANGELOG에서 헤더 이후 내용 추가 (첫 ## 부터)
+          sed -n '/^## \[/,$p' CHANGELOG.md >> CHANGELOG.new.md
+
+          # 새 파일로 교체
+          mv CHANGELOG.new.md CHANGELOG.md
+
+          echo "CHANGELOG.md updated successfully"
+
+      - name: Commit and push CHANGELOG
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git add CHANGELOG.md
+          git commit -m "chore: update CHANGELOG for ${{ steps.get_tag.outputs.new_tag }}" || echo "No changes to commit"
+          git push origin main
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEW_TAG="${{ steps.get_tag.outputs.new_tag }}"
+          CHANGELOG="${{ steps.generate_changelog.outputs.changelog }}"
+
+          # Release 생성
+          gh release create "$NEW_TAG" \
+            --title "$NEW_TAG" \
+            --notes "$CHANGELOG" \
+            --latest
+
+          echo "Release $NEW_TAG created successfully"
