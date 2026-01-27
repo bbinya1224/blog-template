@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { useState } from 'react';
 import { InlineDiffView } from './InlineDiffView';
 
 const meta = {
@@ -117,6 +118,41 @@ export const MinimalChanges: Story = {
 };
 
 /**
+ * 전체 시나리오 (애니메이션 포함) - Wrapper 컴포넌트
+ */
+function FullScenarioWrapper(args: React.ComponentProps<typeof InlineDiffView>) {
+  const [show, setShow] = useState(false);
+
+  return (
+    <div className='space-y-4'>
+      <button
+        onClick={() => setShow(!show)}
+        className='px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition shadow-sm cursor-pointer'
+      >
+        {show ? '미리보기 숨기기' : 'AI 수정 제안 보기 (애니메이션)'}
+      </button>
+
+      <div className='bg-white rounded-xl border border-gray-200 p-6'>
+        <h3 className='text-lg font-bold mb-4 text-gray-900'>원본 리뷰</h3>
+        <div className='bg-slate-50 rounded-lg p-4 text-sm text-gray-700 mb-2'>
+          <pre className='whitespace-pre-wrap font-sans'>
+            {args.originalContent}
+          </pre>
+        </div>
+
+        {show && (
+          <InlineDiffView
+            {...args}
+            show={show}
+            onCancel={() => setShow(false)}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
  * 전체 시나리오 (애니메이션 포함)
  */
 export const FullScenario: Story = {
@@ -126,17 +162,5 @@ export const FullScenario: Story = {
     editedContent: EDITED_REVIEW_CASUAL,
     editRequest: '감성적인 말투로 바꿔줘',
   },
-  render: (args) => (
-    <div className='space-y-4'>
-      <div className='bg-white rounded-xl border border-gray-200 p-6'>
-        <h3 className='text-lg font-bold mb-4'>리뷰 내용</h3>
-        <div className='bg-slate-50 rounded-lg p-4 text-sm'>
-          <pre className='whitespace-pre-wrap font-sans'>
-            {args.originalContent}
-          </pre>
-        </div>
-        <InlineDiffView {...args} />
-      </div>
-    </div>
-  ),
+  render: (args) => <FullScenarioWrapper {...args} />,
 };
