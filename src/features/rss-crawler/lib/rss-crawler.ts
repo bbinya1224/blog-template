@@ -65,7 +65,7 @@ export const crawlBlogRss = async (
     const cleanedPosts: string[] = [];
     const debugDir = path.join(process.cwd(), 'data', 'debug-html');
 
-    if (debug) {
+    if (debug && process.env.NODE_ENV !== 'production') {
       await fs.mkdir(debugDir, { recursive: true });
     }
 
@@ -85,7 +85,7 @@ export const crawlBlogRss = async (
           const html = await fetchHtml(url, link);
 
           // [복원된 디버그 로직]
-          if (debug && i < 3) {
+          if (debug && process.env.NODE_ENV !== 'production' && i < 3) {
             const fileName = `post-${i + 1}-${j + 1}.html`;
             const filePath = path.join(debugDir, fileName);
             await fs.writeFile(filePath, html, 'utf-8');
@@ -99,7 +99,7 @@ export const crawlBlogRss = async (
 
           const result = extractArticleText(html, selectors, debug && i < 3);
 
-          if (debug && i < 3) {
+          if (debug && process.env.NODE_ENV !== 'production' && i < 3) {
             console.log('  [DEBUG] 사용 셀렉터:', result.selectorUsed);
             console.log('  [DEBUG] 길이 정보:', result.allResults);
           }
