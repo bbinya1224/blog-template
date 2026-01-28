@@ -1,15 +1,20 @@
 name: Auto Release with Gemini AI
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      base_branch:
+        description: 'Base branch to analyze for changes (default: develop)'
+        required: false
+        default: 'develop'
+        type: string
 
 jobs:
   create-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
@@ -42,14 +47,22 @@ jobs:
       - name: Get commit messages since last release
         id: get_commits
         run: |
+          BASE_BRANCH="${{ github.event.inputs.base_branch || 'develop' }}"
           LATEST_TAG="${{ steps.get_tag.outputs.latest_tag }}"
 
-          # 최신 태그 이후의 커밋 메시지 가져오기
-          if git rev-parse "$LATEST_TAG" >/dev/null 2>&1; then
-            COMMITS=$(git log $LATEST_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          echo "Analyzing changes from $BASE_BRANCH to main..."
+
+          # base_branch에서 main으로의 변경사항 분석
+          # main에 없고 base_branch에만 있는 커밋들
+          if git rev-parse --verify origin/$BASE_BRANCH >/dev/null 2>&1; then
+            COMMITS=$(git log origin/main..origin/$BASE_BRANCH --pretty=format:"- %s (%h)" --no-merges)
           else
-            # 태그가 없으면 최근 10개 커밋
-            COMMITS=$(git log -10 --pretty=format:"- %s (%h)" --no-merges)
+            echo "Warning: $BASE_BRANCH branch not found, using commits since last tag"
+            if git rev-parse "$LATEST_TAG" >/dev/null 2>&1; then
+              COMMITS=$(git log $LATEST_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
+            else
+              COMMITS=$(git log -10 --pretty=format:"- %s (%h)" --no-merges)
+            fi
           fi
 
           # 여러 줄 출력을 위해 EOF 사용
@@ -200,14 +213,51 @@ jobs:
 
           echo "CHANGELOG.md updated successfully"
 
-      - name: Commit and push CHANGELOG
+      - name: Create branch and commit CHANGELOG
         run: |
+          NEW_TAG="${{ steps.get_tag.outputs.new_tag }}"
+          BRANCH_NAME="chore/ai-changelog-${NEW_TAG}"
+          
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
+          # 새 브랜치 생성 및 체크아웃
+          git checkout -b "$BRANCH_NAME"
+          
           git add CHANGELOG.md
-          git commit -m "chore: update CHANGELOG for ${{ steps.get_tag.outputs.new_tag }}" || echo "No changes to commit"
-          git push origin main
+          git commit -m "chore: update CHANGELOG for ${NEW_TAG}" || echo "No changes to commit"
+          
+          # 새 브랜치에 푸시
+          git push origin "$BRANCH_NAME"
+
+      - name: Create Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEW_TAG="${{ steps.get_tag.outputs.new_tag }}"
+          BRANCH_NAME="chore/ai-changelog-${NEW_TAG}"
+          CHANGELOG="${{ steps.generate_changelog.outputs.changelog }}"
+          
+          # PR 본문 생성
+          PR_BODY=$(cat <<EOF
+          ## 자동 생성된 CHANGELOG 업데이트
+          
+          이 PR은 GitHub Actions에 의해 자동으로 생성되었습니다.
+          
+          ### 변경 내용
+          $CHANGELOG
+          
+          릴리즈 버전: \`${NEW_TAG}\`
+          EOF
+          )
+          
+          # PR 생성
+          gh pr create \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --title "chore: update CHANGELOG for ${NEW_TAG}" \
+            --body "$PR_BODY" \
+            || echo "PR already exists or creation failed"
 
       - name: Create GitHub Release
         env:
