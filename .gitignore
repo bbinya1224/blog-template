@@ -40,10 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# user data (개인 데이터)
-/data/
-
-/docs
+/backup_docs
 
 *storybook.log
 storybook-static
