@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   calculateBackoff,
   isRetryableError,
@@ -28,15 +28,30 @@ describe('calculateBackoff', () => {
   });
 
   it('should include jitter (randomness)', () => {
-    const delays = Array.from({ length: 10 }, () =>
-      calculateBackoff(1, 1000, 10000, 2),
-    );
-    const uniqueDelays = new Set(delays);
-    expect(uniqueDelays.size).toBeGreaterThan(1);
+    const originalRandom = Math.random;
+    const mockRandomValues = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95];
+    let callIndex = 0;
+
+    try {
+      Math.random = () => mockRandomValues[callIndex++ % mockRandomValues.length];
+
+      const delays = Array.from({ length: 10 }, () =>
+        calculateBackoff(1, 1000, 10000, 2),
+      );
+      const uniqueDelays = new Set(delays);
+      expect(uniqueDelays.size).toBeGreaterThan(1);
+    } finally {
+      Math.random = originalRandom;
+    }
   });
 });
 
 describe('isRetryableError', () => {
+  it('should identify 408 timeout status as retryable', () => {
+    const error = new AppError('Request timeout', 'TIMEOUT', 408);
+    expect(isRetryableError(error)).toBe(true);
+  });
+
   it('should identify 429 status as retryable', () => {
     const error = new AppError('Rate limit', 'RATE_LIMIT', 429);
     expect(isRetryableError(error)).toBe(true);
@@ -77,6 +92,10 @@ describe('isRetryableError', () => {
 describe('withRetry', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should return immediately on success', async () => {
@@ -158,6 +177,10 @@ describe('withRetry', () => {
 describe('withRetryResult', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should return success result immediately', async () => {

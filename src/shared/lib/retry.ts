@@ -46,15 +46,19 @@ export const calculateBackoff = (
  */
 export const isRetryableError = (error: unknown): boolean => {
   if (error instanceof AppError) {
-    return error.statusCode === 429 || error.statusCode >= 500;
+    return error.statusCode === 408 || error.statusCode === 429 || error.statusCode >= 500;
   }
 
   if (error && typeof error === 'object') {
+    // Check status first
     if ('status' in error) {
       const status = (error as { status: number }).status;
-      return status === 429 || status >= 500;
+      if (status === 408 || status === 429 || status >= 500) {
+        return true;
+      }
     }
 
+    // Check code for network errors
     if ('code' in error) {
       const code = (error as { code: string }).code;
       return [
@@ -63,6 +67,11 @@ export const isRetryableError = (error: unknown): boolean => {
         'ECONNREFUSED',
         'ENOTFOUND',
       ].includes(code);
+    }
+
+    // If status exists but is not retryable, and no code exists, return false
+    if ('status' in error) {
+      return false;
     }
   }
 
@@ -81,17 +90,18 @@ export const withRetry = async <T>(
   options: Partial<RetryOptions> = {},
 ): Promise<T> => {
   const opts = { ...DEFAULT_RETRY_OPTIONS, ...options };
+  const maxAttempts = Math.max(1, opts.maxAttempts);
   const retryableCheck = opts.retryableErrors ?? isRetryableError;
 
   let lastError: unknown;
 
-  for (let attempt = 1; attempt <= opts.maxAttempts; attempt++) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       return await fn();
     } catch (error) {
       lastError = error;
 
-      if (attempt === opts.maxAttempts) {
+      if (attempt === maxAttempts) {
         throw error;
       }
 
@@ -154,12 +164,13 @@ export const withRetryResult = async <T, E = AppError>(
   options: Partial<RetryOptions> = {},
 ): Promise<Result<T, E>> => {
   const opts = { ...DEFAULT_RETRY_OPTIONS, ...options };
+  const maxAttempts = Math.max(1, opts.maxAttempts);
   const retryableCheck = opts.retryableErrors ?? isRetryableError;
 
   let lastResult: Result<T, E> | null = null;
 
-  for (let attempt = 1; attempt <= opts.maxAttempts; attempt++) {
-    const isLastAttempt = attempt === opts.maxAttempts;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const isLastAttempt = attempt === maxAttempts;
 
     try {
       const result = await fn();

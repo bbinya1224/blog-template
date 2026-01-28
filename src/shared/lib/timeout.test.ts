@@ -54,27 +54,39 @@ describe('withTimeoutAndRetry', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
-  it.skip('should retry if timeout occurs', async () => {
-    let callCount = 0;
-    const fn = vi.fn().mockImplementation(() => {
-      callCount++;
-      if (callCount === 1) {
-        return new Promise((resolve) => {
-          setTimeout(() => resolve('late'), 200);
-        });
-      } else {
-        return Promise.resolve('success');
-      }
-    });
+  it('should retry if timeout occurs', async () => {
+    vi.useFakeTimers();
+    try {
+      let callCount = 0;
+      const fn = vi.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          // First call will timeout
+          return new Promise((resolve) => {
+            setTimeout(() => resolve('late'), 200);
+          });
+        } else {
+          // Second call succeeds immediately
+          return Promise.resolve('success');
+        }
+      });
 
-    const result = await withTimeoutAndRetry(fn, 50, {
-      maxAttempts: 3,
-      initialDelayMs: 10,
-    });
+      const resultPromise = withTimeoutAndRetry(fn, 50, {
+        maxAttempts: 3,
+        initialDelayMs: 10,
+      });
 
-    expect(result).toBe('success');
-    expect(fn).toHaveBeenCalledTimes(2);
-  }, 10000);
+      // Run all timers to completion (timeout + backoff + second call)
+      await vi.runAllTimersAsync();
+
+      const result = await resultPromise;
+
+      expect(result).toBe('success');
+      expect(fn).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 
   it('should exhaust retries on persistent timeout', async () => {
     const fn = vi.fn().mockImplementation(() => {
