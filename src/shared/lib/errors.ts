@@ -2,7 +2,7 @@ export class AppError extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly statusCode: number = 500
+    public readonly statusCode: number = 500,
   ) {
     super(message);
     this.name = 'AppError';
@@ -34,6 +34,37 @@ export class StyleAnalysisError extends AppError {
   constructor(message: string) {
     super(message, 'STYLE_ANALYSIS_ERROR', 500);
     this.name = 'StyleAnalysisError';
+  }
+}
+
+export class TimeoutError extends AppError {
+  constructor(
+    message: string,
+    public readonly timeoutMs: number,
+  ) {
+    super(message, 'TIMEOUT', 408);
+    this.name = 'TimeoutError';
+  }
+}
+
+export class RateLimitError extends AppError {
+  constructor(
+    message: string,
+    public readonly retryAfterMs?: number,
+  ) {
+    super(message, 'RATE_LIMIT_EXCEEDED', 429);
+    this.name = 'RateLimitError';
+  }
+}
+
+export class RetryExhaustedError extends AppError {
+  constructor(
+    message: string,
+    public readonly attempts: number,
+    public readonly lastError: unknown,
+  ) {
+    super(message, 'RETRY_EXHAUSTED', 503);
+    this.name = 'RetryExhaustedError';
   }
 }
 
