@@ -1,7 +1,7 @@
 import { router, protectedProcedure } from '@/shared/api/trpc/init';
 import { z } from 'zod';
 
-import { crawlBlogRss } from '../lib/rss-crawler';
+import { crawlBlogRss } from '../lib';
 import { saveBlogPosts, saveBlogSamples } from '@/shared/api/data-files';
 
 const fetchRssSchema = z.object({

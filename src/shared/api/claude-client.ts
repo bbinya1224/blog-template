@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { AppError } from '@/shared/lib/errors';
+import { AppError, RateLimitError } from '@/shared/lib/errors';
+import { withTimeoutAndRetry } from '@/shared/lib/timeout';
 import type { ReviewPayload } from '@/entities/review/model/types';
 
 // 모델 상수
@@ -31,6 +32,16 @@ const getAnthropicClient = (): Anthropic => {
   return anthropic;
 };
 
+const CLAUDE_TIMEOUT_MS = 60000;
+const CLAUDE_RETRY_OPTIONS = {
+  maxAttempts: 3,
+  initialDelayMs: 2000,
+  maxDelayMs: 10000,
+  onRetry: (attempt: number, error: unknown) => {
+    console.warn(`[Claude] 재시도 ${attempt}회:`, error);
+  },
+};
+
 /**
  * Claude API 호출 (범용)
  */
@@ -42,17 +53,22 @@ export const callClaude = async (
 ): Promise<string> => {
   try {
     const client = getAnthropicClient();
-    const message = await client.messages.create({
-      model,
-      max_tokens: maxTokens,
-      system: systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: userPrompt,
-        },
-      ],
-    });
+    const message = await withTimeoutAndRetry(
+      () =>
+        client.messages.create({
+          model,
+          max_tokens: maxTokens,
+          system: systemPrompt,
+          messages: [
+            {
+              role: 'user',
+              content: userPrompt,
+            },
+          ],
+        }),
+      CLAUDE_TIMEOUT_MS,
+      CLAUDE_RETRY_OPTIONS
+    );
 
     const textContent = message.content.find((block) => block.type === 'text');
     if (!textContent || textContent.type !== 'text') {
@@ -78,10 +94,8 @@ export const callClaude = async (
         );
       }
       if (error.status === 429) {
-        throw new AppError(
-          'Claude API 요청 한도 초과 (Rate Limit).',
-          'RATE_LIMIT_EXCEEDED',
-          429
+        throw new RateLimitError(
+          'Claude API 요청 한도 초과 (재시도 후 실패).'
         );
       }
       throw new AppError(

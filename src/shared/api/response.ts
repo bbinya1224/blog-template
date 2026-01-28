@@ -22,7 +22,7 @@ export const ApiResponse = {
   error(code: string, message: string, status = 400, details?: unknown) {
     return NextResponse.json(
       { success: false, error: { code, message, details } },
-      { status }
+      { status },
     );
   },
 
@@ -44,7 +44,7 @@ export const ApiResponse = {
    * 403 Quota Exceeded
    */
   quotaExceeded(
-    message = '무료 체험 횟수가 만료되었습니다. 후원 후 계속 이용해주세요!'
+    message = '무료 체험 횟수가 만료되었습니다. 후원 후 계속 이용해주세요!',
   ) {
     return this.error(ErrorCode.QUOTA_EXCEEDED, message, 403);
   },
@@ -75,5 +75,28 @@ export const ApiResponse = {
    */
   serverError(message = '서버 오류가 발생했습니다.') {
     return this.error(ErrorCode.INTERNAL_ERROR, message, 500);
+  },
+
+  /**
+   * 408 Request Timeout
+   */
+  timeout(message = '요청 시간이 초과되었습니다.') {
+    return this.error(ErrorCode.TIMEOUT, message, 408);
+  },
+
+  /**
+   * 429 Rate Limit Exceeded
+   */
+  rateLimitExceeded(
+    message = '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.',
+  ) {
+    return this.error(ErrorCode.RATE_LIMIT_EXCEEDED, message, 429);
+  },
+
+  /**
+   * 503 Service Unavailable
+   */
+  serviceUnavailable(message = '일시적으로 서비스를 사용할 수 없습니다.') {
+    return this.error(ErrorCode.RETRY_EXHAUSTED, message, 503);
   },
 };

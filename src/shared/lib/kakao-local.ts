@@ -1,4 +1,5 @@
-import { AppError } from '@/shared/lib/errors';
+import { AppError, RateLimitError } from '@/shared/lib/errors';
+import { withTimeoutAndRetry } from '@/shared/lib/timeout';
 
 /**
  * 카카오 로컬 검색 API 응답 타입
@@ -46,11 +47,21 @@ export interface KakaoPlaceInfo {
   mapLink: string;
 }
 
+const KAKAO_TIMEOUT_MS = 10000;
+const KAKAO_RETRY_OPTIONS = {
+  maxAttempts: 3,
+  initialDelayMs: 1000,
+  maxDelayMs: 5000,
+  onRetry: (attempt: number, error: unknown) => {
+    console.warn(`[Kakao] 재시도 ${attempt}회:`, error);
+  },
+};
+
 /**
  * 카카오 로컬 검색 API 클라이언트
  */
 export async function searchKakaoPlace(
-  query: string
+  query: string,
 ): Promise<KakaoPlaceInfo | null> {
   try {
     console.log(`\n[Kakao] 로컬 검색 시작: "${query}"`);
@@ -59,7 +70,7 @@ export async function searchKakaoPlace(
 
     if (!apiKey) {
       console.warn(
-        '[Kakao] API 키가 설정되지 않았습니다. 카카오 검색을 건너뜁니다.'
+        '[Kakao] API 키가 설정되지 않았습니다. 카카오 검색을 건너뜁니다.',
       );
       return null;
     }
@@ -67,24 +78,34 @@ export async function searchKakaoPlace(
     // 카카오 로컬 검색 API 호출
     const url = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(query)}&size=1`;
 
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `KakaoAK ${apiKey}`,
-      },
-    });
+    const response = await withTimeoutAndRetry(
+      () =>
+        fetch(url, {
+          headers: {
+            Authorization: `KakaoAK ${apiKey}`,
+          },
+        }),
+      KAKAO_TIMEOUT_MS,
+      KAKAO_RETRY_OPTIONS,
+    );
 
     if (!response.ok) {
+      if (response.status === 429) {
+        throw new RateLimitError(
+          '카카오 API 요청 한도 초과. 잠시 후 다시 시도해주세요.',
+        );
+      }
       throw new AppError(
         `카카오 API 호출 실패: ${response.status} ${response.statusText}`,
         'KAKAO_API_ERROR',
-        response.status
+        response.status,
       );
     }
 
     const data: KakaoLocalSearchResponse = await response.json();
 
     console.log(
-      `[Kakao] 검색 완료: ${data.meta.total_count}개 결과 (${data.documents.length}개 반환)`
+      `[Kakao] 검색 완료: ${data.meta.total_count}개 결과 (${data.documents.length}개 반환)`,
     );
 
     if (!data.documents || data.documents.length === 0) {
@@ -110,7 +131,7 @@ export async function searchKakaoPlace(
 
     return placeInfo;
   } catch (error) {
-    console.error('❌ [Kakao] 검색 실패:', error);
+    console.error('❌ [Kakao] 검색 실패 (재시도 후):', error);
     return null; // 검색 실패 시 null 반환 (다른 검색은 계속 진행)
   }
 }

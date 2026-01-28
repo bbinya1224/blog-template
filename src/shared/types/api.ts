@@ -27,6 +27,9 @@ export const ErrorCode = {
   VALIDATION_ERROR: 'VALIDATION_ERROR',
   CONFLICT: 'CONFLICT',
   INTERNAL_ERROR: 'INTERNAL_ERROR',
+  TIMEOUT: 'TIMEOUT',
+  RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
+  RETRY_EXHAUSTED: 'RETRY_EXHAUSTED',
 } as const;
 
 export type ErrorCodeType = (typeof ErrorCode)[keyof typeof ErrorCode];
