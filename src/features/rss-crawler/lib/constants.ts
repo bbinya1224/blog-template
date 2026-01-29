@@ -39,6 +39,12 @@ export const RSS_RETRY_OPTIONS = {
   initialDelayMs: 2000,
   maxDelayMs: 10000,
   onRetry: (attempt: number, error: unknown) => {
-    console.warn(`[RSS] 재시도 ${attempt}회:`, error);
+    const safeMessage =
+      error instanceof Error
+        ? error.message
+        : typeof error === 'string'
+          ? error
+          : '알 수 없는 오류';
+    console.warn(`[RSS] 재시도 ${attempt}회:`, safeMessage);
   },
 };

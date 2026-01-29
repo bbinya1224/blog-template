@@ -2,15 +2,16 @@ import { withRetry, RetryOptions } from './retry';
 import { TimeoutError } from './errors';
 
 /**
- * Promise에 타임아웃 적용
+ * 타임아웃 Promise와 cleanup 함수를 함께 생성
  */
-export const withTimeout = async <T>(
-  promise: Promise<T>,
+const createTimeoutPromise = (
   timeoutMs: number,
   errorMessage?: string,
-): Promise<T> => {
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => {
+): { promise: Promise<never>; clear: () => void } => {
+  let timerId: NodeJS.Timeout;
+
+  const promise = new Promise<never>((_, reject) => {
+    timerId = setTimeout(() => {
       reject(
         new TimeoutError(
           errorMessage ?? `요청 시간이 초과되었습니다. (${timeoutMs}ms)`,
@@ -20,7 +21,25 @@ export const withTimeout = async <T>(
     }, timeoutMs);
   });
 
-  return Promise.race([promise, timeoutPromise]);
+  return {
+    promise,
+    clear: () => clearTimeout(timerId),
+  };
+};
+
+/**
+ * Promise에 타임아웃 적용
+ */
+export const withTimeout = async <T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  errorMessage?: string,
+): Promise<T> => {
+  const timeout = createTimeoutPromise(timeoutMs, errorMessage);
+
+  return Promise.race([promise, timeout.promise]).finally(() => {
+    timeout.clear();
+  });
 };
 
 /**

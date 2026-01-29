@@ -46,7 +46,13 @@ const CLAUDE_RETRY_OPTIONS = {
     return isRetryableError(error);
   },
   onRetry: (attempt: number, error: unknown) => {
-    console.warn(`[Claude] 재시도 ${attempt}회:`, error);
+    const safeMessage =
+      error instanceof Error
+        ? error.message
+        : typeof error === 'string'
+          ? error
+          : '알 수 없는 오류';
+    console.warn(`[Claude] 재시도 ${attempt}회:`, safeMessage);
   },
 };
 
@@ -103,7 +109,14 @@ export const callClaude = async (
       }
       if (error.status === 429) {
         // Extract Retry-After header (in seconds)
-        const retryAfterSeconds = error.headers?.['retry-after'];
+        // Headers is a WHATWG Headers instance, use .get() method
+        let retryAfterSeconds: string | null = null;
+        if (error.headers && typeof error.headers.get === 'function') {
+          retryAfterSeconds = error.headers.get('retry-after');
+        } else if (error.headers && typeof error.headers === 'object') {
+          retryAfterSeconds = error.headers['retry-after'] as string;
+        }
+
         const retryAfterMs = retryAfterSeconds
           ? parseInt(retryAfterSeconds, 10) * 1000
           : undefined;
