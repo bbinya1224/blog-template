@@ -30,6 +30,7 @@ export const ErrorCode = {
   TIMEOUT: 'TIMEOUT',
   RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
   RETRY_EXHAUSTED: 'RETRY_EXHAUSTED',
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
 } as const;
 
 export type ErrorCodeType = (typeof ErrorCode)[keyof typeof ErrorCode];

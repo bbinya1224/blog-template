@@ -97,6 +97,6 @@ export const ApiResponse = {
    * 503 Service Unavailable
    */
   serviceUnavailable(message = '일시적으로 서비스를 사용할 수 없습니다.') {
-    return this.error(ErrorCode.RETRY_EXHAUSTED, message, 503);
+    return this.error(ErrorCode.SERVICE_UNAVAILABLE, message, 503);
   },
 };
