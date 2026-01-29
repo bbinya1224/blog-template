@@ -14,7 +14,7 @@ export type ExtractResult = {
  * 노이즈 노드 제거 (광고, 댓글, 스크립트 등)
  */
 const removeNoiseNodes = ($: cheerio.CheerioAPI) => {
-  [
+  const selectors = [
     'style',
     'script',
     'noscript',
@@ -26,7 +26,10 @@ const removeNoiseNodes = ($: cheerio.CheerioAPI) => {
     '[data-role="ad"]',
     '.ad_area',
     '.ad_wrap',
-  ].forEach((sel) => $(sel).remove());
+  ];
+  for (const sel of selectors) {
+    $(sel).remove();
+  }
 };
 
 /**

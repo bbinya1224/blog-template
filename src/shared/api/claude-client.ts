@@ -108,7 +108,7 @@ export const callClaude = async (
         );
       }
       if (error.status === 429) {
-        // Extract Retry-After header (in seconds)
+        // Extract Retry-After header (in seconds or HTTP-date)
         // Headers is a WHATWG Headers instance, use .get() method
         let retryAfterSeconds: string | null = null;
         if (error.headers && typeof error.headers.get === 'function') {
@@ -117,9 +117,23 @@ export const callClaude = async (
           retryAfterSeconds = error.headers['retry-after'] as string;
         }
 
-        const retryAfterMs = retryAfterSeconds
-          ? parseInt(retryAfterSeconds, 10) * 1000
-          : undefined;
+        let retryAfterMs: number | undefined = undefined;
+        if (retryAfterSeconds) {
+          // Try parsing as numeric seconds first
+          const parsedSeconds = parseInt(retryAfterSeconds, 10);
+          if (!isNaN(parsedSeconds) && parsedSeconds > 0) {
+            retryAfterMs = parsedSeconds * 1000;
+          } else {
+            // Try parsing as HTTP-date
+            const dateMs = Date.parse(retryAfterSeconds);
+            if (!isNaN(dateMs)) {
+              const delaySeconds = (dateMs - Date.now()) / 1000;
+              if (delaySeconds > 0) {
+                retryAfterMs = Math.ceil(delaySeconds * 1000);
+              }
+            }
+          }
+        }
 
         throw new RateLimitError(
           'Claude API 요청 한도 초과 (재시도 후 실패).',

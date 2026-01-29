@@ -135,11 +135,10 @@ describe('withRetry', () => {
       .fn()
       .mockRejectedValue(new AppError('Bad request', 'ERROR', 400));
 
+    const promise = withRetry(fn, { maxAttempts: 3, initialDelayMs: 1000 });
     await vi.runAllTimersAsync();
 
-    await expect(
-      withRetry(fn, { maxAttempts: 3, initialDelayMs: 1000 }),
-    ).rejects.toThrow('Bad request');
+    await expect(promise).rejects.toThrow('Bad request');
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
