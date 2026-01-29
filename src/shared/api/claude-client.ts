@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { AppError, RateLimitError } from '@/shared/lib/errors';
 import { withTimeoutAndRetry } from '@/shared/lib/timeout';
+import { isRetryableError } from '@/shared/lib/retry';
 import type { ReviewPayload } from '@/entities/review/model/types';
 
 // 모델 상수
@@ -37,6 +38,13 @@ const CLAUDE_RETRY_OPTIONS = {
   maxAttempts: 3,
   initialDelayMs: 2000,
   maxDelayMs: 10000,
+  retryableErrors: (error: unknown) => {
+    // Don't retry 429s - they should be handled by callers
+    if (error instanceof Anthropic.APIError && error.status === 429) {
+      return false;
+    }
+    return isRetryableError(error);
+  },
   onRetry: (attempt: number, error: unknown) => {
     console.warn(`[Claude] 재시도 ${attempt}회:`, error);
   },
@@ -94,8 +102,15 @@ export const callClaude = async (
         );
       }
       if (error.status === 429) {
+        // Extract Retry-After header (in seconds)
+        const retryAfterSeconds = error.headers?.['retry-after'];
+        const retryAfterMs = retryAfterSeconds
+          ? parseInt(retryAfterSeconds, 10) * 1000
+          : undefined;
+
         throw new RateLimitError(
-          'Claude API 요청 한도 초과 (재시도 후 실패).'
+          'Claude API 요청 한도 초과 (재시도 후 실패).',
+          retryAfterMs
         );
       }
       throw new AppError(

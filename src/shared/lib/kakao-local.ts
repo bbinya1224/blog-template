@@ -79,28 +79,32 @@ export async function searchKakaoPlace(
     const url = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(query)}&size=1`;
 
     const response = await withTimeoutAndRetry(
-      () =>
-        fetch(url, {
+      async () => {
+        const res = await fetch(url, {
           headers: {
             Authorization: `KakaoAK ${apiKey}`,
           },
-        }),
+        });
+
+        // Validate inside retry wrapper so errors trigger retries
+        if (!res.ok) {
+          if (res.status === 429) {
+            throw new RateLimitError(
+              '카카오 API 요청 한도 초과. 잠시 후 다시 시도해주세요.',
+            );
+          }
+          throw new AppError(
+            `카카오 API 호출 실패: ${res.status} ${res.statusText}`,
+            'KAKAO_API_ERROR',
+            res.status,
+          );
+        }
+
+        return res;
+      },
       KAKAO_TIMEOUT_MS,
       KAKAO_RETRY_OPTIONS,
     );
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        throw new RateLimitError(
-          '카카오 API 요청 한도 초과. 잠시 후 다시 시도해주세요.',
-        );
-      }
-      throw new AppError(
-        `카카오 API 호출 실패: ${response.status} ${response.statusText}`,
-        'KAKAO_API_ERROR',
-        response.status,
-      );
-    }
 
     const data: KakaoLocalSearchResponse = await response.json();
 

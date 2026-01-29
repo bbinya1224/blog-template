@@ -50,12 +50,24 @@ export const isRetryableError = (error: unknown): boolean => {
   }
 
   if (error && typeof error === 'object') {
-    // Check status first
+    // Check Axios-style nested response.status first
+    const axiosResponse = (error as { response?: { status?: number } }).response;
+    if (axiosResponse?.status !== undefined) {
+      const status = axiosResponse.status;
+      if (status === 408 || status === 429 || status >= 500) {
+        return true;
+      }
+      // If response.status exists but is not retryable, return false
+      return false;
+    }
+
+    // Check top-level status
     if ('status' in error) {
       const status = (error as { status: number }).status;
       if (status === 408 || status === 429 || status >= 500) {
         return true;
       }
+      return false;
     }
 
     // Check code for network errors
@@ -67,11 +79,6 @@ export const isRetryableError = (error: unknown): boolean => {
         'ECONNREFUSED',
         'ENOTFOUND',
       ].includes(code);
-    }
-
-    // If status exists but is not retryable, and no code exists, return false
-    if ('status' in error) {
-      return false;
     }
   }
 

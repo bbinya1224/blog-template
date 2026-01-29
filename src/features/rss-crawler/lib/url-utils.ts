@@ -12,12 +12,15 @@ export const parseNaverBlogUrl = (
 ): { blogId?: string; logNo?: string } => {
   try {
     const u = new URL(url);
-    const [blogId, logNo] = u.pathname.split('/').filter(Boolean);
+
+    // Check query params first for blogId
+    const queryBlogId = u.searchParams.get('blogId');
+    const [pathBlogId, pathLogNo] = u.pathname.split('/').filter(Boolean);
     const searchLogNo = u.searchParams.get('logNo');
 
     return {
-      blogId,
-      logNo: logNo || searchLogNo || undefined,
+      blogId: queryBlogId || pathBlogId,
+      logNo: pathLogNo || searchLogNo || undefined,
     };
   } catch {
     return {};
