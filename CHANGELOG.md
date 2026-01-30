@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.0.1] - 2026.01.30
+
+### 📝 변경사항
+
+---
+
 ## [2026.01.14] - Kakao Local API Migration
 
 ### 🚀 Highlights
