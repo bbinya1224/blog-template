@@ -14,13 +14,18 @@ import {
   RSS_TIMEOUT_MS,
   RSS_RETRY_OPTIONS,
 } from './constants';
-import { buildViewerAndMobileUrls, enforceHttps } from './url-utils';
+import { buildViewerAndMobileUrls } from './url-utils';
 import {
   extractArticleText,
   extractPostLinksFromRss,
   type ExtractResult,
 } from './html-extractor';
-import { fetchHtml, getRandomUserAgent, sleep } from './http-client';
+import {
+  fetchHtml,
+  getRandomUserAgent,
+  sleep,
+  withProtocolFallback,
+} from './http-client';
 
 export type CrawlResult = {
   mergedText: string;
@@ -40,18 +45,18 @@ export const crawlBlogRss = async (
   const debug = options?.debug ?? false;
 
   try {
-    // 1. RSS URL HTTPS 강제
-    const secureRssUrl = enforceHttps(rssUrl);
-
-    const rssResponse = await withRetry(
-      () =>
-        axios.get<string>(secureRssUrl, {
-          timeout: RSS_TIMEOUT_MS,
-          headers: {
-            'User-Agent': getRandomUserAgent(),
-          },
-        }),
-      RSS_RETRY_OPTIONS,
+    // 1. RSS 피드 가져오기 (HTTPS 우선, SSL 에러 시 HTTP fallback)
+    const rssResponse = await withProtocolFallback(rssUrl, (resolvedUrl) =>
+      withRetry(
+        () =>
+          axios.get<string>(resolvedUrl, {
+            timeout: RSS_TIMEOUT_MS,
+            headers: {
+              'User-Agent': getRandomUserAgent(),
+            },
+          }),
+        RSS_RETRY_OPTIONS,
+      ),
     );
 
     const postLinks = extractPostLinksFromRss(rssResponse.data, maxPosts);
@@ -78,7 +83,7 @@ export const crawlBlogRss = async (
       let extracted: ExtractResult | null = null;
 
       for (let j = 0; j < candidateUrls.length; j++) {
-        const url = enforceHttps(candidateUrls[j]);
+        const url = candidateUrls[j];
         try {
           console.log(`  → 시도 URL #${j + 1}: ${url}`);
 
