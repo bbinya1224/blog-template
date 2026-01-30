@@ -1,5 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { AppError } from '@/shared/lib/errors';
+import { AppError, RateLimitError } from '@/shared/lib/errors';
+import { withTimeoutAndRetry } from '@/shared/lib/timeout';
+import { isRetryableError } from '@/shared/lib/retry';
 import type { ReviewPayload } from '@/entities/review/model/types';
 
 // 모델 상수
@@ -31,6 +33,29 @@ const getAnthropicClient = (): Anthropic => {
   return anthropic;
 };
 
+const CLAUDE_TIMEOUT_MS = 60000;
+const CLAUDE_RETRY_OPTIONS = {
+  maxAttempts: 3,
+  initialDelayMs: 2000,
+  maxDelayMs: 10000,
+  retryableErrors: (error: unknown) => {
+    // Don't retry 429s - they should be handled by callers
+    if (error instanceof Anthropic.APIError && error.status === 429) {
+      return false;
+    }
+    return isRetryableError(error);
+  },
+  onRetry: (attempt: number, error: unknown) => {
+    const safeMessage =
+      error instanceof Error
+        ? error.message
+        : typeof error === 'string'
+          ? error
+          : '알 수 없는 오류';
+    console.warn(`[Claude] 재시도 ${attempt}회:`, safeMessage);
+  },
+};
+
 /**
  * Claude API 호출 (범용)
  */
@@ -42,17 +67,22 @@ export const callClaude = async (
 ): Promise<string> => {
   try {
     const client = getAnthropicClient();
-    const message = await client.messages.create({
-      model,
-      max_tokens: maxTokens,
-      system: systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: userPrompt,
-        },
-      ],
-    });
+    const message = await withTimeoutAndRetry(
+      () =>
+        client.messages.create({
+          model,
+          max_tokens: maxTokens,
+          system: systemPrompt,
+          messages: [
+            {
+              role: 'user',
+              content: userPrompt,
+            },
+          ],
+        }),
+      CLAUDE_TIMEOUT_MS,
+      CLAUDE_RETRY_OPTIONS
+    );
 
     const textContent = message.content.find((block) => block.type === 'text');
     if (!textContent || textContent.type !== 'text') {
@@ -78,10 +108,36 @@ export const callClaude = async (
         );
       }
       if (error.status === 429) {
-        throw new AppError(
-          'Claude API 요청 한도 초과 (Rate Limit).',
-          'RATE_LIMIT_EXCEEDED',
-          429
+        // Extract Retry-After header (in seconds or HTTP-date)
+        // Headers is a WHATWG Headers instance, use .get() method
+        let retryAfterSeconds: string | null = null;
+        if (error.headers && typeof error.headers.get === 'function') {
+          retryAfterSeconds = error.headers.get('retry-after');
+        } else if (error.headers && typeof error.headers === 'object') {
+          retryAfterSeconds = error.headers['retry-after'] as string;
+        }
+
+        let retryAfterMs: number | undefined = undefined;
+        if (retryAfterSeconds) {
+          // Try parsing as numeric seconds first
+          const parsedSeconds = parseInt(retryAfterSeconds, 10);
+          if (!isNaN(parsedSeconds) && parsedSeconds > 0) {
+            retryAfterMs = parsedSeconds * 1000;
+          } else {
+            // Try parsing as HTTP-date
+            const dateMs = Date.parse(retryAfterSeconds);
+            if (!isNaN(dateMs)) {
+              const delaySeconds = (dateMs - Date.now()) / 1000;
+              if (delaySeconds > 0) {
+                retryAfterMs = Math.ceil(delaySeconds * 1000);
+              }
+            }
+          }
+        }
+
+        throw new RateLimitError(
+          'Claude API 요청 한도 초과 (재시도 후 실패).',
+          retryAfterMs
         );
       }
       throw new AppError(
