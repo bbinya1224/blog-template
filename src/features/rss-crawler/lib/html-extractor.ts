@@ -33,9 +33,32 @@ const removeNoiseNodes = ($: cheerio.CheerioAPI) => {
 };
 
 /**
+ * 본문 텍스트로 간주할 최소 길이 (문자 수)
+ * - 200자 미만은 메타 정보, 요약 등으로 판단
+ */
+const MIN_CONTENT_LENGTH = 200;
+
+/**
+ * 추출된 텍스트 정규화 (중복 개행 제거, trim)
+ */
+const normalizeText = (rawText: string): string =>
+  rawText.replace(/\n{3,}/g, '\n\n').trim();
+
+/**
+ * 셀렉터 기반 텍스트 추출 결과
+ */
+type SelectorResult = {
+  selector: string;
+  text: string;
+  length: number;
+};
+
+/**
  * HTML에서 본문 텍스트 추출
- * - 우선순위 셀렉터 기반
- * - 길이 기준은 보조 지표
+ * - 우선순위 셀렉터 기반 (배열 순서대로 우선)
+ * - MIN_CONTENT_LENGTH 이상인 것만 유효로 간주
+ * - 유효한 결과 중 가장 긴 텍스트 선택
+ * - 유효한 결과 없으면 body fallback
  */
 export const extractArticleText = (
   html: string,
@@ -45,49 +68,51 @@ export const extractArticleText = (
   const $ = cheerio.load(html);
   removeNoiseNodes($);
 
-  let bestText = '';
-  let bestSelector = '';
-  const allResults: Record<string, number> = {};
+  // 1. 모든 셀렉터에 대한 결과 수집 (선언형)
+  const selectorResults: SelectorResult[] = selectors
+    .map((selector) => {
+      const el = $(selector);
+      if (!el.length) {
+        return { selector, text: '', length: 0 };
+      }
 
-  for (const selector of selectors) {
-    const el = $(selector);
-    if (!el.length) {
-      allResults[selector] = 0;
-      continue;
-    }
+      const text = normalizeText(el.text());
+      return { selector, text, length: text.length };
+    });
 
-    const text = el
-      .text()
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+  // 2. allResults 구성 (디버깅용)
+  const allResults = Object.fromEntries(
+    selectorResults.map((r) => [r.selector, r.length])
+  );
 
-    allResults[selector] = text.length;
+  // 3. 유효한 결과 필터링 및 최장 텍스트 선택
+  const validResults = selectorResults.filter(
+    (r) => r.length >= MIN_CONTENT_LENGTH
+  );
 
-    if (!bestText && text.length > 200) {
-      bestText = text;
-      bestSelector = selector;
-    }
+  const bestResult = validResults.reduce<SelectorResult | null>(
+    (best, current) => {
+      if (!best) return current;
+      return current.length > best.length ? current : best;
+    },
+    null
+  );
 
-    if (text.length > bestText.length) {
-      bestText = text;
-      bestSelector = selector;
-    }
-  }
+  // 4. 유효한 결과가 있으면 반환, 없으면 body fallback
+  const shouldUseFallback = !bestResult || bestResult.length < MIN_CONTENT_LENGTH;
 
-  if (!bestText) {
-    const bodyText = $('body')
-      .text()
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
-    bestText = bodyText;
-    bestSelector = 'body (fallback)';
+  if (shouldUseFallback) {
+    const bodyText = normalizeText($('body').text());
     allResults['body'] = bodyText.length;
+
+    return debug
+      ? { text: bodyText, selectorUsed: 'body (fallback)', allResults }
+      : { text: bodyText };
   }
 
-  if (debug) {
-    return { text: bestText, selectorUsed: bestSelector, allResults };
-  }
-  return { text: bestText };
+  return debug
+    ? { text: bestResult.text, selectorUsed: bestResult.selector, allResults }
+    : { text: bestResult.text };
 };
 
 /**
