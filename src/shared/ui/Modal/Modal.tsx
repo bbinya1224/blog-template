@@ -49,9 +49,6 @@ export function Modal({
             e.preventDefault();
           }
         }}
-        onEscapeKeyDown={() => {
-          onClose();
-        }}
         aria-describedby={undefined}
       >
         {!showCloseButton && (

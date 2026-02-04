@@ -55,9 +55,9 @@ export function OverlayProvider({ children }: OverlayProviderProps) {
     <OverlayContext.Provider value={contextValue}>
       {children}
       {Array.from(overlayMap.entries()).map(([id, element], index) => {
-        const zIndex = 50 + index * 10;
+        const overlayZIndex = 50 + index * 10;
         return (
-          <div key={id} style={{ zIndex }}>
+          <div key={id} style={{ position: 'relative', zIndex: overlayZIndex, isolation: 'isolate' }}>
             {element}
           </div>
         );
