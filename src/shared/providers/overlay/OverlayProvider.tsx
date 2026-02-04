@@ -1,6 +1,13 @@
 'use client';
 
-import { createContext, useState, useEffect, type ReactNode } from 'react';
+import {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  type ReactNode,
+} from 'react';
 import type { OverlayContextValue, OverlayId } from './types';
 
 export const OverlayContext = createContext<OverlayContextValue | null>(null);
@@ -14,21 +21,21 @@ export function OverlayProvider({ children }: OverlayProviderProps) {
     Map<OverlayId, React.ReactElement>
   >(new Map());
 
-  const mount = (id: OverlayId, element: React.ReactElement) => {
+  const mount = useCallback((id: OverlayId, element: React.ReactElement) => {
     setOverlayMap((prev) => {
       const next = new Map(prev);
       next.set(id, element);
       return next;
     });
-  };
+  }, []);
 
-  const unmount = (id: OverlayId) => {
+  const unmount = useCallback((id: OverlayId) => {
     setOverlayMap((prev) => {
       const next = new Map(prev);
       next.delete(id);
       return next;
     });
-  };
+  }, []);
 
   useEffect(() => {
     if (overlayMap.size > 0) {
@@ -42,8 +49,10 @@ export function OverlayProvider({ children }: OverlayProviderProps) {
     };
   }, [overlayMap.size]);
 
+  const contextValue = useMemo(() => ({ mount, unmount }), [mount, unmount]);
+
   return (
-    <OverlayContext.Provider value={{ mount, unmount }}>
+    <OverlayContext.Provider value={contextValue}>
       {children}
       {Array.from(overlayMap.entries()).map(([id, element], index) => {
         const zIndex = 50 + index * 10;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -40,22 +40,6 @@ export function Modal({
   closeOnOverlayClick = true,
   className,
 }: ModalProps) {
-  useEffect(() => {
-    if (!closeOnOverlayClick) {
-      const handlePointerDownOutside = (e: Event) => {
-        e.preventDefault();
-      };
-
-      const portal = document.querySelector('[data-radix-portal]');
-      if (portal) {
-        portal.addEventListener('pointerdown', handlePointerDownOutside);
-        return () => {
-          portal.removeEventListener('pointerdown', handlePointerDownOutside);
-        };
-      }
-    }
-  }, [closeOnOverlayClick, isOpen]);
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
