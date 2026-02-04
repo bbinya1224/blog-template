@@ -32,7 +32,6 @@ export function Loading({
   return (
     <div className={containerClasses}>
       <div className={innerContentClasses}>
-        {/* Spinner */}
         <div className='relative h-16 w-16'>
           <div className='absolute inset-0 animate-ping rounded-full bg-blue-400 opacity-25'></div>
           <div className='relative flex h-full w-full items-center justify-center rounded-full bg-blue-100'>
@@ -40,16 +39,13 @@ export function Loading({
           </div>
         </div>
 
-        {/* Text Content */}
         <div className='text-center space-y-2'>
-          {/* Title: Show for overlay/fullscreen, hide for inline unless it's the only text? No, hide for inline. */}
           {variant !== 'inline' && (
             <p className='text-xl font-bold text-gray-900'>
               잠시만 기다려주세요
             </p>
           )}
 
-          {/* Message */}
           {message && (
             <p className='text-base font-medium text-blue-600 animate-pulse'>
               {message}

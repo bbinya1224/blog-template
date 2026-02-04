@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
-import type { ReviewPayload } from '@/entities/review/model/types';
+import type { ReviewPayload } from '@/shared/types/review';
 import { Button } from '@/shared/ui/Button';
 import { StepContext } from './wizard-steps/StepContext';
 import { StepMenu } from './wizard-steps/StepMenu';
@@ -37,26 +37,24 @@ export const ReviewWizard = ({
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === steps.length - 1;
 
-  // 각 스텝별 필수 필드 검증
   const canProceedToNextStep = (): boolean => {
     switch (currentStep) {
-      case 0: // 장소 정보
+      case 0:
         return !!(
           form.name.trim() &&
           form.location.trim()
         );
-      case 1: // 동행인 & 메뉴
+      case 1:
         return !!form.menu.trim();
-      case 2: // 경험 작성 (필수!)
+      case 2:
         return !!(form.user_draft && form.user_draft.trim());
-      case 3: // 평가 및 요약
+      case 3:
         return true;
       default:
         return true;
     }
   };
 
-  // 미완성 필드 메시지
   const getMissingFieldsMessage = (): string => {
     switch (currentStep) {
       case 0:
@@ -90,7 +88,6 @@ export const ReviewWizard = ({
 
   return (
     <form onSubmit={onSubmit} className="w-full max-w-3xl mx-auto">
-      {/* Progress Bar */}
       <div className="mb-12">
         <div className="flex justify-between mb-2">
           {steps.map((step, index) => (
@@ -112,7 +109,6 @@ export const ReviewWizard = ({
         </div>
       </div>
 
-      {/* Step Content */}
       <div className="min-h-[400px] mb-10">
         <CurrentStepComponent
           form={form}
@@ -121,7 +117,6 @@ export const ReviewWizard = ({
         />
       </div>
 
-      {/* Navigation Buttons */}
       <div className="flex justify-between items-center pt-6 border-t border-gray-100">
         <Button
           type="button"

@@ -43,7 +43,6 @@ export const PromptList = ({
 
   return (
     <div>
-      {/* 카테고리 필터 */}
       <div className="mb-6 flex items-center gap-4">
         <label className="text-sm font-medium text-gray-700">카테고리:</label>
         <select
@@ -67,7 +66,6 @@ export const PromptList = ({
         </button>
       </div>
 
-      {/* 프롬프트 목록 */}
       {loading && prompts.length === 0 ? (
         <div className="py-12 text-center text-gray-500">로딩 중...</div>
       ) : prompts.length === 0 ? (
@@ -83,7 +81,6 @@ export const PromptList = ({
                 !prompt.is_active ? 'opacity-60' : ''
               }`}
             >
-              {/* 헤더 */}
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="font-mono text-sm font-semibold text-gray-900">
@@ -115,7 +112,6 @@ export const PromptList = ({
                 </button>
               </div>
 
-              {/* 내용 미리보기 */}
               <div className="rounded-md bg-gray-50 p-3">
                 <pre className="whitespace-pre-wrap font-mono text-xs text-gray-600">
                   {prompt.content.length > 300
@@ -124,7 +120,6 @@ export const PromptList = ({
                 </pre>
               </div>
 
-              {/* 메타 정보 */}
               <div className="mt-2 text-xs text-gray-400">
                 v{prompt.version} | {prompt.content.length}자 | 수정:{' '}
                 {new Date(prompt.updated_at).toLocaleDateString('ko-KR')}
@@ -134,7 +129,6 @@ export const PromptList = ({
         </div>
       )}
 
-      {/* 편집 모달 */}
       {editingPrompt && (
         <PromptEditor
           prompt={editingPrompt}

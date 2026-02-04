@@ -1,21 +1,10 @@
-/**
- * 스타일 분석 모듈
- * 비즈니스 로직을 순수 함수로 분리
- */
-
-import type { StyleProfile } from '@/entities/style-profile/model/types';
+import type { StyleProfile } from '@/shared/types/style-profile';
 import { StyleAnalysisError } from '@/shared/lib/errors';
 import { unique } from '@/shared/lib/utils';
 import { analyzeStyleWithClaude } from '@/shared/api/claude-client';
 import { getStyleAnalysisPrompts } from '@/shared/api/prompt-service';
 
-const COMMON_SECTIONS = [
-  '방문 이유',
-  '분위기',
-  '메뉴/맛',
-  '서비스',
-  '총평',
-];
+const COMMON_SECTIONS = ['방문 이유', '분위기', '메뉴/맛', '서비스', '총평'];
 
 const STOP_WORDS = new Set([
   '그리고',
@@ -29,7 +18,7 @@ const STOP_WORDS = new Set([
 ]);
 
 /**
- * 문장 분리 (순수 함수)
+ * 문장 분리
  */
 const splitSentences = (text: string): string[] => {
   return text
@@ -39,7 +28,7 @@ const splitSentences = (text: string): string[] => {
 };
 
 /**
- * 평균 문장 길이 계산 (순수 함수)
+ * 평균 문장 길이 계산
  */
 const calculateAverageSentenceLength = (sentences: string[]): number => {
   if (sentences.length === 0) return 0;
@@ -48,7 +37,7 @@ const calculateAverageSentenceLength = (sentences: string[]): number => {
 };
 
 /**
- * 빈도수 기반 단어 추출 (순수 함수)
+ * 빈도수 기반 단어 추출
  */
 const extractFrequentWords = (text: string, limit = 6): string[] => {
   const tokens = text
@@ -70,7 +59,7 @@ const extractFrequentWords = (text: string, limit = 6): string[] => {
 };
 
 /**
- * 톤 감지 (순수 함수)
+ * 톤 감지
  */
 const detectTone = (text: string): string => {
   if (text.includes('설레') || text.includes('행복')) {
@@ -83,7 +72,7 @@ const detectTone = (text: string): string => {
 };
 
 /**
- * 주제 편향 감지 (순수 함수)
+ * 주제 편향 감지
  */
 const detectTopicBias = (words: string[]): string => {
   if (words.find((word) => word.includes('카페'))) {
@@ -96,7 +85,7 @@ const detectTopicBias = (words: string[]): string => {
 };
 
 /**
- * 습관적 표현 추측 (순수 함수)
+ * 습관적 표현 추측
  */
 const guessPhrases = (text: string): string[] => {
   const phrases = ['솔직히', '개인적으로'];
@@ -110,7 +99,7 @@ const guessPhrases = (text: string): string[] => {
 };
 
 /**
- * 휴리스틱 기반 스타일 프로필 생성 (순수 함수)
+ * 휴리스틱 기반 스타일 프로필 생성
  * I/O 없이 순수하게 텍스트 분석만 수행
  */
 export const generateHeuristicProfile = (text: string): StyleProfile => {
@@ -231,9 +220,7 @@ export const generateStyleProfileWithClaude = async (
       !styleProfile.structure_pattern ||
       !styleProfile.keyword_profile
     ) {
-      throw new StyleAnalysisError(
-        'Claude API 응답이 올바른 형식이 아닙니다.',
-      );
+      throw new StyleAnalysisError('Claude API 응답이 올바른 형식이 아닙니다.');
     }
 
     return styleProfile;

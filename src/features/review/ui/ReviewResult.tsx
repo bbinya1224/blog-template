@@ -1,10 +1,3 @@
-/**
- * 생성된 리뷰 결과 컴포넌트
- * - 리뷰 미리보기
- * - 복사 기능
- * - 수정 요청 기능
- */
-
 import { Button } from '@/shared/ui/Button';
 
 interface ReviewResultProps {
@@ -27,14 +20,12 @@ export const ReviewResult = ({
   onEdit,
 }: ReviewResultProps) => (
   <div className='space-y-4'>
-    {/* 리뷰 미리보기 */}
     <div className='rounded-xl border border-gray-200 bg-slate-50 p-4 text-sm leading-relaxed text-gray-800 md:p-6 overflow-scroll'>
       <pre className='max-h-96 whitespace-pre-wrap wrap-break-word'>
         {review}
       </pre>
     </div>
 
-    {/* 액션 버튼 */}
     <div className='flex flex-wrap gap-3'>
       <Button
         type='button'
@@ -58,7 +49,6 @@ export const ReviewResult = ({
       </Button>
     </div>
 
-    {/* 수정 요청 입력 */}
     <div>
       <label
         className='text-sm font-medium text-gray-700'

@@ -3,7 +3,7 @@
  * Public API exports
  */
 
-// API
+// Client-side functions
 export { analyzeStyle, saveStyleProfileToStorage } from './api/analyze-style-api';
 
 // UI Components

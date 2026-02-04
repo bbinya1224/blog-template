@@ -43,6 +43,11 @@ export const STATUS_MESSAGES = {
   EDIT_COMPLETE: '리뷰가 수정되었습니다!',
 } as const;
 
+// 사용량 제한
+export const USAGE_LIMITS = {
+  PREVIEW_MAX_USES: 2,
+} as const;
+
 // FAQ 목록
 export const FAQ_ITEMS = [
   {

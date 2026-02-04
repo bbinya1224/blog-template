@@ -1,5 +1,5 @@
-import type { ReviewPayload } from '@/entities/review/model/types';
-import type { StyleProfile } from '@/entities/style-profile/model/types';
+import type { ReviewPayload } from '@/shared/types/review';
+import type { StyleProfile } from '@/shared/types/style-profile';
 import { formatKoreanDate } from '@/shared/lib/utils';
 import {
   generateReviewWithClaude,

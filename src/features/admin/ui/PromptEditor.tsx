@@ -25,7 +25,6 @@ export const PromptEditor = ({ prompt, onSave, onClose, loading }: Props) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="mx-4 w-full max-w-4xl rounded-lg bg-white shadow-xl">
-        {/* 헤더 */}
         <div className="flex items-center justify-between border-b px-6 py-4">
           <h2 className="text-lg font-semibold">프롬프트 수정</h2>
           <button
@@ -49,7 +48,6 @@ export const PromptEditor = ({ prompt, onSave, onClose, loading }: Props) => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* 메타 정보 */}
           <div className="border-b bg-gray-50 px-6 py-3">
             <div className="flex flex-wrap gap-4 text-sm">
               <div>
@@ -81,7 +79,6 @@ export const PromptEditor = ({ prompt, onSave, onClose, loading }: Props) => {
             </div>
           </div>
 
-          {/* 에디터 */}
           <div className="p-6">
             <label className="mb-2 block text-sm font-medium text-gray-700">
               Content
@@ -96,7 +93,6 @@ export const PromptEditor = ({ prompt, onSave, onClose, loading }: Props) => {
               {content.length}자
             </div>
 
-            {/* 활성화 체크박스 */}
             <div className="mt-4">
               <label className="flex items-center gap-2">
                 <input
@@ -113,7 +109,6 @@ export const PromptEditor = ({ prompt, onSave, onClose, loading }: Props) => {
             </div>
           </div>
 
-          {/* 푸터 */}
           <div className="flex items-center justify-end gap-3 border-t bg-gray-50 px-6 py-4">
             <button
               type="button"

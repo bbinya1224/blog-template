@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import type { ReviewPayload } from '@/entities/review/model/types';
+import type { ReviewPayload } from '@/shared/types/review';
 
 interface StepMenuProps {
   form: ReviewPayload;
@@ -34,7 +34,6 @@ export const StepMenu = ({ form, onChange }: StepMenuProps) => {
       </div>
 
       <div className='space-y-8'>
-        {/* Companion Selection */}
         <div className='space-y-3'>
           <label className='block text-lg font-medium text-gray-700'>
             누구와 함께였나요?
@@ -58,7 +57,6 @@ export const StepMenu = ({ form, onChange }: StepMenuProps) => {
           </div>
         </div>
 
-        {/* Menu Input - FACTUAL BOUNDARY */}
         <div className='space-y-3'>
           <label
             htmlFor='menu'

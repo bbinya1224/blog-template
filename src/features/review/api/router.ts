@@ -15,7 +15,7 @@ import {
   saveReviewToDB,
   incrementUsageCount,
 } from '@/shared/api/data-files';
-import { updateReview } from '@/entities/review/api/review-repository';
+import { updateReview } from '@/entities/review';
 
 const reviewPayloadSchema = z.object({
   name: z.string().min(1, '가게 이름을 입력해주세요'),

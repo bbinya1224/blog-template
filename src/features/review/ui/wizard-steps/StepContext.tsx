@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import type { ReviewPayload } from '@/entities/review/model/types';
+import type { ReviewPayload } from '@/shared/types/review';
 
 interface StepContextProps {
   form: ReviewPayload;

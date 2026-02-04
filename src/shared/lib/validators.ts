@@ -1,13 +1,9 @@
 /**
  * 타입 안전한 Validation 함수 모음
- * 순수 함수로 구성되어 재사용 가능하며 테스트 용이
  */
 
-import type {
-  ReviewPayload,
-  ReviewEditPayload,
-} from '@/entities/review/model/types';
-import type { AnalyzePayload } from '@/features/analyze-style/model/types';
+import type { ReviewPayload, ReviewEditPayload } from '@/shared/types/review';
+import type { AnalyzePayload } from '@/shared/types/analyze';
 import { ValidationError } from '@/shared/lib/errors';
 import { isValidNaverRssUrl, isNonEmptyString } from '@/shared/lib/utils';
 
@@ -34,7 +30,7 @@ export const isValidEmail = (email: unknown): email is string => {
  * @throws {ValidationError} 검증 실패 시
  */
 export const isValidAnalyzePayload = (
-  payload: unknown
+  payload: unknown,
 ): payload is AnalyzePayload => {
   if (!payload || typeof payload !== 'object') {
     throw new ValidationError('유효하지 않은 요청 데이터입니다.');
@@ -48,7 +44,7 @@ export const isValidAnalyzePayload = (
 
   if (!isValidNaverRssUrl(p.rssUrl)) {
     throw new ValidationError(
-      '유효한 네이버 블로그 RSS URL을 입력해주세요. (예: https://rss.blog.naver.com/블로그ID.xml)'
+      '유효한 네이버 블로그 RSS URL을 입력해주세요. (예: https://rss.blog.naver.com/블로그ID.xml)',
     );
   }
 
@@ -69,7 +65,7 @@ export const isValidAnalyzePayload = (
  * @throws {ValidationError} 검증 실패 시
  */
 export const isValidReviewPayload = (
-  payload: unknown
+  payload: unknown,
 ): payload is ReviewPayload => {
   if (!payload || typeof payload !== 'object') {
     throw new ValidationError('유효하지 않은 요청 데이터입니다.');
@@ -96,7 +92,7 @@ export const isValidReviewPayload = (
   // 날짜 형식 검증
   if (!DATE_REGEX.test(p.date as string)) {
     throw new ValidationError(
-      '날짜는 YYYY-MM-DD 형식이어야 합니다. (예: 2024-01-15)'
+      '날짜는 YYYY-MM-DD 형식이어야 합니다. (예: 2024-01-15)',
     );
   }
 
@@ -104,7 +100,7 @@ export const isValidReviewPayload = (
   const dateObj = new Date(p.date as string);
   if (isNaN(dateObj.getTime())) {
     throw new ValidationError(
-      '유효하지 않은 날짜입니다. 올바른 날짜를 입력해주세요.'
+      '유효하지 않은 날짜입니다. 올바른 날짜를 입력해주세요.',
     );
   }
 
@@ -116,7 +112,7 @@ export const isValidReviewPayload = (
  * @throws {ValidationError} 검증 실패 시
  */
 export const isValidEditRequest = (
-  payload: unknown
+  payload: unknown,
 ): payload is ReviewEditPayload => {
   if (!payload || typeof payload !== 'object') {
     throw new ValidationError('유효하지 않은 요청 데이터입니다.');

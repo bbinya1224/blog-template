@@ -1,11 +1,4 @@
-/**
- * 스타일 프로필 요약 컴포넌트
- * - 핵심 정보 하이라이트
- * - 접기/펼치기 기능
- * - 다음 단계 CTA
- */
-
-import type { StyleProfile } from '@/entities/style-profile/model/types';
+import type { StyleProfile } from '@/shared/types/style-profile';
 
 interface StyleProfileSummaryProps {
   styleProfile: StyleProfile;
@@ -20,7 +13,6 @@ export const StyleProfileSummary = ({
 }: StyleProfileSummaryProps) => {
   return (
     <div className='space-y-6'>
-      {/* 핵심 요약 */}
       <div className='card-info'>
         <h3 className='mb-3 text-sm font-bold text-blue-900'>
           📝 핵심 스타일 특징
@@ -38,19 +30,14 @@ export const StyleProfileSummary = ({
         </div>
       </div>
 
-      {/* 자주 쓰는 표현 */}
       <HabitualPhrases phrases={styleProfile.writing_style.habitual_phrases} />
 
-      {/* 상세 정보 (접기/펼치기) */}
       <StyleProfileDetails styleProfile={styleProfile} />
 
-      {/* CTA 버튼 */}
       {showCTA && onNextStep && <NextStepCTA onNext={onNextStep} />}
     </div>
   );
 };
-
-// 하위 컴포넌트들 (순수하게 props만 받음)
 
 const KeyValuePair = ({ label, value }: { label: string; value: string }) => (
   <p>

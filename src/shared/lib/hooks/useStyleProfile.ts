@@ -1,13 +1,10 @@
-/**
- * 스타일 프로필 관리 커스텀 훅
- * - localStorage 우선 로딩
- * - API fallback
- * - 타입 안전성 보장
- */
-
 import { useCallback, useEffect, useState } from 'react';
-import type { StyleProfile } from '@/entities/style-profile/model/types';
-import { STORAGE_KEYS, API_ENDPOINTS, STATUS_MESSAGES } from '@/shared/config/constants';
+import type { StyleProfile } from '@/shared/types/style-profile';
+import {
+  STORAGE_KEYS,
+  API_ENDPOINTS,
+  STATUS_MESSAGES,
+} from '@/shared/config/constants';
 
 type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
 

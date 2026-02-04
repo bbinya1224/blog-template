@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent } from 'react';
-import type { ReviewPayload } from '@/entities/review/model/types';
+import type { ReviewPayload } from '@/shared/types/review';
 
 interface StepRefinementProps {
   form: ReviewPayload;
@@ -71,7 +71,6 @@ export const StepRefinement = ({ form, onChange }: StepRefinementProps) => {
       </div>
 
       <div className='space-y-8'>
-        {/* Pros */}
         <div className='space-y-3'>
           <label className='block text-lg font-medium text-gray-700'>
             좋았던 점은? (여러 개 선택 가능)
@@ -100,7 +99,6 @@ export const StepRefinement = ({ form, onChange }: StepRefinementProps) => {
           />
         </div>
 
-        {/* Cons */}
         <div className='space-y-3'>
           <label className='block text-lg font-medium text-gray-700'>
             아쉬웠던 점은? (솔직하게!)
@@ -129,7 +127,6 @@ export const StepRefinement = ({ form, onChange }: StepRefinementProps) => {
           />
         </div>
 
-        {/* Extra */}
         <div className='space-y-2'>
           <label
             htmlFor='extra'

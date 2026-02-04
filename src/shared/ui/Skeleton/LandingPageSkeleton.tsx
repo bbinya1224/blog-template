@@ -1,9 +1,8 @@
-import { Skeleton } from '@/shared/ui/Skeleton/Skeleton';
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 export function LandingPageSkeleton() {
   return (
     <div className='min-h-screen bg-white text-gray-900'>
-      {/* Navigation Bar */}
       <nav className='fixed left-0 top-0 z-50 w-full border-b border-transparent bg-white/80 backdrop-blur-md'>
         <div className='mx-auto flex max-w-5xl items-center justify-between px-6 py-4 md:px-12'>
           <Skeleton className='h-7 w-32' />
@@ -15,7 +14,6 @@ export function LandingPageSkeleton() {
       </nav>
 
       <main className='pt-24'>
-        {/* Hero Section */}
         <section className='relative overflow-hidden px-6 pb-20 pt-16 md:pt-32'>
           <div className='mx-auto max-w-4xl text-center'>
             <Skeleton className='mx-auto mb-6 h-20 w-full max-w-2xl md:h-28' />
@@ -30,7 +28,6 @@ export function LandingPageSkeleton() {
           </div>
         </section>
 
-        {/* Features Section */}
         <section className='bg-gray-50 px-6 py-24 md:py-32'>
           <div className='mx-auto max-w-5xl'>
             <div className='mb-16 md:text-center'>
@@ -57,7 +54,6 @@ export function LandingPageSkeleton() {
           </div>
         </section>
 
-        {/* Feature Cards Section */}
         <section className='px-6 py-24 md:py-32'>
           <div className='mx-auto max-w-5xl'>
             <Skeleton className='mx-auto mb-16 h-16 w-full max-w-md' />
@@ -81,7 +77,6 @@ export function LandingPageSkeleton() {
           </div>
         </section>
 
-        {/* Pricing Section */}
         <section className='bg-gray-900 px-6 py-24 md:py-32'>
           <div className='mx-auto max-w-4xl text-center'>
             <Skeleton className='mx-auto mb-6 h-12 w-80 bg-gray-700' />
@@ -100,7 +95,6 @@ export function LandingPageSkeleton() {
         </section>
       </main>
 
-      {/* Footer */}
       <footer className='border-t border-gray-100 bg-white py-12'>
         <div className='container mx-auto px-6 text-center'>
           <Skeleton className='mx-auto mb-2 h-4 w-64' />

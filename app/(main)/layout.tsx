@@ -3,6 +3,7 @@ import { StepIndicator } from '@/shared/ui/StepIndicator';
 import { UserProfile } from '@/entities/user/ui/UserProfile';
 import { requireAuth } from '@/shared/lib/auth-utils';
 import { getUserStatus } from '@/shared/api/data-files';
+import { USAGE_LIMITS } from '@/shared/config';
 
 export default async function MainLayout({
   children,
@@ -31,12 +32,12 @@ export default async function MainLayout({
             {isPreview && (
               <span
                 className={`rounded-full px-3 py-1 text-xs font-bold ${
-                  usageCount >= 2
+                  usageCount >= USAGE_LIMITS.PREVIEW_MAX_USES
                     ? 'bg-red-100 text-red-600'
                     : 'bg-blue-100 text-blue-600'
                 }`}
               >
-                무료 체험 중 ({usageCount}/2)
+                무료 체험 중 ({usageCount}/{USAGE_LIMITS.PREVIEW_MAX_USES})
               </span>
             )}
             <UserProfile />

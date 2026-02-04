@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '@/shared/lib/supabase';
-import type { ReviewPayload } from '@/entities/review/model/types';
-import type { StyleProfile } from '@/entities/style-profile/model/types';
+import type { ReviewPayload } from '@/shared/types/review';
+import type { StyleProfile } from '@/shared/types/style-profile';
 
 /**
  * 저장된 블로그 글 읽기 (RSS_CONTENTS 테이블)
@@ -25,7 +25,10 @@ export const readBlogPosts = async (email: string): Promise<string> => {
 /**
  * 블로그 글 저장
  */
-export const saveBlogPosts = async (email: string, content: string): Promise<void> => {
+export const saveBlogPosts = async (
+  email: string,
+  content: string,
+): Promise<void> => {
   if (!email) return;
 
   // 통으로 저장하는 경우는 보통 없지만 호환성을 위해 유지
@@ -41,7 +44,9 @@ export const saveBlogPosts = async (email: string, content: string): Promise<voi
 /**
  * 스타일 프로필 읽기
  */
-export const readStyleProfile = async (email: string): Promise<StyleProfile | null> => {
+export const readStyleProfile = async (
+  email: string,
+): Promise<StyleProfile | null> => {
   if (!email) return null;
 
   const { data, error } = await supabaseAdmin
@@ -62,7 +67,7 @@ export const readStyleProfile = async (email: string): Promise<StyleProfile | nu
  */
 export const saveStyleProfile = async (
   email: string,
-  profile: StyleProfile
+  profile: StyleProfile,
 ): Promise<void> => {
   if (!email) return;
 
@@ -95,7 +100,7 @@ export const saveStyleProfile = async (
 export const saveReviewToDB = async (
   email: string,
   review: string,
-  payload: ReviewPayload
+  payload: ReviewPayload,
 ): Promise<string> => {
   if (!email) throw new Error('User email is required');
 
@@ -120,28 +125,29 @@ export const saveReviewToDB = async (
 
 // 하위 호환성을 위해 남겨둠 (하지만 쓰지 않는 것을 권장)
 export const saveReviewToFile = async (): Promise<string> => {
-    throw new Error('saveReviewToFile is deprecated. Use saveReviewToDB instead.');
+  throw new Error(
+    'saveReviewToFile is deprecated. Use saveReviewToDB instead.',
+  );
 };
-
 
 // 샘플 배열을 DB에 저장
 export const saveBlogSamples = async (email: string, samples: string[]) => {
   if (!email || samples.length === 0) return;
 
   const rows = samples.map((sample) => {
-     let title = 'Sample';
-     const content = sample;
-     if (sample.length > 200) {
-         // Try to extract title from first line
-         const firstLine = sample.split('\n')[0];
-         if (firstLine && firstLine.length < 100) title = firstLine;
-     }
+    let title = 'Sample';
+    const content = sample;
+    if (sample.length > 200) {
+      // Try to extract title from first line
+      const firstLine = sample.split('\n')[0];
+      if (firstLine && firstLine.length < 100) title = firstLine;
+    }
 
-     return {
-        user_email: email,
-        content: content,
-        title: title,
-     };
+    return {
+      user_email: email,
+      content: content,
+      title: title,
+    };
   });
 
   await supabaseAdmin.from('rss_contents').insert(rows);
@@ -149,19 +155,19 @@ export const saveBlogSamples = async (email: string, samples: string[]) => {
 
 // 샘플 읽기 (Review Generator용)
 export const readBlogSamples = async (email: string): Promise<string[]> => {
-    if (!email) return [];
-    
-    // rss_contents에서 내용을 가져오는데, title이 'Sample'이거나 
-    // 그냥 모든 rss 컨텐츠를 샘플로 쓸 수도 있음.
-    // 여기서는 최근 20개를 가져와서 섞어 쓰는 방식으로 구현
-    const { data } = await supabaseAdmin
-        .from('rss_contents')
-        .select('content')
-        .eq('user_email', email)
-        .order('created_at', { ascending: false })
-        .limit(20);
-        
-    return data ? data.map(d => d.content) : [];
+  if (!email) return [];
+
+  // rss_contents에서 내용을 가져오는데, title이 'Sample'이거나
+  // 그냥 모든 rss 컨텐츠를 샘플로 쓸 수도 있음.
+  // 여기서는 최근 20개를 가져와서 섞어 쓰는 방식으로 구현
+  const { data } = await supabaseAdmin
+    .from('rss_contents')
+    .select('content')
+    .eq('user_email', email)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  return data ? data.map((d) => d.content) : [];
 };
 
 /**
@@ -189,17 +195,5 @@ export const getUserStatus = async (email: string) => {
 export const incrementUsageCount = async (email: string) => {
   if (!email) return;
 
-  const { data } = await supabaseAdmin
-    .from('approved_users')
-    .select('usage_count')
-    .eq('email', email)
-    .single();
-    
-  if (data) {
-    const currentCount = data.usage_count || 0;
-    await supabaseAdmin
-      .from('approved_users')
-      .update({ usage_count: currentCount + 1 })
-      .eq('email', email);
-  }
+  await supabaseAdmin.rpc('increment_usage_count', { user_email: email });
 };
