@@ -195,17 +195,5 @@ export const getUserStatus = async (email: string) => {
 export const incrementUsageCount = async (email: string) => {
   if (!email) return;
 
-  const { data } = await supabaseAdmin
-    .from('approved_users')
-    .select('usage_count')
-    .eq('email', email)
-    .single();
-
-  if (data) {
-    const currentCount = data.usage_count || 0;
-    await supabaseAdmin
-      .from('approved_users')
-      .update({ usage_count: currentCount + 1 })
-      .eq('email', email);
-  }
+  await supabaseAdmin.rpc('increment_usage_count', { user_email: email });
 };
