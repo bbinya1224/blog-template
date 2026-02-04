@@ -1,13 +1,8 @@
 import { tavily } from '@tavily/core';
 import { AppError } from '@/shared/lib/errors';
 import { withTimeoutAndRetry } from '@/shared/lib/timeout';
-import {
-  searchKakaoPlace,
-  formatKakaoPlaceInfo,
-  type KakaoPlaceInfo,
-} from './kakao-local';
+import { searchKakaoPlace, type KakaoPlaceInfo } from './kakao-local';
 
-// Lazy initialization으로 빌드 시 에러 방지
 let tavilyClient: ReturnType<typeof tavily> | null = null;
 
 const getTavilyClient = () => {
@@ -112,26 +107,4 @@ export async function searchStoreInfo(query: string): Promise<SearchResult> {
     kakaoPlace,
     tavilyContext,
   };
-}
-
-/**
- * 검색 결과를 문자열로 포맷팅 (하위 호환성)
- * @deprecated 대신 searchStoreInfo()를 사용하고 구조화된 결과를 활용하세요
- */
-export async function searchStoreInfoLegacy(query: string): Promise<string> {
-  const result = await searchStoreInfo(query);
-
-  const parts: string[] = [];
-
-  if (result.kakaoPlace) {
-    parts.push(
-      '## 카카오 지역 정보\n' + formatKakaoPlaceInfo(result.kakaoPlace),
-    );
-  }
-
-  if (result.tavilyContext) {
-    parts.push('## 블로그 리뷰\n' + result.tavilyContext);
-  }
-
-  return parts.join('\n\n') || '검색 결과가 없습니다.';
 }
