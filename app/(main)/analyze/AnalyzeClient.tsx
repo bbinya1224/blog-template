@@ -21,7 +21,7 @@ import {
 } from '@/features/analyze-style';
 import { loadStyleProfile } from '@/features/review';
 import { PAGE_TEXTS } from '@/features/analyze-style/constants/texts';
-import type { StyleProfile } from '@/entities/style-profile/model/types';
+import type { StyleProfile } from '@/shared/types/style-profile';
 import type { Session } from 'next-auth';
 import { trpc } from '@/shared/api/trpc';
 
@@ -74,10 +74,7 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
   const error =
     fetchRssMutation.error?.message || analyzeStyleMutation.error?.message;
 
-  const isDisabled = useMemo(
-    () => isLoading || !rssUrl.trim(),
-    [isLoading, rssUrl],
-  );
+  const isDisabled = isLoading || !rssUrl.trim();
 
   const statusMessage = useMemo(() => {
     if (isLoading) return STATUS_MESSAGES.FETCHING_RSS;

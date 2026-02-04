@@ -1,10 +1,5 @@
-/**
- * 리뷰 생성/수정 API
- * - 비즈니스 로직을 순수 함수로 분리
- */
-
-import type { ReviewPayload } from '@/entities/review/model/types';
-import type { StyleProfile } from '@/entities/style-profile/model/types';
+import type { ReviewPayload } from '@/shared/types/review';
+import type { StyleProfile } from '@/shared/types/style-profile';
 
 /**
  * 스타일 프로필 로드 (localStorage → API 폴백)

@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import type { ReviewPayload } from '@/entities/review/model/types';
+import type { ReviewPayload } from '@/shared/types/review';
 
 interface StepExperienceProps {
   form: ReviewPayload;
@@ -60,7 +60,6 @@ export const StepExperience = ({
         ))}
       </div>
 
-      {/* Writing Guide */}
       <div className='bg-gradient-to-br from-orange-50 to-pink-50 border-2 border-orange-200 rounded-2xl p-6 shadow-sm'>
         <p className='text-base text-orange-900 font-bold mb-3 flex items-center gap-2'>
           <span className='text-2xl'>✍️</span>
@@ -97,7 +96,6 @@ export const StepExperience = ({
         </ul>
       </div>
 
-      {/* Character Counter */}
       <div className='flex justify-between items-center text-sm'>
         <span
           className={`font-medium ${
@@ -121,7 +119,6 @@ export const StepExperience = ({
         <span className='text-gray-400'>AI가 10배 이상 확장해드려요 ✨</span>
       </div>
 
-      {/* Enhanced Textarea */}
       <div className='relative group'>
         <div className='absolute -inset-1 bg-gradient-to-r from-orange-300 via-pink-300 to-rose-300 rounded-2xl blur-sm opacity-60 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-300'></div>
         <textarea
@@ -134,7 +131,6 @@ export const StepExperience = ({
         />
       </div>
 
-      {/* Encouragement Message */}
       {isShort && (
         <div className='bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-lg animate-in slide-in-from-top-2 duration-300'>
           <p className='text-sm text-orange-800 font-medium'>

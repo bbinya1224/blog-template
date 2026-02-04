@@ -1,9 +1,4 @@
-/**
- * 스타일 분석 API
- * - 비즈니스 로직을 순수 함수로 분리
- */
-
-import type { StyleProfile } from '@/entities/style-profile/model/types';
+import type { StyleProfile } from '@/shared/types/style-profile';
 import { API_ENDPOINTS, STATUS_MESSAGES } from '@/shared/config/constants';
 
 /**
@@ -23,9 +18,7 @@ export const analyzeStyle = async (
 
   if (!fetchResponse.ok) {
     const errorData = await fetchResponse.json().catch(() => ({}));
-    throw new Error(
-      errorData.error || 'RSS를 읽어오지 못했습니다.',
-    );
+    throw new Error(errorData.error || 'RSS를 읽어오지 못했습니다.');
   }
 
   // 2. Style Analysis
@@ -35,9 +28,7 @@ export const analyzeStyle = async (
 
   if (!analysisResponse.ok) {
     const errorData = await analysisResponse.json().catch(() => ({}));
-    throw new Error(
-      errorData.error || STATUS_MESSAGES.ANALYSIS_ERROR,
-    );
+    throw new Error(errorData.error || STATUS_MESSAGES.ANALYSIS_ERROR);
   }
 
   const data = (await analysisResponse.json()) as {

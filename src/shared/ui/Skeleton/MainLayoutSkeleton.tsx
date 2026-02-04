@@ -3,7 +3,6 @@ import { Skeleton } from '@/shared/ui/Skeleton';
 export function MainLayoutSkeleton() {
   return (
     <div className='min-h-screen bg-slate-50'>
-      {/* Header */}
       <header className='border-b border-gray-200 bg-white'>
         <div className='mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5 md:px-12'>
           <div className='space-y-1'>
@@ -14,18 +13,14 @@ export function MainLayoutSkeleton() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className='mx-auto w-full max-w-5xl px-6 pb-16 pt-10 md:px-12'>
-        {/* StepIndicator */}
         <div className='mb-10 flex gap-3'>
           <Skeleton className='h-7 w-32' />
           <Skeleton className='h-7 w-32' />
           <Skeleton className='h-7 w-32' />
         </div>
 
-        {/* Dashboard Content */}
         <div className='space-y-10'>
-          {/* Header Section */}
           <section className='space-y-4'>
             <Skeleton className='h-4 w-24' />
             <div className='space-y-3'>
@@ -34,7 +29,6 @@ export function MainLayoutSkeleton() {
             </div>
           </section>
 
-          {/* Quick Action Cards */}
           <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
             {[1, 2, 3].map((i) => (
               <div
@@ -50,7 +44,6 @@ export function MainLayoutSkeleton() {
             ))}
           </div>
 
-          {/* Tips Card */}
           <div className='rounded-2xl border border-gray-100 bg-white p-6 shadow-sm'>
             <Skeleton className='mb-4 h-6 w-32' />
             <Skeleton className='mb-3 h-4 w-40' />

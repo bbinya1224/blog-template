@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { StyleProfileSkeleton } from './StyleProfileSkeleton';
 import { StyleProfileSummary } from './StyleProfileSummary';
-import type { StyleProfile } from '@/entities/style-profile/model/types';
+import type { StyleProfile } from '@/shared/types/style-profile';
 
 const meta = {
   title: 'Skeleton/StyleProfile',

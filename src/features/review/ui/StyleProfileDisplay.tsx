@@ -1,10 +1,5 @@
-/**
- * 스타일 프로필 표시 컴포넌트
- * - 현재 적용된 스타일 프로필을 요약해서 보여줌
- */
-
 import { SectionCard } from '@/shared/ui/SectionCard';
-import type { StyleProfile } from '@/entities/style-profile/model/types';
+import type { StyleProfile } from '@/shared/types/style-profile';
 
 interface StyleProfileDisplayProps {
   styleProfile: StyleProfile | null;

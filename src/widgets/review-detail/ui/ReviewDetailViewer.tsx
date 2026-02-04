@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Review } from '@/entities/review/model/review';
+import { Review } from '@/entities/review';
 import { SectionCard } from '@/shared/ui/SectionCard';
 import { copyToClipboard } from '@/features/review';
 import { InlineDiffView } from '@/features/review-edit';

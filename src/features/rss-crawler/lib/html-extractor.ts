@@ -69,25 +69,24 @@ export const extractArticleText = (
   removeNoiseNodes($);
 
   // 1. 모든 셀렉터에 대한 결과 수집 (선언형)
-  const selectorResults: SelectorResult[] = selectors
-    .map((selector) => {
-      const el = $(selector);
-      if (!el.length) {
-        return { selector, text: '', length: 0 };
-      }
+  const selectorResults: SelectorResult[] = selectors.map((selector) => {
+    const el = $(selector);
+    if (!el.length) {
+      return { selector, text: '', length: 0 };
+    }
 
-      const text = normalizeText(el.text());
-      return { selector, text, length: text.length };
-    });
+    const text = normalizeText(el.text());
+    return { selector, text, length: text.length };
+  });
 
   // 2. allResults 구성 (디버깅용)
   const allResults = Object.fromEntries(
-    selectorResults.map((r) => [r.selector, r.length])
+    selectorResults.map((r) => [r.selector, r.length]),
   );
 
   // 3. 유효한 결과 필터링 및 최장 텍스트 선택
   const validResults = selectorResults.filter(
-    (r) => r.length >= MIN_CONTENT_LENGTH
+    (r) => r.length >= MIN_CONTENT_LENGTH,
   );
 
   const bestResult = validResults.reduce<SelectorResult | null>(
@@ -95,11 +94,12 @@ export const extractArticleText = (
       if (!best) return current;
       return current.length > best.length ? current : best;
     },
-    null
+    null,
   );
 
   // 4. 유효한 결과가 있으면 반환, 없으면 body fallback
-  const shouldUseFallback = !bestResult || bestResult.length < MIN_CONTENT_LENGTH;
+  const shouldUseFallback =
+    !bestResult || bestResult.length < MIN_CONTENT_LENGTH;
 
   if (shouldUseFallback) {
     const bodyText = normalizeText($('body').text());
@@ -116,7 +116,7 @@ export const extractArticleText = (
 };
 
 /**
- * RSS XML에서 포스트 링크 추출 (순수 함수)
+ * RSS XML에서 포스트 링크 추출
  */
 export const extractPostLinksFromRss = (
   rssXml: string,

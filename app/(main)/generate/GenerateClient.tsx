@@ -6,8 +6,8 @@ import { SectionCard } from '@/shared/ui/SectionCard';
 import { StatusMessage } from '@/shared/ui/StatusMessage';
 import { DynamicMessage } from '@/shared/ui/DynamicMessage';
 import { ReviewResultSkeleton } from '@/features/review/ui/ReviewResultSkeleton';
-import type { ReviewPayload } from '@/entities/review/model/types';
-import type { StyleProfile } from '@/entities/style-profile/model/types';
+import type { ReviewPayload } from '@/shared/types/review';
+import type { StyleProfile } from '@/shared/types/style-profile';
 import {
   loadStyleProfile,
   copyToClipboard,
