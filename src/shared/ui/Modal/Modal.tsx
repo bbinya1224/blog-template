@@ -44,6 +44,7 @@ export function Modal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         className={cn(SIZE_CLASSES[size], className)}
+        hideCloseButton={!showCloseButton}
         onPointerDownOutside={(e) => {
           if (!closeOnOverlayClick) {
             e.preventDefault();
@@ -51,14 +52,6 @@ export function Modal({
         }}
         aria-describedby={undefined}
       >
-        {!showCloseButton && (
-          <style jsx global>{`
-            [data-radix-portal] button[data-state] {
-              display: none;
-            }
-          `}</style>
-        )}
-
         {title && (
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
