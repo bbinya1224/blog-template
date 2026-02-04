@@ -10,6 +10,10 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
+    base_branches:
+      - develop
+    labels:
+      - '!no-review'
 
   system_prompt: |
     You are a senior frontend developer mentor. Your task is to review the code based on the **[Frontend Design Guideline]** provided below.

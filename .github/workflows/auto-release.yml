@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       base_branch:
-        description: 'Base branch to analyze for changes (default: develop)'
+        description: 'Base branch to analyze (default: develop)'
         required: false
         default: 'develop'
         type: string
 
 jobs:
-  create-release:
+  create-release-pr:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -20,16 +20,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 전체 히스토리 가져오기
+          ref: ${{ github.event.inputs.base_branch || 'develop' }}
+          fetch-depth: 0
 
-      - name: Get latest release tag
-        id: get_tag
+      - name: Setup Git User
         run: |
-          # 최신 릴리즈 태그 가져오기
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Fetch origin main
+        run: git fetch origin main
+
+      - name: Determine Version
+        id: version
+        run: |
+          # Get latest tag
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
-          # 버전 증가 (v1.0.x -> v1.0.(x+1))
+          # Increment version (Patch)
           if [[ $LATEST_TAG =~ v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
             MAJOR="${BASH_REMATCH[1]}"
             MINOR="${BASH_REMATCH[2]}"
@@ -39,237 +48,174 @@ jobs:
           else
             NEW_TAG="v1.0.1"
           fi
-
+          
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
-          echo "Latest tag: $LATEST_TAG"
-          echo "New tag: $NEW_TAG"
+          echo "Current: $LATEST_TAG -> New: $NEW_TAG"
 
-      - name: Get commit messages since last release
-        id: get_commits
+      - name: Get Commits
+        id: commits
         run: |
-          BASE_BRANCH="${{ github.event.inputs.base_branch || 'develop' }}"
-          LATEST_TAG="${{ steps.get_tag.outputs.latest_tag }}"
-
-          echo "Analyzing changes from $BASE_BRANCH to main..."
-
-          # base_branch에서 main으로의 변경사항 분석
-          # main에 없고 base_branch에만 있는 커밋들
-          if git rev-parse --verify origin/$BASE_BRANCH >/dev/null 2>&1; then
-            COMMITS=$(git log origin/main..origin/$BASE_BRANCH --pretty=format:"- %s (%h)" --no-merges)
-          else
-            echo "Warning: $BASE_BRANCH branch not found, using commits since last tag"
-            if git rev-parse "$LATEST_TAG" >/dev/null 2>&1; then
-              COMMITS=$(git log $LATEST_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
-            else
-              COMMITS=$(git log -10 --pretty=format:"- %s (%h)" --no-merges)
-            fi
+          echo "Analyzing changes between origin/main and HEAD..."
+          
+          # Compare origin/main (production) vs HEAD (develop)
+          # We need to ensure origin/main is available.
+          
+          COMMITS=$(git log origin/main..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          
+          if [ -z "$COMMITS" ]; then
+            echo "No changes detected between origin/main and HEAD."
+            # Fallback for testing or if running on main after merge (not recommended flow but handling it)
+            COMMITS=$(git log -10 --pretty=format:"- %s (%h)" --no-merges)
+            echo "⚠️ Using last 10 commits as fallback."
           fi
 
-          # 여러 줄 출력을 위해 EOF 사용
           echo "commits<<EOF" >> $GITHUB_OUTPUT
           echo "$COMMITS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Generate changelog with Gemini AI
-        id: generate_changelog
+      - name: Generate Content with Gemini
+        id: gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          NEW_TAG="${{ steps.get_tag.outputs.new_tag }}"
-          COMMITS="${{ steps.get_commits.outputs.commits }}"
+          NEW_TAG="${{ steps.version.outputs.new_tag }}"
+          COMMITS="${{ steps.commits.outputs.commits }}"
+          DATE=$(date +%Y.%m.%d)
 
-          # Gemini API 프롬프트 생성
-          PROMPT="다음은 GitHub 저장소의 최근 커밋 메시지입니다:
-
+          PROMPT="다음은 변경된 커밋 내역입니다:
+          
           $COMMITS
-
-          위 커밋 내용을 분석하여 다음 형식으로 한국어 CHANGELOG를 작성해주세요:
-
-          ## [$NEW_TAG] - $(date +%Y.%m.%d)
-
+          
+          두 가지 작업을 수행해주세요. 결과는 아래 지정된 구분자(---SPLIT---)로 정확히 나누어 출력해주세요.
+          
+          1. **README 요약**: README.md의 'Release Note' 섹션에 들어갈 1~2문장의 매력적인 요약문 (한국어).
+          2. **CHANGELOG**: CHANGELOG.md에 추가할 상세 변경 내역 (Markdown).
+          
+          형식:
+          [README 요약]
+          ---SPLIT---
+          ## [$NEW_TAG] - $DATE
+          
           ### 🚀 주요 변경사항
-          (핵심 변경사항 2-3줄 요약)
+          ...
+          (나머지 섹션: ✨ 새로운 기능, 🐛 버그 수정, 🛠️ 개선사항 등)
+          "
 
-          ### ✨ 새로운 기능
-          (추가된 기능들)
-
-          ### 🐛 버그 수정
-          (수정된 버그들)
-
-          ### 🛠️ 개선사항
-          (개선된 부분들)
-
-          ### 📦 변경된 파일
-          (주요 변경 파일들)
-
-          해당 섹션에 내용이 없으면 생략하고, 마크다운 형식으로 깔끔하게 작성해주세요."
-
-          # Fallback CHANGELOG 함수 (AI 실패 시 사용)
-          generate_fallback_changelog() {
-            echo "## [$NEW_TAG] - $(date +%Y.%m.%d)"
-            echo ""
-            echo "### 📝 변경사항"
-            echo ""
-            echo "$COMMITS"
-          }
-
-          # 재시도 로직 (최대 3회, exponential backoff)
-          MAX_RETRIES=3
-          RETRY_COUNT=0
-          SUCCESS=false
-
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SUCCESS" = "false" ]; do
-            echo "Gemini API 호출 시도 $((RETRY_COUNT + 1))/$MAX_RETRIES..."
-
-            # Gemini API 호출 (더 안정적인 gemini-1.5-flash 모델 사용)
+          # Simple retry logic
+          for i in {1..3}; do
             RESPONSE=$(curl -s -X POST \
               "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$GEMINI_API_KEY" \
               -H "Content-Type: application/json" \
               -d "{
-                \"contents\": [{
-                  \"parts\": [{
-                    \"text\": $(echo "$PROMPT" | jq -Rs .)
-                  }]
-                }],
-                \"generationConfig\": {
-                  \"temperature\": 0.3,
-                  \"topK\": 40,
-                  \"topP\": 0.95,
-                  \"maxOutputTokens\": 2048
-                }
+                \"contents\": [{ \"parts\": [{ \"text\": $(echo \"$PROMPT\" | jq -Rs . ) }] }],
+                \"generationConfig\": { \"temperature\": 0.3 }
               }")
-
-            # 에러 체크
-            ERROR_CODE=$(echo "$RESPONSE" | jq -r '.error.code // empty')
-
-            if [ -n "$ERROR_CODE" ]; then
-              echo "Gemini API 에러 발생: $ERROR_CODE"
-              ERROR_MESSAGE=$(echo "$RESPONSE" | jq -r '.error.message')
-              echo "에러 메시지: $ERROR_MESSAGE"
-
-              # 429 (Rate Limit) 또는 503 (Service Unavailable) 에러는 재시도
-              if [ "$ERROR_CODE" = "429" ] || [ "$ERROR_CODE" = "503" ]; then
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-                  WAIT_TIME=$((2 ** RETRY_COUNT))  # Exponential backoff: 2, 4, 8초
-                  echo "⏳ ${WAIT_TIME}초 후 재시도합니다..."
-                  sleep $WAIT_TIME
-                fi
-              else
-                # 다른 에러는 즉시 fallback
-                echo "⚠️  복구 불가능한 에러. Fallback CHANGELOG 사용"
-                break
-              fi
-            else
-              # 성공: 응답 파싱
-              CHANGELOG=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text // empty')
-
-              if [ -n "$CHANGELOG" ] && [ "$CHANGELOG" != "null" ]; then
-                echo "✅ Gemini AI로 CHANGELOG 생성 성공"
-                SUCCESS=true
-              else
-                echo "⚠️  응답은 받았으나 내용이 비어있음"
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-                  sleep 2
-                fi
-              fi
+            
+            TEXT=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text // empty')
+            
+            if [ -n "$TEXT" ]; then
+              break
             fi
+            sleep 2
           done
 
-          # 최종 실패 시 Fallback 사용
-          if [ "$SUCCESS" = "false" ]; then
-            echo "❌ Gemini API 호출 실패. Fallback CHANGELOG 생성 중..."
-            CHANGELOG=$(generate_fallback_changelog)
+          if [ -z "$TEXT" ]; then
+            echo "Failed to generate content."
+            exit 1
           fi
 
-          # 여러 줄 출력을 위해 EOF 사용
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          # Parse output using awk/sed based on split
+          README_SUMMARY=$(echo "$TEXT" | awk -F'---SPLIT---' '{print $1}' | sed 's/^[ 	]*//;s/[ 	]*$//')
+          CHANGELOG_CONTENT=$(echo "$TEXT" | awk -F'---SPLIT---' '{print $2}' | sed 's/^[ 	]*//')
+
+          # Output multiline strings
+          echo "readme_summary<<EOF" >> $GITHUB_OUTPUT
+          echo "$README_SUMMARY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Update CHANGELOG.md
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update Files
         run: |
-          CHANGELOG="${{ steps.generate_changelog.outputs.changelog }}"
+          NEW_TAG="${{ steps.version.outputs.new_tag }}"
+          CHANGELOG="${{ steps.gemini.outputs.changelog }}"
+          SUMMARY="${{ steps.gemini.outputs.readme_summary }}"
+          DATE=$(date +%Y.%m.%d)
 
-          # CHANGELOG.md 백업
+          # 1. Update package.json version
+          npm version $NEW_TAG --no-git-tag-version --allow-same-version
+
+          # 2. Update CHANGELOG.md
+          if [ ! -f CHANGELOG.md ]; then touch CHANGELOG.md; fi
           cp CHANGELOG.md CHANGELOG.md.bak
-
-          # 새 내용을 임시 파일에 작성
+          
           echo "# Changelog" > CHANGELOG.new.md
-          echo "" >> CHANGELOG.new.md
-          echo "All notable changes to this project will be documented in this file." >> CHANGELOG.new.md
           echo "" >> CHANGELOG.new.md
           echo "$CHANGELOG" >> CHANGELOG.new.md
           echo "" >> CHANGELOG.new.md
-          echo "---" >> CHANGELOG.new.md
-          echo "" >> CHANGELOG.new.md
-
-          # 기존 CHANGELOG에서 헤더 이후 내용 추가 (첫 ## 부터)
-          sed -n '/^## \[/,$p' CHANGELOG.md >> CHANGELOG.new.md
-
-          # 새 파일로 교체
+          # Append old content skipping header if exists
+          tail -n +2 CHANGELOG.md >> CHANGELOG.new.md || cat CHANGELOG.md >> CHANGELOG.new.md
           mv CHANGELOG.new.md CHANGELOG.md
 
-          echo "CHANGELOG.md updated successfully"
-
-      - name: Create branch and commit CHANGELOG
-        run: |
-          NEW_TAG="${{ steps.get_tag.outputs.new_tag }}"
-          BRANCH_NAME="chore/ai-changelog-${NEW_TAG}"
+          # 3. Update README.md Release Note
+          # Use perl for multiline replace capability or just simple sed if structure is known.
+          # We look for "## 📢 Release Note" block.
           
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          # Construct new Release Note block
+          NEW_NOTE="## 📢 Release Note ($DATE)\n\n> $SUMMARY\n>\n> 👉 [자세한 변경사항 보기 (CHANGELOG)](./CHANGELOG.md)"
+          
+          # Replace the section. Assuming the section ends at the next "## " or EOF.
+          # Here we blindly replace the previous Release Note block.
+          # Strategy: Read file, identify line numbers, replace range.
+          
+          # Simpler approach: Use a temporary placeholder in logic?
+          # Let's try to find the "## 📢 Release Note" line and replace up to the next "## "
+          
+          # Using perl to replace the block with ~ delimiter to avoid slash conflicts
+          perl -0777 -i -pe "s~## 📢 Release Note.*?(?=\n## )~$NEW_NOTE~s" README.md || echo "README update failed pattern match"
 
-          # 새 브랜치 생성 및 체크아웃
+          # If perl didn't match (e.g. it's the last section), try matching to end of file?
+          # Or just append if not found? No, user has it in middle.
+          
+      - name: Create Branch and Push
+        id: create_branch
+        run: |
+          NEW_TAG="${{ steps.version.outputs.new_tag }}"
+          BRANCH_NAME="chore/release-$NEW_TAG"
+          
           git checkout -b "$BRANCH_NAME"
           
-          git add CHANGELOG.md
-          git commit -m "chore: update CHANGELOG for ${NEW_TAG}" || echo "No changes to commit"
+          git add package.json CHANGELOG.md README.md
+          git commit -m "chore: release $NEW_TAG"
           
-          # 새 브랜치에 푸시
-          git push origin "$BRANCH_NAME"
+          git push origin "$BRANCH_NAME" --force
+          
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          NEW_TAG="${{ steps.get_tag.outputs.new_tag }}"
-          BRANCH_NAME="chore/ai-changelog-${NEW_TAG}"
-          CHANGELOG="${{ steps.generate_changelog.outputs.changelog }}"
+          NEW_TAG="${{ steps.version.outputs.new_tag }}"
+          BRANCH_NAME="${{ steps.create_branch.outputs.branch_name }}"
+          CHANGELOG="${{ steps.gemini.outputs.changelog }}"
           
-          # PR 본문 생성
-          PR_BODY=$(cat <<EOF
-          ## 자동 생성된 CHANGELOG 업데이트
-          
-          이 PR은 GitHub Actions에 의해 자동으로 생성되었습니다.
-          
-          ### 변경 내용
-          $CHANGELOG
-          
-          릴리즈 버전: \`${NEW_TAG}\`
-          EOF
-          )
-          
-          # PR 생성
           gh pr create \
             --base main \
             --head "$BRANCH_NAME" \
-            --title "chore: update CHANGELOG for ${NEW_TAG}" \
-            --body "$PR_BODY" \
-            || echo "PR already exists or creation failed"
+            --title "chore: release $NEW_TAG" \
+            --body "## 🚀 Release $NEW_TAG
+            
+            이 PR은 $NEW_TAG 릴리즈를 위해 자동으로 생성되었습니다.
+            develop 브랜치의 변경사항과 자동 생성된 CHANGELOG를 포함합니다.
+            
+            ### 📝 변경 내역
+            $CHANGELOG"
 
-      - name: Create GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release (After Merge)
         run: |
-          NEW_TAG="${{ steps.get_tag.outputs.new_tag }}"
-          CHANGELOG="${{ steps.generate_changelog.outputs.changelog }}"
-
-          # Release 생성
-          gh release create "$NEW_TAG" \
-            --title "$NEW_TAG" \
-            --notes "$CHANGELOG" \
-            --latest
-
-          echo "Release $NEW_TAG created successfully"
+          echo "⚠️ Release creation should happen AFTER this PR is merged."
+          echo "You can set up another workflow to trigger on push to main (tags) or manually create release."
+          # We don't create the release tag here because the code isn't in main yet.

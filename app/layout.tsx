@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Noto_Sans_KR } from 'next/font/google';
 import '@/app/style/globals.css';
-import { SessionProvider } from '@/shared/providers/SessionProvider';
-import { TRPCProvider } from '@/shared/api/trpc';
+import { Providers } from '@/app/providers';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
@@ -45,9 +44,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${notoSans.variable} bg-slate-50 text-gray-900 antialiased`}
       >
-        <SessionProvider>
-          <TRPCProvider>{children}</TRPCProvider>
-        </SessionProvider>
+        <Providers>{children}</Providers>
         <Analytics />
         <SpeedInsights />
       </body>
