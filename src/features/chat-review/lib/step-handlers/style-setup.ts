@@ -1,0 +1,311 @@
+/**
+ * Style Setup Step Handler
+ * 스타일 설정 단계 처리 (3가지 방법)
+ */
+
+import type {
+  ConversationState,
+  StyleSetupMethod,
+} from '../../model/types';
+import type { StyleProfile } from '@/entities/style-profile';
+import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
+import type { StepHandlerResult } from './onboarding';
+
+export interface StyleSetupContext {
+  method?: StyleSetupMethod;
+  blogUrl?: string;
+  pastedTexts?: string[];
+  questionnaireStep?: number;
+}
+
+export interface StyleSetupHandlerResult extends StepHandlerResult {
+  asyncAction?: () => Promise<{ styleProfile?: StyleProfile; error?: string }>;
+}
+
+export function handleStyleSetup(
+  userInput: string,
+  state: ConversationState,
+  context: StyleSetupContext = {}
+): StyleSetupHandlerResult {
+  // 방법 선택
+  if (!context.method) {
+    return handleMethodSelection(userInput, state);
+  }
+
+  // 선택된 방법에 따른 처리
+  switch (context.method) {
+    case 'blog-url':
+      return handleBlogUrlInput(userInput, state);
+    case 'paste-text':
+      return handlePasteText(userInput, state, context);
+    case 'questionnaire':
+      return handleQuestionnaire(userInput, state, context);
+    default:
+      return handleMethodSelection(userInput, state);
+  }
+}
+
+function handleMethodSelection(
+  userInput: string,
+  state: ConversationState
+): StyleSetupHandlerResult {
+  const methodId = userInput.toLowerCase();
+
+  if (
+    methodId === 'blog-url' ||
+    methodId === '1' ||
+    userInput.includes('블로그') ||
+    userInput.includes('주소')
+  ) {
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content: MESSAGES.styleSetup.urlInput,
+        },
+      ],
+      actions: [],
+    };
+  }
+
+  if (
+    methodId === 'paste-text' ||
+    methodId === '2' ||
+    userInput.includes('첨부') ||
+    userInput.includes('붙여')
+  ) {
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content: MESSAGES.styleSetup.pastePrompt,
+        },
+      ],
+      actions: [],
+    };
+  }
+
+  if (
+    methodId === 'questionnaire' ||
+    methodId === '3' ||
+    userInput.includes('직접') ||
+    userInput.includes('설정')
+  ) {
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content: MESSAGES.styleSetup.questionnaireStart,
+        },
+        {
+          role: 'assistant',
+          type: 'choice',
+          content: MESSAGES.styleSetup.questionTone,
+          options: CHOICE_OPTIONS.toneOptions,
+        },
+      ],
+      actions: [],
+    };
+  }
+
+  // 기본: 선택지 다시 표시
+  return {
+    messages: [
+      {
+        role: 'assistant',
+        type: 'choice',
+        content: MESSAGES.styleCheck.noStyle(state.userName || ''),
+        options: CHOICE_OPTIONS.styleSetupMethod,
+      },
+    ],
+    actions: [],
+  };
+}
+
+function handleBlogUrlInput(
+  userInput: string,
+  _state: ConversationState
+): StyleSetupHandlerResult {
+  // URL 검증
+  const urlPattern =
+    /https?:\/\/(blog\.naver\.com|m\.blog\.naver\.com)\/[a-zA-Z0-9_-]+/;
+
+  if (!urlPattern.test(userInput)) {
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content:
+            '올바른 네이버 블로그 URL을 입력해주세요! 📝\n예: https://blog.naver.com/블로그아이디',
+        },
+      ],
+      actions: [],
+    };
+  }
+
+  // URL이 유효하면 분석 시작 메시지
+  return {
+    messages: [
+      {
+        role: 'assistant',
+        type: 'loading',
+        content: MESSAGES.styleSetup.urlAnalyzing,
+      },
+    ],
+    actions: [],
+    // 실제 분석은 상위에서 처리 (async)
+    asyncAction: async () => {
+      // This will be called by the chat page to perform actual crawling
+      return { styleProfile: undefined };
+    },
+  };
+}
+
+function handlePasteText(
+  userInput: string,
+  _state: ConversationState,
+  context: StyleSetupContext
+): StyleSetupHandlerResult {
+  const texts = context.pastedTexts || [];
+  texts.push(userInput);
+
+  if (texts.length < 5) {
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content: `좋아요! ${texts.length}개 받았어요.\n${5 - texts.length}개 더 붙여넣어 주세요! 📋`,
+        },
+      ],
+      actions: [],
+    };
+  }
+
+  // 5개 이상이면 분석 시작
+  return {
+    messages: [
+      {
+        role: 'assistant',
+        type: 'loading',
+        content: MESSAGES.styleSetup.pasteReceived,
+      },
+    ],
+    actions: [],
+  };
+}
+
+function handleQuestionnaire(
+  userInput: string,
+  _state: ConversationState,
+  context: StyleSetupContext
+): StyleSetupHandlerResult {
+  const step = context.questionnaireStep || 0;
+
+  const questions = [
+    {
+      message: MESSAGES.styleSetup.questionEmoji,
+      options: CHOICE_OPTIONS.emojiOptions,
+    },
+    {
+      message: MESSAGES.styleSetup.questionMood,
+      options: CHOICE_OPTIONS.moodOptions,
+    },
+    {
+      message: MESSAGES.styleSetup.questionLength,
+      options: CHOICE_OPTIONS.lengthOptions,
+    },
+  ];
+
+  if (step < questions.length) {
+    const nextQuestion = questions[step];
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'choice',
+          content: nextQuestion.message,
+          options: nextQuestion.options,
+        },
+      ],
+      actions: [],
+    };
+  }
+
+  // 모든 질문 완료 - 스타일 생성
+  return {
+    messages: [
+      {
+        role: 'assistant',
+        type: 'text',
+        content: MESSAGES.styleCheck.styleUpdated,
+      },
+    ],
+    actions: [{ type: 'GO_TO_STEP', payload: 'topic-select' }],
+    nextStep: 'topic-select',
+  };
+}
+
+export function handleStyleCheck(
+  userInput: string,
+  state: ConversationState
+): StepHandlerResult {
+  const lowered = userInput.toLowerCase();
+
+  // 기존 스타일이 있고 확인된 경우
+  if (state.hasExistingStyle) {
+    if (lowered === 'yes' || lowered.includes('좋아') || lowered.includes('네')) {
+      return {
+        messages: [],
+        actions: [{ type: 'GO_TO_STEP', payload: 'topic-select' }],
+        nextStep: 'topic-select',
+      };
+    }
+    if (lowered === 'no' || lowered.includes('수정') || lowered.includes('아니')) {
+      return {
+        messages: [
+          {
+            role: 'assistant',
+            type: 'text',
+            content: MESSAGES.styleCheck.styleModifyRequest,
+          },
+        ],
+        actions: [],
+      };
+    }
+  }
+
+  // 스타일 수정 요청 처리
+  if (state.styleProfile && userInput.length > 5) {
+    // 수정 요청으로 간주하고 처리
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content: `알겠어요! "${userInput}" 스타일로 수정할게요! ✨`,
+        },
+      ],
+      actions: [{ type: 'GO_TO_STEP', payload: 'topic-select' }],
+      nextStep: 'topic-select',
+    };
+  }
+
+  // 기존 스타일 없음 - 설정 방법 선택
+  return {
+    messages: [
+      {
+        role: 'assistant',
+        type: 'choice',
+        content: MESSAGES.styleCheck.noStyle(state.userName || ''),
+        options: CHOICE_OPTIONS.styleSetupMethod,
+      },
+    ],
+    actions: [{ type: 'GO_TO_STEP', payload: 'style-setup' }],
+    nextStep: 'style-setup',
+  };
+}
