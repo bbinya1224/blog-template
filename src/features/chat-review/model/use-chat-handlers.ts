@@ -1,0 +1,127 @@
+'use client';
+
+import { useCallback } from 'react';
+import { useAtom, useAtomValue } from 'jotai';
+import { conversationStateAtom, isProcessingAtom } from './atoms';
+import { useConversationActions } from './use-conversation-actions';
+import { useChatMessagesJotai } from './use-chat-messages-jotai';
+import { useMessageProcessor } from './use-message-processor';
+import { useStreamMessage } from './use-stream-message';
+import { useBlogAnalysis } from './use-blog-analysis';
+import { usePlaceSearch } from './use-place-search';
+import { useReviewGeneration } from './use-review-generation';
+import { handlePlaceConfirmed } from '../lib/step-handlers';
+import { MESSAGES } from '../constants/messages';
+import type { StyleSetupContext } from '../lib/step-handlers';
+import type { PlaceCardMetadata, ChatMessage } from '@/entities/chat-message';
+
+interface UseChatHandlersProps {
+  userEmail: string;
+  styleSetupContext: StyleSetupContext;
+  setStyleSetupContext: React.Dispatch<React.SetStateAction<StyleSetupContext>>;
+}
+
+export function useChatHandlers({
+  userEmail,
+  styleSetupContext,
+  setStyleSetupContext,
+}: UseChatHandlersProps) {
+  const state = useAtomValue(conversationStateAtom);
+  const [isProcessing, setIsProcessing] = useAtom(isProcessingAtom);
+  const { isStreaming } = useStreamMessage();
+  const { dispatchActions } = useConversationActions();
+  const { messages, addMessage, addUserMessage, addAssistantMessage } = useChatMessagesJotai();
+
+  const { analyzeBlogUrl } = useBlogAnalysis(state.userName);
+  const { searchPlace } = usePlaceSearch();
+  const { editReview } = useReviewGeneration({ userEmail });
+
+  const { processMessage } = useMessageProcessor({
+    state,
+    styleSetupContext,
+    setStyleSetupContext,
+    addMessage,
+    onBlogUrlAnalysis: analyzeBlogUrl,
+    onPlaceSearch: searchPlace,
+    onReviewEditRequest: editReview,
+  });
+
+  // Main message handler - simplified and declarative
+  const handleSendMessage = useCallback(
+    async (content: string) => {
+      if (isProcessing || isStreaming) return;
+
+      setIsProcessing(true);
+      addUserMessage(content);
+
+      try {
+        const result = await processMessage(content);
+        if (result) {
+          dispatchActions(result.actions);
+        }
+      } catch (error) {
+        console.error('Message handling error:', error);
+        addAssistantMessage(MESSAGES.error.unknown, 'text');
+      }
+
+      setIsProcessing(false);
+    },
+    [isProcessing, isStreaming, setIsProcessing, addUserMessage, processMessage, dispatchActions, addAssistantMessage]
+  );
+
+  // Choice selection handler
+  const handleChoiceSelect = useCallback(
+    (messageId: string, optionId: string) => {
+      const message = messages.find((m) => m.id === messageId);
+      const option = message?.options?.find((o) => o.id === optionId);
+      if (option) {
+        handleSendMessage(option.label);
+      }
+    },
+    [messages, handleSendMessage]
+  );
+
+  // Place confirmation handler
+  const handlePlaceConfirmation = useCallback(
+    (messageId: string, confirmed: boolean) => {
+      const message = messages.find((m) => m.id === messageId);
+      if (!message?.metadata) return;
+
+      const metadata = message.metadata as unknown as PlaceCardMetadata;
+      const result = handlePlaceConfirmed(
+        confirmed,
+        metadata.name,
+        metadata.roadAddress || metadata.address,
+        state
+      );
+
+      result.messages.forEach((msg) => {
+        addMessage({
+          ...msg,
+          id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          timestamp: new Date(),
+        } as ChatMessage);
+      });
+
+      dispatchActions(result.actions);
+    },
+    [messages, state, addMessage, dispatchActions]
+  );
+
+  // Review action handler
+  const handleReviewAction = useCallback(
+    (_messageId: string, action: 'complete' | 'edit') => {
+      handleSendMessage(action === 'complete' ? '완벽해요!' : '수정해주세요');
+    },
+    [handleSendMessage]
+  );
+
+  return {
+    handleSendMessage,
+    handleChoiceSelect,
+    handlePlaceConfirmation,
+    handleReviewAction,
+    isProcessing,
+    isStreaming,
+  };
+}
