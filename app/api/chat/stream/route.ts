@@ -177,6 +177,13 @@ export async function POST(req: NextRequest) {
     const body: StreamRequestBody = await req.json();
     const { message, context, history = [] } = body;
 
+    if (!message?.trim() || !context?.step) {
+      return new Response(
+        JSON.stringify({ error: '메시지와 대화 단계는 필수입니다.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // 개발 환경에서 Mock 사용
     if (shouldUseMock()) {
       console.log(`[Chat Stream] 🎭 MOCK MODE - step: ${context.step}`);

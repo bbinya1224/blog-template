@@ -15,6 +15,7 @@ export {
   PlaceCard,
   StyleSummaryCard,
   ReviewPreview,
+  WelcomeScreen,
 } from './ui';
 
 // Model (Hooks & Types)

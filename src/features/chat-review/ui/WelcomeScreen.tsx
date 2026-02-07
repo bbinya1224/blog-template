@@ -26,7 +26,7 @@ export function WelcomeScreen({
       )}
     >
       {/* Scrollable content area */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 flex flex-col overflow-y-auto">
         {/* Recent reviews - Card Grid (if exists) */}
         {recentReviews.length > 0 && (
           <div className="px-6 pt-6 pb-4">
@@ -99,7 +99,7 @@ export function WelcomeScreen({
             </span>
           </button>
           <p className="text-xs text-stone-300 text-center mt-2">
-            Enter로 시작
+            클릭하여 시작
           </p>
         </div>
       </div>
