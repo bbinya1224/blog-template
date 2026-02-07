@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/shared/lib/utils';
+import { cn, formatReviewDate } from '@/shared/lib/utils';
 import type { Review } from '@/entities/review';
 import Link from 'next/link';
 
@@ -59,10 +59,7 @@ export function WelcomeScreen({
                     {review.storeName || '맛집 리뷰'}
                   </h3>
                   <p className="text-xs text-stone-400">
-                    {new Date(review.date).toLocaleDateString('ko-KR', {
-                      month: 'short',
-                      day: 'numeric',
-                    })}
+                    {formatReviewDate(review.date)}
                   </p>
                 </Link>
               ))}

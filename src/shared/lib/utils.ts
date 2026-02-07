@@ -47,6 +47,19 @@ export const formatKoreanDate = (dateString: string): string => {
   }
 };
 
+export const formatReviewDate = (
+  dateString: string,
+  options?: Intl.DateTimeFormatOptions
+): string => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
+  return date.toLocaleDateString(
+    'ko-KR',
+    options ?? { month: 'short', day: 'numeric' }
+  );
+};
+
 export const sanitizeFileName = (name: string): string => {
   return name
     .replace(FILENAME_UNSAFE_CHARS, '-')

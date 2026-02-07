@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/shared/lib/utils';
+import { cn, formatReviewDate } from '@/shared/lib/utils';
 import Link from 'next/link';
 import type { ChatMessage } from '@/entities/chat-message';
 import type { ConversationStep } from '../model/types';
@@ -213,10 +213,7 @@ export function ChatContainer({
                   {review.storeName || '맛집 리뷰'}
                 </h3>
                 <p className="text-xs text-stone-400">
-                  {new Date(review.date).toLocaleDateString('ko-KR', {
-                    month: 'short',
-                    day: 'numeric',
-                  })}
+                  {formatReviewDate(review.date)}
                 </p>
               </Link>
             ))}

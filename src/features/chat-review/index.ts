@@ -21,7 +21,6 @@ export {
 export {
   useChatMessages,
   useStreamMessage,
-  useConversation,
   type ConversationState,
   type ConversationStep,
   type ConversationAction,
@@ -31,7 +30,6 @@ export {
   stepTransitions,
   type UseChatMessagesReturn,
   type UseStreamMessageReturn,
-  type UseConversationReturn,
 } from './model';
 
 // API
