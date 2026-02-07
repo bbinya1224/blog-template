@@ -50,8 +50,8 @@ function handleDateInput(
   userInput: string,
   _state: ConversationState
 ): InfoGatheringResult {
-  const dateValue = extractDateInfo(userInput);
-  const dateLabel = getDateLabel(userInput) || dateValue;
+  const dateLabel = getDateLabel(userInput) || userInput;
+  const dateValue = extractDateInfo(dateLabel);
 
   return {
     messages: [
@@ -73,8 +73,8 @@ function handleCompanionInput(
   userInput: string,
   _state: ConversationState
 ): InfoGatheringResult {
-  const companionValue = extractCompanionInfo(userInput);
-  const companionLabel = getCompanionLabel(userInput) || companionValue;
+  const companionLabel = getCompanionLabel(userInput) || userInput;
+  const companionValue = extractCompanionInfo(companionLabel);
 
   return {
     messages: [

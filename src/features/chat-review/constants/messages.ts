@@ -9,6 +9,18 @@ import type { ChoiceOption } from '@/entities/chat-message';
  * 쁠리 캐릭터 메시지 템플릿
  */
 export const MESSAGES = {
+  // 카테고리 선택 시작 메시지
+  categoryStart: {
+    restaurant: `좋아요! 어떤 맛집을 기록해볼까요? 🍽️
+가게 이름이나 위치를 알려주시면 함께 리뷰를 작성해드릴게요.`,
+    beauty: `뷰티 리뷰를 작성해볼까요? 💄
+
+어떤 제품이나 서비스를 기록하고 싶으세요?`,
+    book: `어떤 책을 기록해볼까요? 📚
+
+책 제목이나 저자를 알려주세요.`,
+  },
+
   // 온보딩
   onboarding: {
     welcome: `안녕하세요!
@@ -41,7 +53,8 @@ export const MESSAGES = {
     urlAnalyzed: (name: string) =>
       `${name}님 글 스타일 파악했어요!\n이 스타일로 글을 써드릴까요?`,
 
-    pastePrompt: '글을 붙여넣어 주세요.\n5개 이상의 글이 있으면 더 정확하게 분석할 수 있어요.',
+    pastePrompt:
+      '글을 붙여넣어 주세요.\n5개 이상의 글이 있으면 더 정확하게 분석할 수 있어요.',
 
     pasteReceived: '글 잘 받았어요! 분석 중...',
 
@@ -70,7 +83,8 @@ export const MESSAGES = {
 
     selected: (topic: string) => `${topic} 리뷰군요! 좋아요!`,
 
-    comingSoon: '아직 준비 중이에요.\n조금만 기다려주세요! 맛집 리뷰부터 시작해볼까요?',
+    comingSoon:
+      '아직 준비 중이에요.\n조금만 기다려주세요! 맛집 리뷰부터 시작해볼까요?',
   },
 
   // 정보 수집 - 맛집
@@ -86,7 +100,8 @@ export const MESSAGES = {
 
       placeConfirm: '혹시 이 매장인가요?',
 
-      placeNotFound: '검색 결과가 없네요.\n매장 이름과 위치를 더 자세히 알려주실 수 있나요?',
+      placeNotFound:
+        '검색 결과가 없네요.\n매장 이름과 위치를 더 자세히 알려주실 수 있나요?',
 
       placeConfirmed: (placeName: string) =>
         `${placeName}! 여기 요즘 핫하잖아요!`,
@@ -289,7 +304,7 @@ export const CHOICE_OPTIONS: Record<string, ChoiceOption[]> = {
  * 동행인 ID → 표시 텍스트 변환
  */
 export function getCompanionLabel(id: string): string {
-  const option = CHOICE_OPTIONS.companion.find(o => o.id === id);
+  const option = CHOICE_OPTIONS.companion.find((o) => o.id === id);
   return option?.label || id;
 }
 
@@ -297,6 +312,6 @@ export function getCompanionLabel(id: string): string {
  * 날짜 ID → 표시 텍스트 변환
  */
 export function getDateLabel(id: string): string {
-  const option = CHOICE_OPTIONS.visitDate.find(o => o.id === id);
+  const option = CHOICE_OPTIONS.visitDate.find((o) => o.id === id);
   return option?.label || id;
 }

@@ -1,5 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 import type { StyleProfile } from '@/entities/style-profile';
 import { getReviewEditPrompt } from '@/shared/api/prompt-service';
 import {
@@ -19,10 +21,23 @@ interface EditReviewInput {
 
 export async function POST(req: NextRequest) {
   try {
-    // Note: Authentication should be handled by the caller (ChatPageContent)
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new Response(
+        JSON.stringify({ error: '인증이 필요합니다.' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
     const { originalReview, editRequest, styleProfile }: EditReviewInput =
       await req.json();
+
+    if (!originalReview?.trim() || !editRequest?.trim()) {
+      return new Response(
+        JSON.stringify({ error: '원본 리뷰와 수정 요청은 필수입니다.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
     // 개발 환경에서 Mock 사용
     if (shouldUseMock()) {

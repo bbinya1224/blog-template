@@ -1,5 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 import {
   shouldUseMock,
   generateMockStream,
@@ -164,8 +166,23 @@ function selectModel(step: string): string {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new Response(
+        JSON.stringify({ error: '인증이 필요합니다.' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const body: StreamRequestBody = await req.json();
     const { message, context, history = [] } = body;
+
+    if (!message?.trim() || !context?.step) {
+      return new Response(
+        JSON.stringify({ error: '메시지와 대화 단계는 필수입니다.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
     // 개발 환경에서 Mock 사용
     if (shouldUseMock()) {

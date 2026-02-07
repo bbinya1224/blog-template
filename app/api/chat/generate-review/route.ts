@@ -1,5 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import type { ReviewPayload } from '@/shared/types/review';
 import type { StyleProfile } from '@/entities/style-profile';
@@ -44,8 +46,13 @@ const getRandomWritingSamples = async (
 
 export async function POST(req: NextRequest) {
   try {
-    // Note: Using supabaseAdmin for server-side operations
-    // Authentication should be handled by the caller (ChatPageContent)
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new Response(
+        JSON.stringify({ error: '인증이 필요합니다.' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
     const { payload, styleProfile, userEmail }: GenerateReviewInput =
       await req.json();
