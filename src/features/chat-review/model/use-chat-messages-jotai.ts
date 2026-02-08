@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import { messagesAtom } from './atoms';
 import type { ChatMessage, MessageType, ChoiceOption } from '@/entities/chat-message';
 

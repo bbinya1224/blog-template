@@ -32,7 +32,7 @@ export const PromptEditor = ({ prompt, onSave, onClose, loading }: Props) => {
             className="text-gray-400 hover:text-gray-600"
           >
             <svg
-              className="h-6 w-6"
+              className="size-6 "
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -59,7 +59,7 @@ export const PromptEditor = ({ prompt, onSave, onClose, loading }: Props) => {
               <div>
                 <span className="text-gray-500">Role:</span>{' '}
                 <span
-                  className={`rounded px-1.5 py-0.5 text-xs ${
+                  className={`rounded-sm px-1.5 py-0.5 text-xs ${
                     prompt.role === 'system'
                       ? 'bg-purple-100 text-purple-700'
                       : 'bg-blue-100 text-blue-700'
@@ -99,7 +99,7 @@ export const PromptEditor = ({ prompt, onSave, onClose, loading }: Props) => {
                   type="checkbox"
                   checked={isActive}
                   onChange={(e) => setIsActive(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="size-4  rounded-sm border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-700">활성화</span>
               </label>

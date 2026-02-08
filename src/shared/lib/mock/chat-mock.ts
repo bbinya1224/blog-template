@@ -1,16 +1,8 @@
-/**
- * Chat Mock Responses
- * 개발 환경에서 API 비용 없이 UI/UX 테스트를 위한 가짜 응답
- */
-
 export interface MockResponse {
   content: string;
   delay?: number; // 토큰당 딜레이 (ms)
 }
 
-/**
- * 단계별 Mock 응답
- */
 export const MOCK_RESPONSES: Record<string, MockResponse[]> = {
   onboarding: [
     {
@@ -132,9 +124,6 @@ export const MOCK_RESPONSES: Record<string, MockResponse[]> = {
   ],
 };
 
-/**
- * Mock 스트리밍 응답 생성
- */
 export async function* generateMockStream(
   step: string,
   responseIndex: number = 0
@@ -152,9 +141,6 @@ export async function* generateMockStream(
   }
 }
 
-/**
- * Mock 리뷰 생성 (긴 응답)
- */
 export async function* generateMockReview(): AsyncGenerator<string> {
   const content = `어제 친구와 함께 요즘 핫하다는 맛집에 다녀왔어요! 🍽️
 
@@ -180,12 +166,9 @@ export async function* generateMockReview(): AsyncGenerator<string> {
   }
 }
 
-/**
- * Mock 리뷰 수정 응답
- */
 export async function* generateMockEditReview(
   originalReview: string,
-  editRequest: string
+  _editRequest: string
 ): AsyncGenerator<string> {
   // 간단한 수정 시뮬레이션 - 가격 정보 추가 예시
   const content = `${originalReview}
@@ -204,9 +187,6 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/**
- * 개발 환경 체크
- */
 export function shouldUseMock(): boolean {
   return (
     process.env.NODE_ENV === 'development' &&

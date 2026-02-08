@@ -1,8 +1,3 @@
-/**
- * 인증 미들웨어
- * 세션 확인 및 사용자 정보 주입
- */
-
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import { ApiResponse } from '../response';
@@ -21,15 +16,6 @@ type AuthHandler<TContext = unknown> = (
   context?: TContext
 ) => Promise<Response>;
 
-/**
- * 인증이 필요한 핸들러를 감싸는 미들웨어
- *
- * @example
- * const handler = withAuth(async (request) => {
- *   const { email } = request.user;
- *   // ...
- * });
- */
 export const withAuth = <TContext = unknown>(
   handler: AuthHandler<TContext>
 ) => {
@@ -41,7 +27,6 @@ export const withAuth = <TContext = unknown>(
         return ApiResponse.unauthorized();
       }
 
-      // request에 user 정보 주입
       const authenticatedRequest = Object.assign(request, {
         user: {
           email: session.user.email,

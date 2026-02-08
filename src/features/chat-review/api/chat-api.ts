@@ -1,8 +1,3 @@
-/**
- * Chat API
- * SSE 스트리밍 API 호출
- */
-
 import type { ConversationState } from '../model/types';
 
 export interface StreamMessageInput {
@@ -22,9 +17,6 @@ export interface StreamCallbacks {
   onError: (error: Error) => void;
 }
 
-/**
- * SSE 스트리밍으로 메시지 전송
- */
 export async function streamChatMessage(
   input: StreamMessageInput,
   callbacks: StreamCallbacks
@@ -118,9 +110,6 @@ export async function streamChatMessage(
   }
 }
 
-/**
- * 대화 상태로부터 API 컨텍스트 생성
- */
 export function buildContextFromState(
   state: ConversationState
 ): StreamMessageInput['context'] {

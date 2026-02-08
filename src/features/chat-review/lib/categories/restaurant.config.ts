@@ -1,15 +1,7 @@
-/**
- * Restaurant Category Configuration
- * 맛집 카테고리 설정
- */
-
 import type { CategoryConfig } from './types';
 import type { RestaurantPayload } from '@/shared/types/review';
 import type { RestaurantInfoStep } from '../../model/types';
 
-/**
- * 맛집 정보 수집 단계별 선택지 옵션
- */
 export const RESTAURANT_CHOICE_OPTIONS = {
   date: [
     { id: 'today', label: '오늘' },
@@ -33,9 +25,6 @@ export const RESTAURANT_CHOICE_OPTIONS = {
   ],
 };
 
-/**
- * 맛집 카테고리 설정
- */
 export const restaurantConfig: CategoryConfig<
   RestaurantPayload,
   RestaurantInfoStep

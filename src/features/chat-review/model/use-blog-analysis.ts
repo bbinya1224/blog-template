@@ -14,7 +14,7 @@ function convertBlogUrlToRss(blogUrl: string): string {
   return blogUrl;
 }
 
-function formatStyleForDisplay(profile: any): Record<string, unknown> {
+function formatStyleForDisplay(profile: Record<string, Record<string, string>>): Record<string, unknown> {
   return {
     writingStyle: profile.writing_style?.tone || '친근한 톤',
     emojiUsage: profile.writing_style?.emoji_usage || '적당히 사용',

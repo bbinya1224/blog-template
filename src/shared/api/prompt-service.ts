@@ -1,8 +1,3 @@
-/**
- * Supabase 프롬프트 서비스
- * DB에서 프롬프트를 가져오고 캐싱 관리
- */
-
 import { supabaseAdmin } from '@/shared/lib/supabase';
 
 type PromptKey =
@@ -19,7 +14,6 @@ interface CachedPrompt {
   fetchedAt: number;
 }
 
-// 메모리 캐시 (5분 TTL)
 const promptCache = new Map<string, CachedPrompt>();
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
@@ -32,22 +26,17 @@ const isCacheValid = (cached: CachedPrompt | undefined): boolean => {
   return Date.now() - cached.fetchedAt < CACHE_TTL_MS;
 };
 
-/**
- * 단일 프롬프트 조회
- */
 export const getPrompt = async (
   promptKey: PromptKey,
   category: CategorySlug = 'restaurant'
 ): Promise<string> => {
   const cacheKey = getCacheKey(category, promptKey);
 
-  // 캐시 확인
   const cached = promptCache.get(cacheKey);
   if (isCacheValid(cached)) {
     return cached!.content;
   }
 
-  // DB 조회
   const { data, error } = await supabaseAdmin
     .from('prompts')
     .select('content, prompt_categories!inner(slug)')
@@ -63,7 +52,6 @@ export const getPrompt = async (
     throw new Error(`프롬프트를 찾을 수 없습니다: ${promptKey}`);
   }
 
-  // 캐시 저장
   promptCache.set(cacheKey, {
     content: data.content,
     fetchedAt: Date.now(),
@@ -72,9 +60,6 @@ export const getPrompt = async (
   return data.content;
 };
 
-/**
- * 여러 프롬프트 일괄 조회 (성능 최적화)
- */
 export const getPrompts = async (
   promptKeys: PromptKey[],
   category: CategorySlug = 'restaurant'
@@ -82,7 +67,6 @@ export const getPrompts = async (
   const result: Partial<Record<PromptKey, string>> = {};
   const keysToFetch: PromptKey[] = [];
 
-  // 캐시된 것과 아닌 것 분리
   for (const key of promptKeys) {
     const cacheKey = getCacheKey(category, key);
     const cached = promptCache.get(cacheKey);
@@ -94,7 +78,6 @@ export const getPrompts = async (
     }
   }
 
-  // DB에서 나머지 조회
   if (keysToFetch.length > 0) {
     const { data, error } = await supabaseAdmin
       .from('prompts')
@@ -108,7 +91,6 @@ export const getPrompts = async (
       throw new Error('프롬프트를 불러오는데 실패했습니다.');
     }
 
-    // 결과 및 캐시 저장
     for (const row of data || []) {
       const key = row.prompt_key as PromptKey;
       result[key] = row.content;
@@ -123,9 +105,6 @@ export const getPrompts = async (
   return result as Record<PromptKey, string>;
 };
 
-/**
- * 스타일 분석용 프롬프트 조회
- */
 export const getStyleAnalysisPrompts = async (
   category: CategorySlug = 'restaurant'
 ) => {
@@ -140,9 +119,6 @@ export const getStyleAnalysisPrompts = async (
   };
 };
 
-/**
- * 리뷰 생성용 프롬프트 조회
- */
 export const getReviewGenerationPrompts = async (
   category: CategorySlug = 'restaurant'
 ) => {
@@ -157,18 +133,13 @@ export const getReviewGenerationPrompts = async (
   };
 };
 
-/**
- * 리뷰 수정용 프롬프트 조회
- */
 export const getReviewEditPrompt = async (
   category: CategorySlug = 'restaurant'
 ) => {
   return getPrompt('review_edit_system', category);
 };
 
-/**
- * 캐시 무효화 (Admin에서 프롬프트 수정 시 호출)
- */
+// Call this when admin updates prompts to invalidate cache
 export const invalidatePromptCache = (
   category?: CategorySlug,
   promptKey?: PromptKey
@@ -176,14 +147,12 @@ export const invalidatePromptCache = (
   if (category && promptKey) {
     promptCache.delete(getCacheKey(category, promptKey));
   } else if (category) {
-    // 특정 카테고리 전체 무효화
     for (const key of promptCache.keys()) {
       if (key.startsWith(`${category}:`)) {
         promptCache.delete(key);
       }
     }
   } else {
-    // 전체 무효화
     promptCache.clear();
   }
 };

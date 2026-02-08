@@ -1,8 +1,3 @@
-/**
- * LocalStorage를 React state처럼 사용하는 커스텀 훅
- * 타입 안전성과 SSR 호환성 보장
- */
-
 import { useCallback, useState } from 'react';
 
 type SetValue<T> = T | ((prev: T) => T);
@@ -26,7 +21,6 @@ export const useLocalStorage = <T>(
     }
   });
 
-  // 값 설정 함수 (함수형 업데이트 지원)
   const setValue = useCallback(
     (value: SetValue<T>) => {
       try {
@@ -45,7 +39,6 @@ export const useLocalStorage = <T>(
     [key, storedValue],
   );
 
-  // 값 삭제 함수
   const removeValue = useCallback(() => {
     try {
       setStoredValue(initialValue);

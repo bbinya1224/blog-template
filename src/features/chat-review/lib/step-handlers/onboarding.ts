@@ -1,8 +1,3 @@
-/**
- * Onboarding Step Handler
- * 온보딩 단계 처리
- */
-
 import type { ChatMessage } from '@/entities/chat-message';
 import type { ConversationState, ConversationAction } from '../../model/types';
 import { MESSAGES } from '../../constants/messages';

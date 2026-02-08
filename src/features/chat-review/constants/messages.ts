@@ -1,13 +1,5 @@
-/**
- * Chat Message Constants
- * 쁠리 캐릭터 메시지 템플릿 및 선택지 옵션
- */
-
 import type { ChoiceOption } from '@/entities/chat-message';
 
-/**
- * 쁠리 캐릭터 메시지 템플릿
- */
 export const MESSAGES = {
   // 카테고리 선택 시작 메시지
   categoryStart: {
@@ -171,9 +163,6 @@ export const MESSAGES = {
   },
 } as const;
 
-/**
- * 선택지 옵션
- */
 export const CHOICE_OPTIONS: Record<string, ChoiceOption[]> = {
   // 스타일 설정 방법
   styleSetupMethod: [
@@ -300,17 +289,11 @@ export const CHOICE_OPTIONS: Record<string, ChoiceOption[]> = {
   ],
 } as const;
 
-/**
- * 동행인 ID → 표시 텍스트 변환
- */
 export function getCompanionLabel(id: string): string {
   const option = CHOICE_OPTIONS.companion.find((o) => o.id === id);
   return option?.label || id;
 }
 
-/**
- * 날짜 ID → 표시 텍스트 변환
- */
 export function getDateLabel(id: string): string {
   const option = CHOICE_OPTIONS.visitDate.find((o) => o.id === id);
   return option?.label || id;

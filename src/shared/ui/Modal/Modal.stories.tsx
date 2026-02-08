@@ -215,11 +215,10 @@ export const ConfirmDialog: Story = {
   },
 };
 
-export const AllSizes: Story = {
-  render: () => {
-    const [openModal, setOpenModal] = useState<string | null>(null);
+function AllSizesRender() {
+  const [openModal, setOpenModal] = useState<string | null>(null);
 
-    return (
+  return (
       <div className='flex flex-col gap-4'>
         <Button onClick={() => setOpenModal('sm')}>Small 모달</Button>
         <Button onClick={() => setOpenModal('md')}>Medium 모달</Button>
@@ -272,6 +271,9 @@ export const AllSizes: Story = {
           <p>전체 너비 (max-w-full mx-4)</p>
         </Modal>
       </div>
-    );
-  },
+  );
+}
+
+export const AllSizes: Story = {
+  render: () => <AllSizesRender />,
 };

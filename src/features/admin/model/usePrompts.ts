@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 // ============================================
 // Types
@@ -40,14 +40,11 @@ export const usePrompts = (adminPassword: string) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const headers = {
+  const headers = useMemo(() => ({
     'Content-Type': 'application/json',
     'X-Admin-Password': adminPassword,
-  };
+  }), [adminPassword]);
 
-  /**
-   * 카테고리 목록 조회
-   */
   const fetchCategories = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/prompts/categories', { headers });
@@ -62,11 +59,8 @@ export const usePrompts = (adminPassword: string) => {
       console.error('카테고리 조회 오류:', err);
       setError(err instanceof Error ? err.message : '카테고리 조회 실패');
     }
-  }, [adminPassword]);
+  }, [headers]);
 
-  /**
-   * 프롬프트 목록 조회
-   */
   const fetchPrompts = useCallback(
     async (categorySlug?: string) => {
       setLoading(true);
@@ -92,12 +86,9 @@ export const usePrompts = (adminPassword: string) => {
         setLoading(false);
       }
     },
-    [adminPassword]
+    [headers]
   );
 
-  /**
-   * 프롬프트 수정
-   */
   const updatePrompt = useCallback(
     async (id: string, updates: { content?: string; is_active?: boolean }) => {
       setLoading(true);
@@ -130,12 +121,9 @@ export const usePrompts = (adminPassword: string) => {
         setLoading(false);
       }
     },
-    [adminPassword]
+    [headers]
   );
 
-  /**
-   * 프롬프트 삭제
-   */
   const deletePrompt = useCallback(
     async (id: string) => {
       if (!confirm('정말 삭제하시겠습니까?')) return false;
@@ -167,7 +155,7 @@ export const usePrompts = (adminPassword: string) => {
         setLoading(false);
       }
     },
-    [adminPassword]
+    [headers]
   );
 
   return {

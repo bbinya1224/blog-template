@@ -1,8 +1,3 @@
-/**
- * Category Registry Index
- * 카테고리 레지스트리 및 자동 등록
- */
-
 // 타입 및 레지스트리 함수 re-export
 export * from './types';
 export * from './registry';

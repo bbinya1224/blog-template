@@ -32,7 +32,7 @@ export function PlaceCard({ metadata, onConfirm, className }: PlaceCardProps) {
           {metadata.rating != null && (
             <div className="flex items-center gap-1.5 bg-amber-50 px-2.5 py-1 rounded-lg">
               <svg
-                className="w-4 h-4 text-amber-400"
+                className="size-4  text-amber-400"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -49,7 +49,7 @@ export function PlaceCard({ metadata, onConfirm, className }: PlaceCardProps) {
         <div className="space-y-2 text-sm text-stone-500">
           <p className="flex items-start gap-2.5">
             <svg
-              className="w-4 h-4 mt-0.5 flex-shrink-0 text-stone-300"
+              className="size-4  mt-0.5 shrink-0 text-stone-300"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -72,7 +72,7 @@ export function PlaceCard({ metadata, onConfirm, className }: PlaceCardProps) {
           {metadata.phone && (
             <p className="flex items-center gap-2.5">
               <svg
-                className="w-4 h-4 flex-shrink-0 text-stone-300"
+                className="size-4  shrink-0 text-stone-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

@@ -1,14 +1,9 @@
-/**
- * Review Edit Step Handler
- * 리뷰 수정 단계 처리
- */
-
 import type { ConversationState } from '../../model/types';
 import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
 import type { StepHandlerResult } from './onboarding';
 
 export interface ReviewEditResult extends StepHandlerResult {
-  editRequest?: string; // 수정 요청이 있는 경우
+  editRequest?: string;
 }
 
 export function handleReviewEdit(
@@ -17,7 +12,6 @@ export function handleReviewEdit(
 ): ReviewEditResult {
   const lowered = userInput.toLowerCase();
 
-  // 완료
   if (
     lowered === 'complete' ||
     lowered.includes('완벽') ||
@@ -37,9 +31,7 @@ export function handleReviewEdit(
     };
   }
 
-  // 수정 요청
   if (lowered === 'edit' || lowered.includes('수정')) {
-    // "수정해주세요"만 입력한 경우 - 구체적인 요청 받기
     if (userInput.length < 10) {
       return {
         messages: [
@@ -54,7 +46,6 @@ export function handleReviewEdit(
     }
   }
 
-  // 구체적인 수정 요청 (길이가 충분하면)
   if (userInput.length >= 5) {
     return {
       messages: [
@@ -69,7 +60,6 @@ export function handleReviewEdit(
     };
   }
 
-  // 불명확한 경우
   return {
     messages: [
       {
@@ -83,9 +73,6 @@ export function handleReviewEdit(
   };
 }
 
-/**
- * 수정 완료 후 호출
- */
 export function handleReviewEdited(
   editedReview: string,
   _state: ConversationState
