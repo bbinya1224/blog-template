@@ -12,19 +12,25 @@ function getIsDesktop() {
 
 export function SidebarReviewList() {
   const { reviews, isLoading } = useRecentReviews(20);
-  const { isExpanded, collapse } = useSidebar();
+  const { showLabels, expand, collapse } = useSidebar();
 
   const handleClick = () => {
     if (!getIsDesktop()) collapse();
   };
 
-  if (!isExpanded) {
+  if (!showLabels) {
     return (
-      <div className="flex flex-col items-center gap-2 px-2 py-3">
-        <svg className="size-5  text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      </div>
+      <button
+        onClick={expand}
+        className="w-full py-3 hover:bg-stone-50 transition-colors"
+        title="보관함"
+      >
+        <div className="w-16 flex justify-center">
+          <svg className="size-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+      </button>
     );
   }
 
