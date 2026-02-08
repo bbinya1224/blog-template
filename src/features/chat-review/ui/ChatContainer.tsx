@@ -153,7 +153,7 @@ export function ChatContainer({
         {/* Welcome content - animates out when messages appear */}
         <div
           className={cn(
-            'absolute inset-0 flex flex-col items-center justify-center px-6',
+            'absolute inset-0 flex flex-col items-center justify-center',
             'transition-all duration-500 ease-out',
             hasMessages
               ? 'pointer-events-none translate-y-8 opacity-0'

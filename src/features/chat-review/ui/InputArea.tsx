@@ -52,22 +52,15 @@ export function InputArea({
   const canSend = value.trim().length > 0 && !disabled;
 
   return (
-    <div
-      className={cn(
-        'px-4 sm:px-6 py-3',
-        className
-      )}
-    >
-      <div className="max-w-2xl mx-auto">
+    <div className={cn('px-4 py-3 sm:px-6', className)}>
+      <div className='w-full'>
         <div
           className={cn(
             'relative flex items-end gap-2',
-            'bg-stone-50 rounded-xl',
+            'rounded-xl bg-stone-50',
             'border transition-all duration-200',
-            isFocused
-              ? 'border-stone-300 bg-white'
-              : 'border-transparent',
-            disabled && 'opacity-60'
+            isFocused ? 'border-stone-300 bg-white' : 'border-stone-200',
+            disabled && 'opacity-60',
           )}
         >
           {/* Textarea */}
@@ -87,7 +80,7 @@ export function InputArea({
               'text-stone-800 placeholder:text-stone-400',
               'focus:outline-none',
               'disabled:cursor-not-allowed',
-              'text-[15px] leading-relaxed'
+              'text-[15px] leading-relaxed',
             )}
           />
 
@@ -96,23 +89,23 @@ export function InputArea({
             onClick={handleSubmit}
             disabled={!canSend}
             className={cn(
-              'shrink-0 mr-2 mb-2',
-              'size-8  rounded-lg',
+              'mr-2 mb-2 shrink-0',
+              'size-8 rounded-lg',
               'flex items-center justify-center',
               'transition-all duration-150',
               canSend
                 ? 'bg-stone-800 text-white hover:bg-stone-700 active:scale-95'
-                : 'bg-transparent text-stone-300'
+                : 'bg-transparent text-stone-300',
             )}
-            aria-label="메시지 전송"
+            aria-label='메시지 전송'
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="size-4 "
+              xmlns='http://www.w3.org/2000/svg'
+              viewBox='0 0 24 24'
+              fill='currentColor'
+              className='size-4'
             >
-              <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
+              <path d='M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z' />
             </svg>
           </button>
         </div>

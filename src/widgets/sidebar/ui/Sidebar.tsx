@@ -63,6 +63,8 @@ export function Sidebar() {
         <div className='flex h-14 shrink-0 items-center border-b border-stone-100'>
           <button
             onClick={toggle}
+            aria-label={isExpanded ? '사이드바 접기' : '사이드바 펼치기'}
+            aria-expanded={isExpanded}
             className='flex w-16 shrink-0 justify-center transition-opacity hover:opacity-80'
           >
             <OrotiIcon />
