@@ -18,15 +18,16 @@ interface ProgressBarProps {
 }
 
 export function ProgressBar({ currentStep, className }: ProgressBarProps) {
-  const currentIndex = STEPS.findIndex(
+  const rawIndex = STEPS.findIndex(
     (s) =>
       s.key === currentStep ||
       (currentStep === 'style-setup' && s.key === 'style-check') ||
       (currentStep === 'generating' && s.key === 'confirmation') ||
       (currentStep === 'review-edit' && s.key === 'confirmation')
   );
+  const currentIndex = Math.max(0, rawIndex);
 
-  const progress = ((currentIndex + 1) / STEPS.length) * 100;
+  const progress = Math.min(((currentIndex + 1) / STEPS.length) * 100, 100);
 
   return (
     <div className={cn('px-6 pt-5 pb-4', className)}>

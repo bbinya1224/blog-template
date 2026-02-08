@@ -63,9 +63,9 @@ export function StyleSummaryCard({ metadata, className }: StyleSummaryCardProps)
         <div className="mt-4 pt-4 border-t border-stone-100/80">
           <p className="text-xs text-stone-400 mb-2.5">자주 쓰는 표현</p>
           <div className="flex flex-wrap gap-2">
-            {metadata.frequentExpressions.map((expr) => (
+            {metadata.frequentExpressions.map((expr, index) => (
               <span
-                key={expr}
+                key={`${expr}-${index}`}
                 className="text-xs bg-white text-stone-500 px-3 py-1.5 rounded-full border border-stone-100 shadow-sm"
               >
                 "{expr}"

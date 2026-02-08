@@ -22,7 +22,7 @@ export default async function ChatPage() {
     .from('style_profiles')
     .select('*')
     .eq('user_email', userEmail)
-    .single();
+    .maybeSingle();
 
   return (
     <ChatPageContent

@@ -247,8 +247,9 @@ export async function POST(req: NextRequest) {
 
           controller.close();
         } catch (error) {
+          console.error('[Chat Stream] 스트리밍 에러:', error);
           const errorData = `event: error\ndata: ${JSON.stringify({
-            message: error instanceof Error ? error.message : 'Unknown error',
+            message: '요청 처리 중 오류가 발생했습니다.',
           })}\n\n`;
           controller.enqueue(encoder.encode(errorData));
           controller.close();

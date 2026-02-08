@@ -22,7 +22,6 @@ const client = new Anthropic({
 interface GenerateReviewInput {
   payload: ReviewPayload;
   styleProfile: StyleProfile | null;
-  userEmail: string;
 }
 
 const getRandomWritingSamples = async (
@@ -54,13 +53,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { payload, styleProfile, userEmail }: GenerateReviewInput =
+    const authenticatedEmail = session.user.email;
+
+    const { payload, styleProfile }: GenerateReviewInput =
       await req.json();
 
     // 개발 환경에서 Mock 사용
     if (shouldUseMock()) {
       console.log('[Review Gen API] 🎭 MOCK MODE');
-      return createMockReviewResponse(userEmail, payload);
+      return createMockReviewResponse(authenticatedEmail, payload);
     }
 
     // 검색 및 프롬프트 로드
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
         console.error('❌ 통합 검색 실패:', err.message || err);
         return { kakaoPlace: null, tavilyContext: '' };
       }),
-      userEmail ? getRandomWritingSamples(userEmail, 3) : Promise.resolve(''),
+      getRandomWritingSamples(authenticatedEmail, 3),
       getReviewGenerationPrompts(),
     ]);
 
@@ -141,7 +142,7 @@ export async function POST(req: NextRequest) {
 
           // 리뷰 저장
           await supabaseAdmin.from('reviews').insert({
-            user_email: userEmail,
+            user_email: authenticatedEmail,
             content: reviewText,
             payload: payload,
             character_count: reviewText.length,

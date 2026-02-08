@@ -19,7 +19,8 @@ export function ChoiceButtons({
   return (
     <div
       className={cn(
-        'flex flex-wrap gap-2',
+        'grid gap-2',
+        columns === 3 ? 'grid-cols-3' : 'grid-cols-2',
         className
       )}
     >

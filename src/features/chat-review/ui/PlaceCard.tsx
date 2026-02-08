@@ -29,7 +29,7 @@ export function PlaceCard({ metadata, onConfirm, className }: PlaceCardProps) {
               <p className="text-sm text-stone-400 mt-0.5">{metadata.category}</p>
             )}
           </div>
-          {metadata.rating && (
+          {metadata.rating != null && (
             <div className="flex items-center gap-1.5 bg-amber-50 px-2.5 py-1 rounded-lg">
               <svg
                 className="w-4 h-4 text-amber-400"
