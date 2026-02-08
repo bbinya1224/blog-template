@@ -24,7 +24,7 @@ function OrotiIcon() {
 }
 
 export function Sidebar() {
-  const { isExpanded, toggle, collapse } = useSidebar();
+  const { isExpanded, showLabels, toggle, collapse } = useSidebar();
   const router = useRouter();
   const resetConversation = useSetAtom(resetConversationAtom);
 
@@ -46,8 +46,8 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          'flex flex-col bg-white border-r border-stone-200 h-full z-50',
-          'transition-all duration-300 ease-in-out shrink-0',
+          'flex flex-col bg-white border-r border-stone-200 h-full z-50 overflow-hidden',
+          'transition-[width] duration-300 ease-in-out shrink-0',
           isExpanded ? 'w-64' : 'w-16',
           // Mobile: fixed overlay when expanded
           isExpanded
@@ -56,65 +56,51 @@ export function Sidebar() {
         )}
       >
         {/* Top: Brand + Toggle */}
-        <div className={cn(
-          'flex items-center border-b border-stone-100 h-14 shrink-0',
-          isExpanded ? 'px-4 justify-between' : 'justify-center'
-        )}>
-          {isExpanded ? (
-            <button onClick={toggle} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-              <OrotiIcon />
-              <span className="text-base font-bold tracking-tight text-stone-800">
+        <div className="flex items-center border-b border-stone-100 h-14 shrink-0">
+          <button onClick={toggle} className="w-16 shrink-0 flex justify-center hover:opacity-80 transition-opacity">
+            <OrotiIcon />
+          </button>
+          {showLabels && (
+            <>
+              <span className="text-base font-bold tracking-tight text-stone-800 whitespace-nowrap">
                 오롯이
               </span>
-            </button>
-          ) : (
-            <button onClick={toggle} className="hover:opacity-80 transition-opacity">
-              <OrotiIcon />
-            </button>
-          )}
-          {isExpanded && (
-            <button
-              onClick={toggle}
-              className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors text-stone-400"
-            >
-              <svg className="size-4 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-              </svg>
-            </button>
+              <div className="flex-1" />
+              <button
+                onClick={toggle}
+                className="p-1.5 mr-3 rounded-lg hover:bg-stone-100 transition-colors text-stone-400"
+              >
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
+              </button>
+            </>
           )}
         </div>
 
         {/* New Record Button */}
-        <div className={cn(
-          'shrink-0 border-b border-stone-100',
-          isExpanded ? 'p-3' : 'p-2 flex justify-center'
-        )}>
-          {isExpanded ? (
-            <button
-              onClick={handleNewRecord}
-              className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-stone-700 hover:bg-stone-100 transition-colors"
-            >
-              <svg className="size-4  text-(--primary)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="shrink-0 border-b border-stone-100">
+          <button
+            onClick={handleNewRecord}
+            className="flex items-center w-full hover:bg-stone-100 transition-colors py-2.5"
+            title="새 기록 남기기"
+          >
+            <div className="w-16 shrink-0 flex justify-center">
+              <svg className="size-5 text-(--primary)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              새 기록 남기기
-            </button>
-          ) : (
-            <button
-              onClick={handleNewRecord}
-              className="p-2.5 rounded-lg hover:bg-stone-100 transition-colors"
-              title="새 기록 남기기"
-            >
-              <svg className="size-5  text-(--primary)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
-          )}
+            </div>
+            {showLabels && (
+              <span className="text-sm font-medium text-stone-700 whitespace-nowrap">
+                새 기록 남기기
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Review List (scrollable) */}
         <div className="flex-1 overflow-y-auto sidebar-scrollbar min-h-0">
-          {isExpanded && (
+          {showLabels && (
             <div className="px-4 pt-3 pb-1">
               <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider">
                 보관함

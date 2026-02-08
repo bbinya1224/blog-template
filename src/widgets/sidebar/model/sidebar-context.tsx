@@ -6,11 +6,13 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from 'react';
 
 interface SidebarContextValue {
   isExpanded: boolean;
+  showLabels: boolean;
   toggle: () => void;
   expand: () => void;
   collapse: () => void;
@@ -61,12 +63,30 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     return () => mql.removeEventListener('change', handler);
   }, []);
 
+  const [showLabels, setShowLabels] = useState(false);
+  const initializedRef = useRef(false);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      setShowLabels(isExpanded);
+      return;
+    }
+    if (isExpanded) {
+      const timer = setTimeout(() => setShowLabels(true), 300);
+      return () => clearTimeout(timer);
+    } else {
+      setShowLabels(false);
+    }
+  }, [isExpanded, hydrated]);
+
   const toggle = useCallback(() => setIsExpanded((v) => !v), []);
   const expand = useCallback(() => setIsExpanded(true), []);
   const collapse = useCallback(() => setIsExpanded(false), []);
 
   return (
-    <SidebarContext.Provider value={{ isExpanded, toggle, expand, collapse }}>
+    <SidebarContext.Provider value={{ isExpanded, showLabels, toggle, expand, collapse }}>
       {children}
     </SidebarContext.Provider>
   );

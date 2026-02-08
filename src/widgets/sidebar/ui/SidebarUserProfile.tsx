@@ -5,7 +5,7 @@ import { useSidebar } from '../model/sidebar-context';
 
 export function SidebarUserProfile() {
   const { data: session, status } = useSession();
-  const { isExpanded } = useSidebar();
+  const { showLabels, expand } = useSidebar();
 
   if (status === 'loading') {
     return (
@@ -32,11 +32,13 @@ export function SidebarUserProfile() {
     </div>
   );
 
-  if (!isExpanded) {
+  if (!showLabels) {
     return (
-      <div className="flex justify-center py-3">
-        {avatar}
-      </div>
+      <button onClick={expand} className="w-full py-3 hover:bg-stone-50 transition-colors">
+        <div className="w-16 flex justify-center">
+          {avatar}
+        </div>
+      </button>
     );
   }
 
