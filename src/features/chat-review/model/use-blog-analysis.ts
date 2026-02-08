@@ -5,6 +5,7 @@ import { useConversationActions } from './use-conversation-actions';
 import { useChatMessagesJotai } from './use-chat-messages-jotai';
 import { analyzeStyle } from '@/features/analyze-style';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
+import type { StyleProfile } from '@/shared/types/style-profile';
 
 function convertBlogUrlToRss(blogUrl: string): string {
   const match = blogUrl.match(/blog\.naver\.com\/([a-zA-Z0-9_-]+)/);
@@ -14,7 +15,7 @@ function convertBlogUrlToRss(blogUrl: string): string {
   return blogUrl;
 }
 
-function formatStyleForDisplay(profile: Record<string, Record<string, string>>): Record<string, unknown> {
+function formatStyleForDisplay(profile: StyleProfile): Record<string, unknown> {
   return {
     writingStyle: profile.writing_style?.tone || '친근한 톤',
     emojiUsage: profile.writing_style?.emoji_usage || '적당히 사용',
@@ -24,7 +25,8 @@ function formatStyleForDisplay(profile: Record<string, Record<string, string>>):
 }
 
 export function useBlogAnalysis(userName: string | null) {
-  const { setStyleProfile, setHasExistingStyle, goToStep } = useConversationActions();
+  const { setStyleProfile, setHasExistingStyle, goToStep } =
+    useConversationActions();
   const { addAssistantMessage } = useChatMessagesJotai();
 
   const analyzeBlogUrl = useCallback(
@@ -42,7 +44,7 @@ export function useBlogAnalysis(userName: string | null) {
             MESSAGES.styleSetup.urlAnalyzed(userName || ''),
             'style-summary',
             CHOICE_OPTIONS.styleConfirm,
-            formatStyleForDisplay(styleProfile)
+            formatStyleForDisplay(styleProfile),
           );
           goToStep('style-check');
         } else {
@@ -53,11 +55,17 @@ export function useBlogAnalysis(userName: string | null) {
         addAssistantMessage(
           MESSAGES.styleCheck.noStyle(userName || ''),
           'choice',
-          CHOICE_OPTIONS.styleSetupMethod
+          CHOICE_OPTIONS.styleSetupMethod,
         );
       }
     },
-    [userName, setStyleProfile, setHasExistingStyle, goToStep, addAssistantMessage]
+    [
+      userName,
+      setStyleProfile,
+      setHasExistingStyle,
+      goToStep,
+      addAssistantMessage,
+    ],
   );
 
   return { analyzeBlogUrl };

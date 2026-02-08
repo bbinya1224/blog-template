@@ -17,21 +17,21 @@ type Story = StoryObj<typeof meta>;
 const MockStepIndicator = () => (
   <ol className='flex flex-wrap gap-3 text-sm font-medium text-gray-500'>
     <li className='flex items-center text-sm'>
-      <span className='mr-2 inline-flex size-7  items-center justify-center rounded-full bg-(--primary) text-xs font-semibold text-white'>
+      <span className='mr-2 inline-flex size-7 items-center justify-center rounded-full bg-(--primary) text-xs font-semibold text-white'>
         1
       </span>
       <span className='text-gray-900'>스타일 분석</span>
       <span className='mx-3 text-gray-300'>—</span>
     </li>
     <li className='flex items-center text-sm'>
-      <span className='mr-2 inline-flex size-7  items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500'>
+      <span className='mr-2 inline-flex size-7 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500'>
         2
       </span>
       <span>리뷰 생성</span>
       <span className='mx-3 text-gray-300'>—</span>
     </li>
     <li className='flex items-center text-sm'>
-      <span className='mr-2 inline-flex size-7  items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500'>
+      <span className='mr-2 inline-flex size-7 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500'>
         3
       </span>
       <span>수정/보관</span>
@@ -48,7 +48,7 @@ export const WithLayout: Story = {
       <header className='border-b border-gray-200 bg-white'>
         <div className='mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5 md:px-12'>
           <div>
-            <p className='text-xs font-semibold uppercase tracking-[0.2em] text-(--primary)'>
+            <p className='text-xs font-semibold tracking-[0.2em] text-(--primary) uppercase'>
               오롯이
             </p>
             <p className='text-lg font-semibold text-gray-900'>
@@ -56,13 +56,13 @@ export const WithLayout: Story = {
             </p>
           </div>
           <div className='flex items-center gap-4'>
-            <div className='size-8  rounded-full bg-gray-300' />
+            <div className='size-8 rounded-full bg-gray-300' />
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className='mx-auto w-full max-w-5xl px-6 pb-16 pt-10 md:px-12'>
+      <main className='mx-auto w-full max-w-5xl px-6 pt-10 pb-16 md:px-12'>
         <div className='mb-10'>
           <MockStepIndicator />
         </div>
@@ -92,7 +92,7 @@ export const Comparison: Story = {
             <header className='border-b border-gray-200 bg-white'>
               <div className='mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5 md:px-12'>
                 <div>
-                  <p className='text-xs font-semibold uppercase tracking-[0.2em] text-(--primary)'>
+                  <p className='text-xs font-semibold tracking-[0.2em] text-(--primary) uppercase'>
                     오롯이
                   </p>
                   <p className='text-lg font-semibold text-gray-900'>
@@ -100,11 +100,11 @@ export const Comparison: Story = {
                   </p>
                 </div>
                 <div className='flex items-center gap-4'>
-                  <div className='size-8  rounded-full bg-gray-300' />
+                  <div className='size-8 rounded-full bg-gray-300' />
                 </div>
               </div>
             </header>
-            <main className='mx-auto w-full max-w-5xl px-6 pb-16 pt-10 md:px-12'>
+            <main className='mx-auto w-full max-w-5xl px-6 pt-10 pb-16 md:px-12'>
               <div className='mb-10'>
                 <MockStepIndicator />
               </div>

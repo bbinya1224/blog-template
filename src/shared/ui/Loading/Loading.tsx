@@ -20,26 +20,26 @@ export function Loading({
     variant === 'fullscreen' && 'fixed inset-0 z-50 bg-white',
     variant === 'overlay' && 'fixed inset-0 z-50 bg-black/50 backdrop-blur-sm',
     variant === 'inline' && 'w-full py-8',
-    className
+    className,
   );
 
   const innerContentClasses = cn(
     'flex flex-col items-center gap-6',
     variant === 'overlay' &&
-      'rounded-2xl bg-white p-10 shadow-2xl animate-in zoom-in-95'
+      'rounded-2xl bg-white p-10 shadow-2xl animate-in zoom-in-95',
   );
 
   return (
     <div className={containerClasses}>
       <div className={innerContentClasses}>
-        <div className='relative size-16 '>
+        <div className='relative size-16'>
           <div className='absolute inset-0 animate-ping rounded-full bg-blue-400 opacity-25'></div>
-          <div className='relative flex size-full  items-center justify-center rounded-full bg-blue-100'>
-            <div className='size-8  animate-spin rounded-full border-4 border-blue-500 border-t-transparent'></div>
+          <div className='relative flex size-full items-center justify-center rounded-full bg-blue-100'>
+            <div className='size-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent'></div>
           </div>
         </div>
 
-        <div className='text-center space-y-2'>
+        <div className='space-y-2 text-center'>
           {variant !== 'inline' && (
             <p className='text-xl font-bold text-gray-900'>
               잠시만 기다려주세요
@@ -47,7 +47,7 @@ export function Loading({
           )}
 
           {message && (
-            <p className='text-base font-medium text-blue-600 animate-pulse'>
+            <p className='animate-pulse text-base font-medium text-blue-600'>
               {message}
             </p>
           )}
@@ -56,4 +56,3 @@ export function Loading({
     </div>
   );
 }
-

@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   useRef,
   type ReactNode,
 } from 'react';
@@ -85,10 +86,13 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const expand = useCallback(() => setIsExpanded(true), []);
   const collapse = useCallback(() => setIsExpanded(false), []);
 
+  const value = useMemo(
+    () => ({ isExpanded, showLabels, toggle, expand, collapse }),
+    [isExpanded, showLabels, toggle, expand, collapse],
+  );
+
   return (
-    <SidebarContext.Provider value={{ isExpanded, showLabels, toggle, expand, collapse }}>
-      {children}
-    </SidebarContext.Provider>
+    <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>
   );
 }
 
