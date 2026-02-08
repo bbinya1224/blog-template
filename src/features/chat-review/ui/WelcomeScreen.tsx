@@ -20,7 +20,7 @@ export function WelcomeScreen({
   return (
     <div
       className={cn(
-        'flex flex-col h-[100dvh] w-full',
+        'flex flex-col h-dvh w-full',
         'md:max-w-3xl md:mx-auto',
         className
       )}
@@ -49,7 +49,7 @@ export function WelcomeScreen({
                   key={review.id}
                   href={`/reviews/${review.id}`}
                   className={cn(
-                    'group flex-shrink-0 w-48 p-4',
+                    'group shrink-0 w-48 p-4',
                     'rounded-xl border border-stone-200',
                     'hover:border-orange-300 hover:shadow-md',
                     'transition-all duration-200'

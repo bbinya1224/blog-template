@@ -3,12 +3,6 @@ import { UrlInput, NumberInput } from '@/shared/ui/Input';
 import { Button } from '@/shared/ui/Button';
 import { ANALYSIS_CONFIG } from '@/shared/config/constants';
 
-const UI_CLASSES = {
-  INPUT: 'input-base',
-  LABEL: 'text-sm font-medium text-gray-700',
-  DESCRIPTION: 'mt-2 text-sm text-gray-500',
-};
-
 const FORM_TEXTS = {
   RSS_URL_LABEL: 'RSS URL',
   RSS_URL_PLACEHOLDER: 'https://rss.blog.naver.com/블로그ID.xml',

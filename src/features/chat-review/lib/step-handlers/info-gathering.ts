@@ -1,9 +1,4 @@
-/**
- * Info Gathering Step Handler
- * 정보 수집 단계 처리 (맛집)
- */
-
-import type { ConversationState, RestaurantInfoStep } from '../../model/types';
+import type { ConversationState } from '../../model/types';
 import type { ReviewPayload } from '@/shared/types/review';
 import {
   MESSAGES,
@@ -19,7 +14,7 @@ import {
 import type { StepHandlerResult } from './onboarding';
 
 export interface InfoGatheringResult extends StepHandlerResult {
-  placeSearchQuery?: string; // 장소 검색이 필요한 경우
+  placeSearchQuery?: string;
 }
 
 export function handleInfoGathering(
@@ -95,8 +90,6 @@ function handlePlaceInput(
   userInput: string,
   _state: ConversationState
 ): InfoGatheringResult {
-  // 장소 검색을 위한 쿼리 반환
-  // 실제 검색은 상위 컴포넌트에서 처리
   return {
     messages: [
       {
@@ -110,7 +103,6 @@ function handlePlaceInput(
   };
 }
 
-// 장소 확인 후 호출
 export function handlePlaceConfirmed(
   confirmed: boolean,
   placeName: string,
@@ -179,7 +171,6 @@ function handleExperienceInput(
   userInput: string,
   _state: ConversationState
 ): InfoGatheringResult {
-  // 경험 내용에서 긍정/부정 추출
   const positiveKeywords = [
     '맛있',
     '좋',
@@ -216,17 +207,12 @@ function handleExperienceInput(
     }
   });
 
-  // 분류 결과에 따라 payload 설정
   const payload: Partial<ReviewPayload> = {};
   if (hasPositive && !hasNegative) {
     payload.pros = userInput;
   } else if (hasNegative && !hasPositive) {
     payload.cons = userInput;
-  } else if (hasPositive && hasNegative) {
-    // 둘 다 있으면 extra에 넣고 나중에 AI가 분류
-    payload.extra = userInput;
   } else {
-    // 분류가 안 되면 extra에 넣기
     payload.extra = userInput;
   }
 
@@ -252,7 +238,6 @@ function handleAdditionalInput(
 ): InfoGatheringResult {
   const lowered = userInput.toLowerCase();
 
-  // "됐어요" 선택 시 확인 단계로
   if (lowered === 'done' || lowered.includes('됐') || lowered.includes('충분')) {
     return {
       messages: [],
@@ -261,7 +246,6 @@ function handleAdditionalInput(
     };
   }
 
-  // 웨이팅 정보
   if (
     lowered === 'waiting' ||
     lowered.includes('웨이팅') ||
@@ -280,7 +264,6 @@ function handleAdditionalInput(
     };
   }
 
-  // 가격대
   if (lowered === 'price' || lowered.includes('가격')) {
     return {
       messages: [
@@ -295,7 +278,6 @@ function handleAdditionalInput(
     };
   }
 
-  // 다른 메뉴
   if (lowered === 'other-menu' || lowered.includes('다른 메뉴')) {
     return {
       messages: [
@@ -309,7 +291,6 @@ function handleAdditionalInput(
     };
   }
 
-  // 기타 입력은 extra에 추가
   const currentExtra = state.collectedInfo.extra || '';
   return {
     messages: [

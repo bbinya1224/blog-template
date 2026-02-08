@@ -1,8 +1,3 @@
-/**
- * Conversation State Types
- * 채팅 리뷰 대화 상태 타입 정의
- */
-
 import type { StyleProfile } from '@/entities/style-profile';
 import type { ReviewPayload } from '@/shared/types/review';
 

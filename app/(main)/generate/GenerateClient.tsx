@@ -197,6 +197,7 @@ export default function GenerateClient() {
                     rel='noopener noreferrer'
                     className='hover:opacity-90 transition-opacity'
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src='https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png'
                       alt='Buy Me A Coffee'

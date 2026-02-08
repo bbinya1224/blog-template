@@ -13,19 +13,6 @@ export type ApprovedUser = {
   usage_count: number | null;
 };
 
-/**
- * Manages whitelist state and provides CRUD operations against the admin whitelist API using the given admin password.
- *
- * @param password - Admin password sent as `X-Admin-Password` header for API requests; if falsy, fetch and mutation operations are no-ops.
- * @returns An object with:
- *  - `users`: current array of approved whitelist entries,
- *  - `loading`: `true` while an API operation is in progress,
- *  - `error`: localized error message when an operation fails (empty string otherwise),
- *  - `fetchUsers`: function to load the whitelist from the server,
- *  - `addUser`: function `(email, notes)` to add an entry; returns `true` on success and `false` on failure,
- *  - `updateUserStatus`: function `(email, updates)` to modify an entry; returns `true` on success and `false` on failure,
- *  - `deleteUser`: function `(email)` to remove an entry after confirmation; returns `true` on success and `false` on failure.
- */
 export function useWhitelist(password: string) {
   const [users, setUsers] = useState<ApprovedUser[]>([]);
   const [loading, setLoading] = useState(false);

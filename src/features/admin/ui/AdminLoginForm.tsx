@@ -29,13 +29,13 @@ export function AdminLoginForm({
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-sm border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
               placeholder="ADMIN_PASSWORD"
             />
           </div>
 
           {error && (
-            <div className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <div className="mb-4 rounded-sm border border-red-200 bg-red-50 p-3 text-sm text-red-700">
               {error}
             </div>
           )}
@@ -43,7 +43,7 @@ export function AdminLoginForm({
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 disabled:bg-gray-400"
+            className="w-full rounded-sm bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 disabled:bg-gray-400"
           >
             {loading ? '확인 중...' : '로그인'}
           </button>

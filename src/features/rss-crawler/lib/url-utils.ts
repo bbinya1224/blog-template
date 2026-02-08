@@ -1,19 +1,9 @@
-/**
- * URL 파싱 및 변환 유틸리티
- */
-
-/**
- * 네이버 블로그 원본 URL에서 blogId, logNo 추출
- * - https://blog.naver.com/bbinjjam/224688244...
- * - https://m.blog.naver.com/bbinjjam/224688244...
- */
 export const parseNaverBlogUrl = (
   url: string,
 ): { blogId?: string; logNo?: string } => {
   try {
     const u = new URL(url);
 
-    // Check query params first for blogId
     const queryBlogId = u.searchParams.get('blogId');
     const [pathBlogId, pathLogNo] = u.pathname.split('/').filter(Boolean);
     const searchLogNo = u.searchParams.get('logNo');
@@ -27,9 +17,6 @@ export const parseNaverBlogUrl = (
   }
 };
 
-/**
- * viewer / mobile URL 생성
- */
 export const buildViewerAndMobileUrls = (originalUrl: string): string[] => {
   const { blogId, logNo } = parseNaverBlogUrl(originalUrl);
   const urls: string[] = [];
@@ -46,9 +33,6 @@ export const buildViewerAndMobileUrls = (originalUrl: string): string[] => {
   return urls;
 };
 
-/**
- * HTTP를 HTTPS로 강제 변환
- */
 export const enforceHttps = (url: string): string => {
   if (url.startsWith('http://')) {
     return url.replace('http://', 'https://');
@@ -56,9 +40,6 @@ export const enforceHttps = (url: string): string => {
   return url;
 };
 
-/**
- * HTTPS를 HTTP로 변환 (fallback용)
- */
 export const downgradeToHttp = (url: string): string => {
   if (url.startsWith('https://')) {
     return url.replace('https://', 'http://');
@@ -66,11 +47,6 @@ export const downgradeToHttp = (url: string): string => {
   return url;
 };
 
-/**
- * SSL/TLS 프로토콜 에러 판별
- * - 인증서 만료, SSL 프로토콜 오류 등
- * - 일반 네트워크 에러(timeout, 404 등)와 구분
- */
 export const isProtocolError = (error: unknown): boolean => {
   if (typeof error !== 'object' || error === null) return false;
 

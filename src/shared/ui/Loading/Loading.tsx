@@ -32,10 +32,10 @@ export function Loading({
   return (
     <div className={containerClasses}>
       <div className={innerContentClasses}>
-        <div className='relative h-16 w-16'>
+        <div className='relative size-16 '>
           <div className='absolute inset-0 animate-ping rounded-full bg-blue-400 opacity-25'></div>
-          <div className='relative flex h-full w-full items-center justify-center rounded-full bg-blue-100'>
-            <div className='h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent'></div>
+          <div className='relative flex size-full  items-center justify-center rounded-full bg-blue-100'>
+            <div className='size-8  animate-spin rounded-full border-4 border-blue-500 border-t-transparent'></div>
           </div>
         </div>
 

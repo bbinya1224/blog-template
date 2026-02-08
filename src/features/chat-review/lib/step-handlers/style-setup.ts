@@ -1,8 +1,3 @@
-/**
- * Style Setup Step Handler
- * 스타일 설정 단계 처리 (3가지 방법)
- */
-
 import type {
   ConversationState,
   StyleSetupMethod,
@@ -27,12 +22,10 @@ export function handleStyleSetup(
   state: ConversationState,
   context: StyleSetupContext = {}
 ): StyleSetupHandlerResult {
-  // 방법 선택
   if (!context.method) {
     return handleMethodSelection(userInput, state);
   }
 
-  // 선택된 방법에 따른 처리
   switch (context.method) {
     case 'blog-url':
       return handleBlogUrlInput(userInput, state);
@@ -111,7 +104,6 @@ function handleMethodSelection(
     };
   }
 
-  // 기본: 선택지 다시 표시
   return {
     messages: [
       {
@@ -129,7 +121,6 @@ function handleBlogUrlInput(
   userInput: string,
   _state: ConversationState
 ): StyleSetupHandlerResult {
-  // URL 검증
   const urlPattern =
     /https?:\/\/(blog\.naver\.com|m\.blog\.naver\.com)\/[a-zA-Z0-9_-]+/;
 
@@ -147,7 +138,6 @@ function handleBlogUrlInput(
     };
   }
 
-  // URL이 유효하면 분석 시작 메시지
   return {
     messages: [
       {
@@ -157,9 +147,7 @@ function handleBlogUrlInput(
       },
     ],
     actions: [],
-    // 실제 분석은 상위에서 처리 (async)
     asyncAction: async () => {
-      // This will be called by the chat page to perform actual crawling
       return { styleProfile: undefined };
     },
   };
@@ -186,7 +174,6 @@ function handlePasteText(
     };
   }
 
-  // 5개 이상이면 분석 시작
   return {
     messages: [
       {
@@ -236,7 +223,6 @@ function handleQuestionnaire(
     };
   }
 
-  // 모든 질문 완료 - 스타일 생성
   return {
     messages: [
       {
@@ -256,7 +242,6 @@ export function handleStyleCheck(
 ): StepHandlerResult {
   const lowered = userInput.toLowerCase();
 
-  // 기존 스타일이 있고 확인된 경우
   if (state.hasExistingStyle) {
     if (lowered === 'yes' || lowered.includes('좋아') || lowered.includes('네')) {
       return {
@@ -279,9 +264,7 @@ export function handleStyleCheck(
     }
   }
 
-  // 스타일 수정 요청 처리
   if (state.styleProfile && userInput.length > 5) {
-    // 수정 요청으로 간주하고 처리
     return {
       messages: [
         {
@@ -295,7 +278,6 @@ export function handleStyleCheck(
     };
   }
 
-  // 기존 스타일 없음 - 설정 방법 선택
   return {
     messages: [
       {

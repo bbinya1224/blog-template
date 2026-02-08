@@ -92,7 +92,7 @@ export default function AdminPage() {
 
         {/* 에러 메시지 */}
         {error && (
-          <div className='mb-4 rounded border border-red-200 bg-red-50 p-4 text-red-700'>
+          <div className='mb-4 rounded-sm border border-red-200 bg-red-50 p-4 text-red-700'>
             {error}
           </div>
         )}

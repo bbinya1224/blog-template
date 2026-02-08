@@ -1,8 +1,3 @@
-/**
- * Feature: Chat Review
- * Public API exports
- */
-
 // UI Components
 export {
   ChatContainer,

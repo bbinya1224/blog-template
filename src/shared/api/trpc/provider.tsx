@@ -6,23 +6,13 @@ import { useState } from 'react';
 import superjson from 'superjson';
 import { trpc } from './client';
 
-/**
- * tRPC Provider
- * - app/layout.tsx에서 사용
- *
- * @example
- * <TRPCProvider>
- *   <App />
- * </TRPCProvider>
- */
 export function TRPCProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
           queries: {
-            // React Query 기본 설정
-            staleTime: 60 * 1000, // 1분
+            staleTime: 60 * 1000,
             refetchOnWindowFocus: false,
           },
         },

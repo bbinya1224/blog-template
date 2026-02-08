@@ -1,8 +1,3 @@
-/**
- * Confirmation Step Handler
- * 수집 정보 확인 단계 처리
- */
-
 import type { ChatMessage } from '@/entities/chat-message';
 import type { ConversationState, RestaurantInfoStep } from '../../model/types';
 import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
@@ -14,7 +9,6 @@ export function handleConfirmation(
 ): StepHandlerResult {
   const lowered = userInput.toLowerCase();
 
-  // 확인
   if (
     lowered === 'yes' ||
     lowered.includes('네') ||
@@ -39,7 +33,6 @@ export function handleConfirmation(
     };
   }
 
-  // 수정 필요
   if (
     lowered === 'no' ||
     lowered.includes('수정') ||
@@ -58,7 +51,6 @@ export function handleConfirmation(
     };
   }
 
-  // 특정 필드 수정 요청
   const fieldKeywords: Record<string, RestaurantInfoStep> = {
     '날짜': 'date',
     '언제': 'date',
@@ -92,7 +84,6 @@ export function handleConfirmation(
     }
   }
 
-  // 불명확한 경우
   return {
     messages: [
       {
@@ -106,9 +97,6 @@ export function handleConfirmation(
   };
 }
 
-/**
- * 확인용 요약 메시지 생성
- */
 export function createSummaryMessage(
   state: ConversationState
 ): Omit<ChatMessage, 'id' | 'timestamp'> {

@@ -11,9 +11,6 @@ type WhitelistUser = {
   usage_count: number | null;
 };
 
-/**
- * 모든 사용자 조회
- */
 export const getAllUsers = async (): Promise<WhitelistUser[]> => {
   const { data, error } = await supabaseAdmin
     .from('approved_users')
@@ -28,9 +25,6 @@ export const getAllUsers = async (): Promise<WhitelistUser[]> => {
   return data || [];
 };
 
-/**
- * 이메일로 사용자 조회
- */
 export const getUserByEmail = async (
   email: string
 ): Promise<WhitelistUser | null> => {
@@ -40,8 +34,8 @@ export const getUserByEmail = async (
     .eq('email', email)
     .single();
 
+  // PGRST116 = no rows returned
   if (error && error.code !== 'PGRST116') {
-    // PGRST116 = no rows returned
     console.error('사용자 조회 실패:', error);
     throw error;
   }
@@ -49,9 +43,6 @@ export const getUserByEmail = async (
   return data;
 };
 
-/**
- * 사용자 추가
- */
 export const addUser = async (email: string, notes?: string): Promise<void> => {
   const { error } = await supabaseAdmin.from('approved_users').insert({
     email,
@@ -65,9 +56,6 @@ export const addUser = async (email: string, notes?: string): Promise<void> => {
   }
 };
 
-/**
- * 사용자 정보 업데이트
- */
 export const updateUser = async (
   email: string,
   updates: { is_preview?: boolean; usage_count?: number }
@@ -83,9 +71,6 @@ export const updateUser = async (
   }
 };
 
-/**
- * 사용자 삭제
- */
 export const deleteUser = async (email: string): Promise<void> => {
   const { error } = await supabaseAdmin
     .from('approved_users')

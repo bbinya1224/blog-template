@@ -19,16 +19,16 @@ export function StyleSummaryCard({ metadata, className }: StyleSummaryCardProps)
   return (
     <div
       className={cn(
-        'bg-gradient-to-br from-stone-50 to-orange-50/30 rounded-2xl p-5',
+        'bg-linear-to-br from-stone-50 to-orange-50/30 rounded-2xl p-5',
         'border border-stone-100',
         className
       )}
     >
       {/* Header */}
       <div className="flex items-center gap-2.5 mb-4">
-        <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
+        <div className="size-8  rounded-lg bg-orange-100 flex items-center justify-center">
           <svg
-            className="w-4 h-4 text-orange-500"
+            className="size-4  text-orange-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -48,7 +48,7 @@ export function StyleSummaryCard({ metadata, className }: StyleSummaryCardProps)
       <div className="space-y-2.5">
         {styleItems.map((item) => (
           <div key={item.label} className="flex items-start gap-3">
-            <span className="text-xs text-stone-400 w-16 flex-shrink-0 pt-0.5">
+            <span className="text-xs text-stone-400 w-16 shrink-0 pt-0.5">
               {item.label}
             </span>
             <span className="text-sm text-stone-600 leading-relaxed">
@@ -68,7 +68,7 @@ export function StyleSummaryCard({ metadata, className }: StyleSummaryCardProps)
                 key={`${expr}-${index}`}
                 className="text-xs bg-white text-stone-500 px-3 py-1.5 rounded-full border border-stone-100 shadow-sm"
               >
-                "{expr}"
+                &ldquo;{expr}&rdquo;
               </span>
             ))}
           </div>

@@ -1,9 +1,3 @@
-/**
- * 비동기 작업을 관리하는 범용 커스텀 훅
- * - 로딩 상태, 에러 처리, 데이터 관리
- * - 타입 안전성 보장
- */
-
 import { useCallback, useState } from 'react';
 
 type AsyncStatus = 'idle' | 'loading' | 'success' | 'error';

@@ -1,9 +1,7 @@
-import Link from 'next/link';
-import { StepIndicator } from '@/shared/ui/StepIndicator';
-import { UserProfile } from '@/entities/user/ui/UserProfile';
 import { requireAuth } from '@/shared/lib/auth-utils';
 import { getUserStatus } from '@/shared/api/data-files';
 import { USAGE_LIMITS } from '@/shared/config';
+import { AppShell } from '@/widgets/app-shell';
 
 export default async function MainLayout({
   children,
@@ -17,39 +15,23 @@ export default async function MainLayout({
   const usageCount = userStatus?.usage_count || 0;
 
   return (
-    <div className='min-h-screen bg-[var(--background)]'>
-      <header className='border-b border-stone-200 bg-white'>
-        <div className='mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5 md:px-12'>
-          <Link href='/dashboard'>
-            <p className='text-xs font-semibold uppercase tracking-[0.2em] text-[var(--primary)]'>
-              오롯이
-            </p>
-            <p className='text-lg font-semibold text-stone-800'>
-              당신의 경험을 가장 풍부하게 기록하는 도구
-            </p>
-          </Link>
-          <div className="flex items-center gap-4">
-            {isPreview && (
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-bold ${
-                  usageCount >= USAGE_LIMITS.PREVIEW_MAX_USES
-                    ? 'bg-red-100 text-red-600'
-                    : 'bg-orange-100 text-[var(--primary)]'
-                }`}
-              >
-                무료 체험 중 ({usageCount}/{USAGE_LIMITS.PREVIEW_MAX_USES})
-              </span>
-            )}
-            <UserProfile />
+    <AppShell>
+      <div className="px-6 py-8 pb-16 md:px-12 max-w-5xl mx-auto w-full">
+        {isPreview && (
+          <div className="mb-6">
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-bold ${
+                usageCount >= USAGE_LIMITS.PREVIEW_MAX_USES
+                  ? 'bg-red-100 text-red-600'
+                  : 'bg-orange-100 text-(--primary)'
+              }`}
+            >
+              무료 체험 중 ({usageCount}/{USAGE_LIMITS.PREVIEW_MAX_USES})
+            </span>
           </div>
-        </div>
-      </header>
-      <main className='mx-auto w-full max-w-5xl px-6 pb-16 pt-10 md:px-12'>
-        <div className="mb-10">
-          <StepIndicator />
-        </div>
+        )}
         {children}
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }
