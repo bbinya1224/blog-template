@@ -1,5 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import type { ReviewPayload } from '@/shared/types/review';
 import type { StyleProfile } from '@/entities/style-profile';
@@ -20,7 +22,6 @@ const client = new Anthropic({
 interface GenerateReviewInput {
   payload: ReviewPayload;
   styleProfile: StyleProfile | null;
-  userEmail: string;
 }
 
 const getRandomWritingSamples = async (
@@ -44,16 +45,23 @@ const getRandomWritingSamples = async (
 
 export async function POST(req: NextRequest) {
   try {
-    // Note: Using supabaseAdmin for server-side operations
-    // Authentication should be handled by the caller (ChatPageContent)
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return new Response(
+        JSON.stringify({ error: '인증이 필요합니다.' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-    const { payload, styleProfile, userEmail }: GenerateReviewInput =
+    const authenticatedEmail = session.user.email;
+
+    const { payload, styleProfile }: GenerateReviewInput =
       await req.json();
 
     // 개발 환경에서 Mock 사용
     if (shouldUseMock()) {
       console.log('[Review Gen API] 🎭 MOCK MODE');
-      return createMockReviewResponse(userEmail, payload);
+      return createMockReviewResponse(authenticatedEmail, payload);
     }
 
     // 검색 및 프롬프트 로드
@@ -65,7 +73,7 @@ export async function POST(req: NextRequest) {
         console.error('❌ 통합 검색 실패:', err.message || err);
         return { kakaoPlace: null, tavilyContext: '' };
       }),
-      userEmail ? getRandomWritingSamples(userEmail, 3) : Promise.resolve(''),
+      getRandomWritingSamples(authenticatedEmail, 3),
       getReviewGenerationPrompts(),
     ]);
 
@@ -134,7 +142,7 @@ export async function POST(req: NextRequest) {
 
           // 리뷰 저장
           await supabaseAdmin.from('reviews').insert({
-            user_email: userEmail,
+            user_email: authenticatedEmail,
             content: reviewText,
             payload: payload,
             character_count: reviewText.length,
