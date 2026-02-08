@@ -1,0 +1,176 @@
+name: Auto Changelog
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Generate changelog
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -e
+
+          # Skip if last commit was auto-changelog
+          LAST_MSG=$(git log -1 --pretty=%s)
+          if [[ "$LAST_MSG" == "docs: auto-update CHANGELOG.md" ]]; then
+            echo "Last commit was auto-changelog. Skipping."
+            exit 0
+          fi
+
+          # Find merge base
+          git fetch origin main
+          BASE=$(git merge-base origin/main HEAD)
+
+          # Collect commits (skip merges)
+          COMMITS=$(git log --no-merges --pretty=format:"%s" "$BASE..HEAD" \
+            | grep -v "^docs: auto-update CHANGELOG.md$" || true)
+
+          if [ -z "$COMMITS" ]; then
+            echo "No commits found. Skipping."
+            exit 0
+          fi
+
+          # Categorize commits
+          FEATS=""
+          FIXES=""
+          REFACTORS=""
+          STYLES=""
+          DOCS=""
+          PERFS=""
+          TESTS=""
+          CHORES=""
+          OTHERS=""
+
+          while IFS= read -r subject; do
+            [ -z "$subject" ] && continue
+
+            # Remove type prefix: feat(scope): desc -> desc
+            clean=$(echo "$subject" | sed -E 's/^[a-z]+(\([^)]*\))?: //')
+
+            case "$subject" in
+              feat*)     FEATS="$FEATS- $clean"$'\n' ;;
+              fix*)      FIXES="$FIXES- $clean"$'\n' ;;
+              refactor*) REFACTORS="$REFACTORS- $clean"$'\n' ;;
+              style*)    STYLES="$STYLES- $clean"$'\n' ;;
+              docs*)     DOCS="$DOCS- $clean"$'\n' ;;
+              perf*)     PERFS="$PERFS- $clean"$'\n' ;;
+              test*)     TESTS="$TESTS- $clean"$'\n' ;;
+              chore*)    CHORES="$CHORES- $clean"$'\n' ;;
+              *)         OTHERS="$OTHERS- $subject"$'\n' ;;
+            esac
+          done <<< "$COMMITS"
+
+          # Build entry
+          DATE=$(date +%Y.%m.%d)
+          {
+            echo "<!-- CHANGELOG:AUTO:START -->"
+            echo "## [$DATE] - $PR_TITLE"
+            echo ""
+
+            if [ -n "$FEATS" ]; then
+              echo "### ✨ New Features"
+              printf "%s" "$FEATS"
+              echo ""
+            fi
+
+            if [ -n "$FIXES" ]; then
+              echo "### 🐛 Bug Fixes"
+              printf "%s" "$FIXES"
+              echo ""
+            fi
+
+            if [ -n "$REFACTORS" ]; then
+              echo "### ♻️ Refactoring"
+              printf "%s" "$REFACTORS"
+              echo ""
+            fi
+
+            if [ -n "$PERFS" ]; then
+              echo "### ⚡ Performance"
+              printf "%s" "$PERFS"
+              echo ""
+            fi
+
+            if [ -n "$STYLES" ]; then
+              echo "### 🎨 Styling"
+              printf "%s" "$STYLES"
+              echo ""
+            fi
+
+            if [ -n "$TESTS" ]; then
+              echo "### 🧪 Tests"
+              printf "%s" "$TESTS"
+              echo ""
+            fi
+
+            if [ -n "$DOCS" ]; then
+              echo "### 📝 Documentation"
+              printf "%s" "$DOCS"
+              echo ""
+            fi
+
+            if [ -n "$CHORES" ]; then
+              echo "### 🔧 Chores"
+              printf "%s" "$CHORES"
+              echo ""
+            fi
+
+            if [ -n "$OTHERS" ]; then
+              echo "### 📦 Other Changes"
+              printf "%s" "$OTHERS"
+              echo ""
+            fi
+
+            echo "<!-- CHANGELOG:AUTO:END -->"
+          } > /tmp/entry.md
+
+          # Remove previous auto-generated section if exists
+          if grep -q "<!-- CHANGELOG:AUTO:START -->" CHANGELOG.md; then
+            awk '
+              /<!-- CHANGELOG:AUTO:START -->/ { skip=1; next }
+              /<!-- CHANGELOG:AUTO:END -->/ { skip=0; next }
+              !skip { print }
+            ' CHANGELOG.md > /tmp/clean.md
+            mv /tmp/clean.md CHANGELOG.md
+          fi
+
+          # Insert new entry before the first ## line
+          FIRST_ENTRY=$(grep -n "^## " CHANGELOG.md | head -1 | cut -d: -f1)
+
+          if [ -n "$FIRST_ENTRY" ]; then
+            head -n $((FIRST_ENTRY - 1)) CHANGELOG.md > /tmp/final.md
+            cat /tmp/entry.md >> /tmp/final.md
+            echo "" >> /tmp/final.md
+            tail -n +"$FIRST_ENTRY" CHANGELOG.md >> /tmp/final.md
+          else
+            cat CHANGELOG.md > /tmp/final.md
+            echo "" >> /tmp/final.md
+            cat /tmp/entry.md >> /tmp/final.md
+          fi
+
+          mv /tmp/final.md CHANGELOG.md
+
+          echo "--- Generated changelog entry ---"
+          cat /tmp/entry.md
+
+      - name: Commit changelog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --cached --quiet && echo "No changes to commit." && exit 0
+          git commit -m "docs: auto-update CHANGELOG.md"
+          git push

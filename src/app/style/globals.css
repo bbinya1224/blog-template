@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f9fafb;
-  --foreground: #111827;
+  --background: #FFFBF7;
+  --foreground: #44403C;
+  --primary: #E8825C;
+  --primary-hover: #D4714E;
+  --secondary: #F4A261;
+  --surface: #FFF5ED;
+  --text-light: #A8A29E;
+  --border: #E7E5E4;
+  --accent: #7C6F64;
 }
 
 @theme inline {
@@ -20,16 +27,16 @@ body {
 }
 
 * {
-  outline-color: #3b82f6;
+  outline-color: var(--primary);
 }
 
 @layer components {
   .btn-primary {
-    @apply rounded-xl bg-blue-500 py-3 px-6 text-base font-semibold text-white shadow-sm transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-blue-200;
+    @apply rounded-xl bg-[var(--primary)] py-3 px-6 text-base font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:bg-orange-200;
   }
 
   .btn-secondary {
-    @apply rounded-xl bg-gray-100 py-3 px-6 text-base font-semibold text-gray-700 shadow-sm transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:bg-gray-50;
+    @apply rounded-xl bg-stone-100 py-3 px-6 text-base font-semibold text-stone-700 shadow-sm transition hover:bg-stone-200 disabled:cursor-not-allowed disabled:bg-stone-50;
   }
 
   .btn-success {
@@ -41,11 +48,11 @@ body {
   }
 
   .input-base {
-    @apply mt-2 w-full rounded-xl border border-gray-300 px-4 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30;
+    @apply mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 text-base shadow-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30;
   }
 
   .card-info {
-    @apply rounded-xl border-2 border-blue-100 bg-blue-50 p-4;
+    @apply rounded-xl border-2 border-orange-100 bg-[var(--surface)] p-4;
   }
 
   .card-success {

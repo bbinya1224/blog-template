@@ -17,18 +17,22 @@ const notoSans = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: 'Blog Tone Lab',
-  description: 'AI blog review generator',
+  title: '오롯이 — 경험 기록 도구',
+  description: '당신의 경험을 가장 풍부하게 기록하는 도구',
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/apple-touch-icon.png',
   },
   metadataBase: new URL(
-    process.env.NEXTAUTH_URL || 'https://my-blog-tone-lab.vercel.app',
+    process.env.NEXTAUTH_URL || 'https://oroti.vercel.app',
   ),
   openGraph: {
-    title: 'Blog Tone Lab',
-    description: 'AI-powered blog review generator',
-    siteName: 'Blog Tone Lab',
+    title: '오롯이 — 경험 기록 도구',
+    description: '경험은 당신이, 표현은 오롯이가',
+    siteName: '오롯이',
     locale: 'ko_KR',
     type: 'website',
   },
@@ -42,7 +46,7 @@ export default function RootLayout({
   return (
     <html lang='ko'>
       <body
-        className={`${inter.variable} ${notoSans.variable} bg-slate-50 text-gray-900 antialiased`}
+        className={`${inter.variable} ${notoSans.variable} bg-[var(--background)] text-[var(--foreground)] antialiased`}
       >
         <Providers>{children}</Providers>
         <Analytics />

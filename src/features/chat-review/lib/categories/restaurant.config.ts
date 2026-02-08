@@ -31,7 +31,7 @@ export const RESTAURANT_CHOICE_OPTIONS = {
     { id: 'other-menu', label: '다른 메뉴' },
     { id: 'done', label: '됐어요, 이만하면 충분해요!' },
   ],
-} as const;
+};
 
 /**
  * 맛집 카테고리 설정

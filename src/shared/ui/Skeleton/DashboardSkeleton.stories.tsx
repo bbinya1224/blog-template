@@ -17,7 +17,7 @@ type Story = StoryObj<typeof meta>;
 const MockStepIndicator = () => (
   <ol className='flex flex-wrap gap-3 text-sm font-medium text-gray-500'>
     <li className='flex items-center text-sm'>
-      <span className='mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-xs font-semibold text-white'>
+      <span className='mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-semibold text-white'>
         1
       </span>
       <span className='text-gray-900'>스타일 분석</span>
@@ -43,16 +43,16 @@ export const Default: Story = {};
 
 export const WithLayout: Story = {
   render: () => (
-    <div className='min-h-screen bg-slate-50'>
+    <div className='min-h-screen bg-[var(--background)]'>
       {/* Header */}
       <header className='border-b border-gray-200 bg-white'>
         <div className='mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5 md:px-12'>
           <div>
-            <p className='text-xs font-semibold uppercase tracking-[0.2em] text-blue-500'>
-              Blog Tone Lab
+            <p className='text-xs font-semibold uppercase tracking-[0.2em] text-[var(--primary)]'>
+              오롯이
             </p>
             <p className='text-lg font-semibold text-gray-900'>
-              블로그 톤 기반 리뷰 생성 도구
+              당신의 경험을 가장 풍부하게 기록하는 도구
             </p>
           </div>
           <div className='flex items-center gap-4'>
@@ -74,7 +74,7 @@ export const WithLayout: Story = {
 
 export const SkeletonOnly: Story = {
   render: () => (
-    <div className='bg-slate-50 p-6'>
+    <div className='bg-[var(--background)] p-6'>
       <DashboardSkeleton />
     </div>
   ),
@@ -88,15 +88,15 @@ export const Comparison: Story = {
           Full Layout Context (권장 - 실제 사용 환경)
         </h2>
         <div className='overflow-hidden rounded-lg border'>
-          <div className='min-h-screen bg-slate-50'>
+          <div className='min-h-screen bg-[var(--background)]'>
             <header className='border-b border-gray-200 bg-white'>
               <div className='mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5 md:px-12'>
                 <div>
-                  <p className='text-xs font-semibold uppercase tracking-[0.2em] text-blue-500'>
-                    Blog Tone Lab
+                  <p className='text-xs font-semibold uppercase tracking-[0.2em] text-[var(--primary)]'>
+                    오롯이
                   </p>
                   <p className='text-lg font-semibold text-gray-900'>
-                    블로그 톤 기반 리뷰 생성 도구
+                    당신의 경험을 가장 풍부하게 기록하는 도구
                   </p>
                 </div>
                 <div className='flex items-center gap-4'>
@@ -116,7 +116,7 @@ export const Comparison: Story = {
 
       <div className='border-t pt-8'>
         <h2 className='mb-4 text-xl font-bold'>Skeleton Only (참고용)</h2>
-        <div className='rounded-lg border bg-slate-50 p-6'>
+        <div className='rounded-lg border bg-[var(--background)] p-6'>
           <DashboardSkeleton />
         </div>
       </div>

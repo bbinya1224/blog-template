@@ -27,6 +27,15 @@ export type RestaurantInfoStep =
   | 'experience'  // 경험 상세 (맛, 분위기, 서비스)
   | 'additional'; // 추가 정보 (웨이팅, 가격 등)
 
+// 책 정보 수집 세부 단계
+export type BookInfoStep =
+  | 'title'       // 책 제목
+  | 'author'      // 저자
+  | 'readDate'    // 읽은 시기
+  | 'genre'       // 장르
+  | 'experience'  // 독서 경험
+  | 'additional'; // 추가 정보
+
 // 리뷰 주제 타입
 export type ReviewTopic =
   | 'restaurant'  // 맛집 (MVP)

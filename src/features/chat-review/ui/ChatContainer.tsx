@@ -28,6 +28,17 @@ const REVIEW_CATEGORIES: CategoryOption[] = [
     ),
   },
   {
+    id: 'product',
+    label: '제품',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      </svg>
+    ),
+    disabled: true,
+    disabledLabel: '준비중',
+  },
+  {
     id: 'beauty',
     label: '뷰티',
     icon: (
@@ -40,7 +51,7 @@ const REVIEW_CATEGORIES: CategoryOption[] = [
   },
   {
     id: 'book',
-    label: '책',
+    label: '독서',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -111,10 +122,10 @@ export function ChatContainer({
         >
           <div className="text-center mb-8">
             <h1 className="text-2xl sm:text-3xl font-semibold text-stone-800 mb-2">
-              {userName ? `${userName}님,` : '안녕하세요'}
+              {userName ? `${userName}님, 안녕하세요` : '안녕하세요'}
             </h1>
             <p className="text-lg text-stone-400">
-              어떤 기록을 남길까요?
+              오늘은 어떤 경험을 남겨볼까요?
             </p>
           </div>
 

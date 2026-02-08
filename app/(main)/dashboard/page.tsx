@@ -32,17 +32,17 @@ export default async function DashboardPage() {
     <div className='space-y-10'>
       <section className='space-y-4'>
         <div className='flex items-center justify-between'>
-          <p className='text-sm font-semibold uppercase tracking-[0.3em] text-blue-500'>
+          <p className='text-sm font-semibold uppercase tracking-[0.3em] text-[var(--primary)]'>
             Dashboard
           </p>
         </div>
 
         <div className='space-y-3'>
-          <h1 className='text-3xl font-semibold leading-tight text-gray-900 md:text-4xl'>
-            안녕하세요, {session?.user?.name || '블로거'}님!
+          <h1 className='text-3xl font-semibold leading-tight text-stone-800 md:text-4xl'>
+            안녕하세요, {session?.user?.name || '기록자'}님!
           </h1>
-          <p className='text-lg text-gray-600'>
-            내 블로그 톤 그대로 리뷰를 자동으로 만들어보세요.
+          <p className='text-lg text-stone-500'>
+            오늘은 어떤 경험을 기록해볼까요?
           </p>
         </div>
       </section>
@@ -53,7 +53,7 @@ export default async function DashboardPage() {
             <p className='text-gray-600 h-20'>{action.body}</p>
             <Link
               href={action.href}
-              className='mt-4 inline-flex items-center justify-center rounded-lg bg-blue-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600'
+              className='mt-4 inline-flex items-center justify-center rounded-lg bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover)]'
             >
               {action.cta}
             </Link>

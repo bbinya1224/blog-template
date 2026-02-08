@@ -10,7 +10,18 @@ export type ReviewPayload = {
   user_draft?: string;
 };
 
+export type RestaurantPayload = ReviewPayload;
+
 export type ReviewEditPayload = {
   review: string;
   request: string;
+};
+
+export type BookPayload = {
+  title: string;
+  author: string;
+  readDate?: string;
+  genre?: string;
+  pros?: string;
+  extra?: string;
 };
