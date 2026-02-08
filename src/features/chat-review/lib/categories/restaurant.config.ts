@@ -65,8 +65,13 @@ export const restaurantConfig: CategoryConfig<
     date: '맛집 리뷰군요!\n언제 식사하러 가셨어요?',
     companion: (ctx) =>
       `${ctx.date || ''}에 다녀오셨군요!\n누구랑 같이 가셨어요?`,
-    place: (ctx) =>
-      `${ctx.companion || ''}이랑 맛있는 거 먹으러 가셨군요!\n\n어느 매장에서 어떤 음식을 드셨어요?\n더 알려주세요.`,
+    place: (ctx) => {
+      const companion = ctx.companion || '';
+      if (companion === '혼자') {
+        return `혼자 다녀오셨군요!\n\n어느 매장에서 어떤 음식을 드셨어요?\n더 알려주세요.`;
+      }
+      return `${companion}이랑 맛있는 거 먹으러 가셨군요!\n\n어느 매장에서 어떤 음식을 드셨어요?\n더 알려주세요.`;
+    },
     menu: '뭘 드셨어요? 메뉴 이름을 알려주세요.',
     experience: '맛이나 분위기, 기억에 남는 거\n자유롭게 얘기해주세요.',
     additional: '혹시 더 알려주실 내용이 있나요?',
@@ -80,16 +85,23 @@ export const restaurantConfig: CategoryConfig<
 
   extractors: {
     date: (input: string): string => {
+      const formatLocalDate = (d: Date): string => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+
       const today = new Date();
       const lowered = input.toLowerCase();
 
       if (lowered.includes('오늘')) {
-        return today.toISOString().split('T')[0];
+        return formatLocalDate(today);
       }
       if (lowered.includes('어제')) {
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
-        return yesterday.toISOString().split('T')[0];
+        return formatLocalDate(yesterday);
       }
       if (lowered.includes('이번 주') || lowered.includes('이번주')) {
         return '이번 주';

@@ -56,7 +56,7 @@ export function determineNextStepForCategory<TPayload>(
     const fieldValue = (collectedInfo as Record<string, unknown>)[stepDef.field];
 
     // 필수 필드가 비어있으면 해당 스텝 반환
-    if (stepDef.isRequired && !fieldValue) {
+    if (stepDef.isRequired && (fieldValue === undefined || fieldValue === null)) {
       return step;
     }
 

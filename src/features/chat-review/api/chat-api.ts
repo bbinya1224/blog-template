@@ -29,25 +29,31 @@ export async function streamChatMessage(
   input: StreamMessageInput,
   callbacks: StreamCallbacks
 ): Promise<void> {
-  const response = await fetch('/api/chat/stream', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(input),
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const reader = response.body?.getReader();
-  if (!reader) {
-    throw new Error('No response body');
-  }
-
-  const decoder = new TextDecoder();
-  let buffer = '';
-
   try {
+    const response = await fetch('/api/chat/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+
+    if (!response.ok) {
+      const err = new Error(`HTTP error! status: ${response.status}`);
+      callbacks.onError(err);
+      return;
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      const err = new Error('No response body');
+      callbacks.onError(err);
+      return;
+    }
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let seenDoneEvent = false;
+    let seenErrorEvent = false;
+
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -57,31 +63,26 @@ export async function streamChatMessage(
       buffer = lines.pop() || '';
 
       for (const line of lines) {
-        if (line.startsWith('data: ')) {
+        if (line.startsWith('event: done')) {
+          seenDoneEvent = true;
+        } else if (line.startsWith('event: error')) {
+          seenErrorEvent = true;
+        } else if (line.startsWith('data: ')) {
           try {
             const data = JSON.parse(line.slice(6));
-            if (data.token) {
+            if (seenDoneEvent) {
+              if (data.fullText) {
+                callbacks.onDone(data.fullText);
+              }
+              seenDoneEvent = false;
+            } else if (seenErrorEvent) {
+              callbacks.onError(new Error(data.message || 'Stream error'));
+              seenErrorEvent = false;
+            } else if (data.token) {
               callbacks.onToken(data.token);
             }
           } catch {
             // Ignore parse errors for partial data
-          }
-        } else if (line.startsWith('event: done')) {
-          // Next line will have the full data
-        } else if (line.startsWith('event: error')) {
-          // Next line will have error data
-        } else if (buffer.includes('"fullText"')) {
-          // This is the done event data
-          try {
-            const match = buffer.match(/data: (.+)/);
-            if (match) {
-              const data = JSON.parse(match[1]);
-              if (data.fullText) {
-                callbacks.onDone(data.fullText);
-              }
-            }
-          } catch {
-            // Ignore
           }
         }
       }
@@ -91,11 +92,16 @@ export async function streamChatMessage(
     if (buffer) {
       const lines = buffer.split('\n');
       for (const line of lines) {
-        if (line.startsWith('data: ')) {
+        if (line.startsWith('event: done')) {
+          seenDoneEvent = true;
+        } else if (line.startsWith('data: ')) {
           try {
             const data = JSON.parse(line.slice(6));
-            if (data.fullText) {
-              callbacks.onDone(data.fullText);
+            if (seenDoneEvent) {
+              if (data.fullText) {
+                callbacks.onDone(data.fullText);
+              }
+              seenDoneEvent = false;
             } else if (data.token) {
               callbacks.onToken(data.token);
             }

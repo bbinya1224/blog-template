@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/shared/lib/utils';
 import type { ReviewPreviewMetadata } from '@/entities/chat-message';
 
@@ -12,11 +12,23 @@ interface ReviewPreviewProps {
 
 export function ReviewPreview({ metadata, onAction, className }: ReviewPreviewProps) {
   const [copied, setCopied] = useState(false);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    };
+  }, []);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(metadata.review);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(metadata.review);
+      setCopied(true);
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard API 실패 시 무시
+    }
   };
 
   return (

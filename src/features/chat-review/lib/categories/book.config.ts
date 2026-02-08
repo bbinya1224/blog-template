@@ -79,7 +79,7 @@ export const bookConfig: CategoryConfig<BookPayload, BookInfoStep> = {
 
   messages: {
     title: '책 리뷰군요!\n어떤 책을 읽으셨어요? 책 제목을 알려주세요.',
-    author: (ctx) => `"${ctx.title}" 좋은 책이네요!\n저자가 누구인가요?`,
+    author: (ctx) => `"${ctx.title ?? '이 책'}" 좋은 책이네요!\n저자가 누구인가요?`,
     readDate: '언제쯤 읽으셨어요?',
     genre: '어떤 장르의 책인가요?',
     experience:
