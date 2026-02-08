@@ -34,7 +34,7 @@ export const StepExperience = ({
   return (
     <div className='space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500'>
       <div className='text-center space-y-3 mb-8'>
-        <div className='inline-block px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full mb-2'>
+        <div className='inline-block px-4 py-2 bg-linear-to-r from-orange-500 to-pink-500 rounded-full mb-2'>
           <span className='text-white font-bold text-sm'>
             ⭐ 가장 중요한 단계입니다 (필수!)
           </span>
@@ -60,7 +60,7 @@ export const StepExperience = ({
         ))}
       </div>
 
-      <div className='bg-gradient-to-br from-orange-50 to-pink-50 border-2 border-orange-200 rounded-2xl p-6 shadow-sm'>
+      <div className='bg-linear-to-br from-orange-50 to-pink-50 border-2 border-orange-200 rounded-2xl p-6 shadow-sm'>
         <p className='text-base text-orange-900 font-bold mb-3 flex items-center gap-2'>
           <span className='text-2xl'>✍️</span>
           작성 팁 - 이렇게 작성하면 최고의 리뷰가 만들어져요!
@@ -120,7 +120,7 @@ export const StepExperience = ({
       </div>
 
       <div className='relative group'>
-        <div className='absolute -inset-1 bg-gradient-to-r from-orange-300 via-pink-300 to-rose-300 rounded-2xl blur-sm opacity-60 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-300'></div>
+        <div className='absolute -inset-1 bg-linear-to-r from-orange-300 via-pink-300 to-rose-300 rounded-2xl blur-sm opacity-60 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-300'></div>
         <textarea
           id='user_draft'
           value={form.user_draft || ''}

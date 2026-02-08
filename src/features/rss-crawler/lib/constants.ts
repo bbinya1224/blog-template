@@ -1,11 +1,7 @@
-/**
- * RSS 크롤링 관련 상수 정의
- */
-
-export const MIN_TEXT_LENGTH = 80; // 추출된 텍스트의 최소 길이
-export const MIN_POST_LENGTH = 200; // 분석/샘플에 포함할 최소 글 길이
-export const MAX_SAMPLE_LENGTH = 1500; // Few-shot용 샘플 최대 길이
-export const MAX_MERGED_LENGTH = 4000; // 스타일 분석용 개별 글 최대 길이
+export const MIN_TEXT_LENGTH = 80;
+export const MIN_POST_LENGTH = 200;
+export const MAX_SAMPLE_LENGTH = 1500;
+export const MAX_MERGED_LENGTH = 4000;
 
 export const USER_AGENTS = [
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',

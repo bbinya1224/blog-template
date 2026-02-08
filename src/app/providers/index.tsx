@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { SessionProvider } from '@/shared/providers/SessionProvider';
 import { TRPCProvider } from '@/shared/api/trpc';
 import { OverlayProvider } from '@/shared/providers/overlay';
+import { SidebarProvider } from '@/widgets/sidebar';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -17,7 +18,9 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <SessionProvider>
       <TRPCProvider>
-        <OverlayProvider>{children}</OverlayProvider>
+        <OverlayProvider>
+          <SidebarProvider>{children}</SidebarProvider>
+        </OverlayProvider>
       </TRPCProvider>
     </SessionProvider>
   );

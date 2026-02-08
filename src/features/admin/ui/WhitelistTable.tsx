@@ -40,7 +40,7 @@ export function WhitelistTable({
   };
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow">
+    <div className="rounded-lg bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-semibold">
           승인된 사용자 ({users.length}명)

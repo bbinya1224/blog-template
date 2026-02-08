@@ -6,14 +6,14 @@ export function UserProfile() {
   const { data: session, status } = useSession();
 
   if (status === 'loading') {
-    return <div className="h-8 w-20 animate-pulse rounded bg-gray-200" />;
+    return <div className='h-8 w-20 animate-pulse rounded-sm bg-gray-200' />;
   }
 
   if (!session) {
     return (
       <button
         onClick={() => signIn('google')}
-        className="rounded-full bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+        className='rounded-full bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-blue-700'
       >
         Google로 로그인
       </button>
@@ -21,20 +21,21 @@ export function UserProfile() {
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className='flex items-center gap-3'>
       {session.user?.image && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={session.user.image}
           alt={session.user.name || 'User'}
-          className="h-8 w-8 rounded-full border border-gray-200"
+          className='size-8 rounded-full border border-gray-200'
         />
       )}
-      <span className="hidden text-sm font-medium text-gray-700 md:inline-block">
+      <span className='hidden text-sm font-medium text-gray-700 md:inline-block'>
         {session.user?.name}
       </span>
       <button
         onClick={() => signOut()}
-        className="text-sm font-medium text-gray-500 hover:text-gray-900"
+        className='text-sm font-medium text-gray-500 hover:text-gray-900'
       >
         로그아웃
       </button>

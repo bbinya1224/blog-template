@@ -16,8 +16,7 @@ import {
   conversationStateAtom,
   sessionIdAtom,
 } from './atoms';
-import type { ConversationStep, RestaurantInfoStep, ReviewTopic, ConversationAction } from './types';
-import type { StyleProfile } from '@/entities/style-profile';
+import type { ConversationAction } from './types';
 import type { ChatMessage } from '@/entities/chat-message';
 import type { ReviewPayload } from '@/shared/types/review';
 

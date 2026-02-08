@@ -1,8 +1,3 @@
-/**
- * Conversation Engine
- * 대화 흐름 관리 엔진
- */
-
 import type {
   ConversationStep,
   ConversationState,
@@ -13,9 +8,6 @@ import type { ChatMessage } from '@/entities/chat-message';
 import type { StyleProfile } from '@/entities/style-profile';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
 
-/**
- * 현재 단계에서 다음 단계로 전이 가능한지 확인
- */
 export function canTransition(
   currentStep: ConversationStep,
   targetStep: ConversationStep,
@@ -25,9 +17,6 @@ export function canTransition(
   return allowed?.includes(targetStep) ?? false;
 }
 
-/**
- * 상태 기반으로 다음 단계 결정
- */
 export function determineNextStep(state: ConversationState): ConversationStep {
   switch (state.step) {
     case 'onboarding':
@@ -59,9 +48,6 @@ export function determineNextStep(state: ConversationState): ConversationStep {
   }
 }
 
-/**
- * 맛집 정보 수집이 완료되었는지 확인
- */
 export function isInfoGatheringComplete(state: ConversationState): boolean {
   const info = state.collectedInfo;
   return !!(
@@ -73,9 +59,6 @@ export function isInfoGatheringComplete(state: ConversationState): boolean {
   );
 }
 
-/**
- * 현재 정보 수집 서브스텝 결정
- */
 export function determineInfoSubStep(
   state: ConversationState
 ): RestaurantInfoStep {
@@ -89,9 +72,6 @@ export function determineInfoSubStep(
   return 'additional';
 }
 
-/**
- * 사용자 입력 의도 분류
- */
 export type UserIntent =
   | 'answer'           // 질문에 대한 답변
   | 'modify_previous'  // 이전 답변 수정
@@ -137,9 +117,6 @@ export function classifyIntent(input: string): UserIntent {
   return 'answer';
 }
 
-/**
- * 단계별 초기 메시지 생성
- */
 export function createInitialMessage(
   step: ConversationStep,
   state: ConversationState
@@ -231,9 +208,6 @@ export function createInitialMessage(
   }
 }
 
-/**
- * 정보 수집 단계 메시지 생성
- */
 function createInfoGatheringMessage(
   subStep: RestaurantInfoStep
 ): ChatMessage {
@@ -299,9 +273,6 @@ function createInfoGatheringMessage(
   }
 }
 
-/**
- * 스타일 프로필을 요약 메타데이터로 변환
- */
 function formatStyleSummary(profile: StyleProfile): Record<string, unknown> {
   return {
     writingStyle: profile.writing_style?.tone || '친근한 톤',
@@ -312,9 +283,6 @@ function formatStyleSummary(profile: StyleProfile): Record<string, unknown> {
   };
 }
 
-/**
- * 입력에서 날짜 정보 추출
- */
 export function extractDateInfo(input: string): string {
   const today = new Date();
   const lowered = input.toLowerCase();
@@ -343,9 +311,6 @@ export function extractDateInfo(input: string): string {
   return input;
 }
 
-/**
- * 입력에서 동행인 정보 추출
- */
 export function extractCompanionInfo(input: string): string {
   const lowered = input.toLowerCase();
 

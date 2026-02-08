@@ -47,24 +47,39 @@ interface TextRendererProps {
   enableTyping?: boolean;
 }
 
-export function TextRenderer({ content, enableTyping = false }: TextRendererProps) {
-  const { displayedText, isTyping, fullText } = useTypingEffect(content, enableTyping);
+export function TextRenderer({
+  content,
+  enableTyping = false,
+}: TextRendererProps) {
+  const { displayedText, isTyping, fullText } = useTypingEffect(
+    content,
+    enableTyping,
+  );
 
   if (!content) return null;
 
   return (
-    <div className="relative">
+    <div className='relative'>
       {/* Invisible full text to reserve space */}
       {enableTyping && (
-        <p className="text-stone-800 leading-7 whitespace-pre-wrap text-[15px] invisible" aria-hidden>
+        <p
+          className='invisible text-[15px] leading-7 whitespace-pre-wrap text-stone-800'
+          aria-hidden
+        >
           {fullText}
         </p>
       )}
       {/* Visible text */}
-      <p className={enableTyping ? 'absolute inset-0 text-stone-800 leading-7 whitespace-pre-wrap text-[15px]' : 'text-stone-800 leading-7 whitespace-pre-wrap text-[15px]'}>
+      <p
+        className={
+          enableTyping
+            ? 'absolute inset-0 text-[15px] leading-7 whitespace-pre-wrap text-stone-800'
+            : 'text-[15px] leading-7 whitespace-pre-wrap text-stone-800'
+        }
+      >
         {enableTyping ? displayedText : content}
         {isTyping && (
-          <span className="inline-block w-0.5 h-5 bg-stone-400 ml-0.5 animate-pulse align-middle" />
+          <span className='ml-0.5 inline-block h-5 w-0.5 animate-pulse bg-stone-400 align-middle' />
         )}
       </p>
     </div>
@@ -73,7 +88,7 @@ export function TextRenderer({ content, enableTyping = false }: TextRendererProp
 
 export function ChoiceRenderer({
   options,
-  onSelect
+  onSelect,
 }: {
   options: ChatMessage['options'];
   onSelect?: (id: string) => void;
@@ -84,12 +99,14 @@ export function ChoiceRenderer({
 
 export function PlaceCardRenderer({
   metadata,
-  onConfirm
+  onConfirm,
 }: {
   metadata: unknown;
   onConfirm?: (confirmed: boolean) => void;
 }) {
-  return <PlaceCard metadata={metadata as PlaceCardMetadata} onConfirm={onConfirm} />;
+  return (
+    <PlaceCard metadata={metadata as PlaceCardMetadata} onConfirm={onConfirm} />
+  );
 }
 
 export function StyleSummaryRenderer({ metadata }: { metadata: unknown }) {
@@ -98,21 +115,26 @@ export function StyleSummaryRenderer({ metadata }: { metadata: unknown }) {
 
 export function ReviewPreviewRenderer({
   metadata,
-  onAction
+  onAction,
 }: {
   metadata: unknown;
   onAction?: (action: 'complete' | 'edit') => void;
 }) {
-  return <ReviewPreview metadata={metadata as ReviewPreviewMetadata} onAction={onAction} />;
+  return (
+    <ReviewPreview
+      metadata={metadata as ReviewPreviewMetadata}
+      onAction={onAction}
+    />
+  );
 }
 
 export function LoadingRenderer() {
   return (
-    <div className="flex items-center gap-1">
+    <div className='flex items-center gap-1'>
       {[0, 150, 300].map((delay) => (
         <span
           key={delay}
-          className="w-2 h-2 bg-stone-300 rounded-full animate-bounce"
+          className='size-2 animate-bounce rounded-full bg-stone-300'
           style={{ animationDelay: `${delay}ms` }}
         />
       ))}
@@ -120,15 +142,19 @@ export function LoadingRenderer() {
   );
 }
 
-export function SummaryRenderer({ metadata }: { metadata: Record<string, unknown> }) {
+export function SummaryRenderer({
+  metadata,
+}: {
+  metadata: Record<string, unknown>;
+}) {
   if (!metadata) return null;
 
   return (
-    <div className="bg-stone-50 rounded-xl p-4 space-y-2">
+    <div className='space-y-2 rounded-xl bg-stone-50 p-4'>
       {Object.entries(metadata).map(([key, value]) => (
-        <div key={key} className="flex gap-2 text-sm">
-          <span className="text-stone-400">{key}:</span>
-          <span className="text-stone-600">{String(value)}</span>
+        <div key={key} className='flex gap-2 text-sm'>
+          <span className='text-stone-400'>{key}:</span>
+          <span className='text-stone-600'>{String(value)}</span>
         </div>
       ))}
     </div>
@@ -151,25 +177,42 @@ export function MessageContent({
   onReviewAction,
 }: MessageContentProps) {
   const renderers: Record<string, () => React.ReactNode> = {
-    text: () => <TextRenderer content={message.content || ''} enableTyping={enableTyping} />,
+    text: () => (
+      <TextRenderer
+        content={message.content || ''}
+        enableTyping={enableTyping}
+      />
+    ),
     choice: () => (
       <>
         <TextRenderer content={message.content || ''} />
         <ChoiceRenderer options={message.options} onSelect={onChoiceSelect} />
       </>
     ),
-    'place-card': () => <PlaceCardRenderer metadata={message.metadata} onConfirm={onPlaceConfirm} />,
+    'place-card': () => (
+      <PlaceCardRenderer
+        metadata={message.metadata}
+        onConfirm={onPlaceConfirm}
+      />
+    ),
     'style-summary': () => <StyleSummaryRenderer metadata={message.metadata} />,
-    'review-preview': () => <ReviewPreviewRenderer metadata={message.metadata} onAction={onReviewAction} />,
+    'review-preview': () => (
+      <ReviewPreviewRenderer
+        metadata={message.metadata}
+        onAction={onReviewAction}
+      />
+    ),
     loading: () => <LoadingRenderer />,
     summary: () => (
       <>
         <TextRenderer content={message.content || ''} />
-        <SummaryRenderer metadata={message.metadata as Record<string, unknown>} />
+        <SummaryRenderer
+          metadata={message.metadata as Record<string, unknown>}
+        />
       </>
     ),
   };
 
   const render = renderers[message.type] || renderers.text;
-  return <div className="space-y-3">{render()}</div>;
+  return <div className='space-y-3'>{render()}</div>;
 }

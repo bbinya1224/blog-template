@@ -17,9 +17,6 @@ const STOP_WORDS = new Set([
   '정도',
 ]);
 
-/**
- * 문장 분리
- */
 const splitSentences = (text: string): string[] => {
   return text
     .split(/[.!?。\n]+/)
@@ -27,18 +24,12 @@ const splitSentences = (text: string): string[] => {
     .filter((s) => s.length > 0);
 };
 
-/**
- * 평균 문장 길이 계산
- */
 const calculateAverageSentenceLength = (sentences: string[]): number => {
   if (sentences.length === 0) return 0;
   const totalLength = sentences.reduce((sum, s) => sum + s.length, 0);
   return totalLength / sentences.length;
 };
 
-/**
- * 빈도수 기반 단어 추출
- */
 const extractFrequentWords = (text: string, limit = 6): string[] => {
   const tokens = text
     .replace(/[^가-힣a-zA-Z\s]/g, ' ')
@@ -58,9 +49,6 @@ const extractFrequentWords = (text: string, limit = 6): string[] => {
     .slice(0, limit);
 };
 
-/**
- * 톤 감지
- */
 const detectTone = (text: string): string => {
   if (text.includes('설레') || text.includes('행복')) {
     return '감성적이고 따뜻한 톤';
@@ -71,9 +59,6 @@ const detectTone = (text: string): string => {
   return '담백하게 경험을 전달하는 톤';
 };
 
-/**
- * 주제 편향 감지
- */
 const detectTopicBias = (words: string[]): string => {
   if (words.find((word) => word.includes('카페'))) {
     return '카페 및 디저트 리뷰 비중이 높음';
@@ -84,9 +69,6 @@ const detectTopicBias = (words: string[]): string => {
   return '일상 기록 중심';
 };
 
-/**
- * 습관적 표현 추측
- */
 const guessPhrases = (text: string): string[] => {
   const phrases = ['솔직히', '개인적으로'];
   if (text.includes('분위기')) {
@@ -98,10 +80,6 @@ const guessPhrases = (text: string): string[] => {
   return unique(phrases);
 };
 
-/**
- * 휴리스틱 기반 스타일 프로필 생성
- * I/O 없이 순수하게 텍스트 분석만 수행
- */
 export const generateHeuristicProfile = (text: string): StyleProfile => {
   if (!text.trim()) {
     throw new StyleAnalysisError(
@@ -114,12 +92,10 @@ export const generateHeuristicProfile = (text: string): StyleProfile => {
   const frequentWords = extractFrequentWords(text);
   const topicBias = detectTopicBias(frequentWords);
 
-  // 존댓말 사용 여부 확인
   const formality = text.includes('요')
     ? '친근한 존댓말'
     : '담백한 반말 혹은 혼합체';
 
-  // 문장 길이 분류
   const sentenceLengthDesc =
     avgLength > 120
       ? '길고 묘사 위주 문장'
@@ -127,13 +103,11 @@ export const generateHeuristicProfile = (text: string): StyleProfile => {
         ? '중간 길이 문장'
         : '짧고 경쾌한 문장';
 
-  // 글쓰기 속도/리듬
   const pacing =
     sentences.length > 80
       ? '느긋하게 장면을 묘사함'
       : '빠르게 핵심을 전달하고 체험을 요약';
 
-  // 이모티콘 사용 여부
   const emojiUsage =
     text.includes('ㅎㅎ') || text.includes('^^')
       ? '이모티콘을 가볍게 활용'
@@ -166,10 +140,6 @@ export const generateHeuristicProfile = (text: string): StyleProfile => {
   };
 };
 
-/**
- * Claude API를 사용한 스타일 프로필 생성
- * Claude Sonnet이 블로그 텍스트를 분석하여 JSON 반환
- */
 export const generateStyleProfileWithClaude = async (
   blogText: string,
 ): Promise<StyleProfile> => {
@@ -180,10 +150,8 @@ export const generateStyleProfileWithClaude = async (
   }
 
   try {
-    // Supabase에서 프롬프트 조회
     const { systemPrompt, userPrompt } = await getStyleAnalysisPrompts();
 
-    // Claude Sonnet API 호출
     const responseText = await analyzeStyleWithClaude(
       blogText,
       systemPrompt,
@@ -194,13 +162,10 @@ export const generateStyleProfileWithClaude = async (
     console.log(responseText.substring(0, 500));
     console.log('...\n');
 
-    // JSON 추출 - 여러 방법 시도
     let cleanedJson = responseText;
 
-    // 1. 코드 블록 마커 제거
     cleanedJson = cleanedJson.replace(/```json\s*/g, '').replace(/```\s*/g, '');
 
-    // 2. JSON 객체만 추출 (가장 바깥쪽 {} 사이의 내용)
     const jsonMatch = cleanedJson.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       cleanedJson = jsonMatch[0];
@@ -214,7 +179,6 @@ export const generateStyleProfileWithClaude = async (
 
     const styleProfile = JSON.parse(cleanedJson) as StyleProfile;
 
-    // 기본 구조 검증
     if (
       !styleProfile.writing_style ||
       !styleProfile.structure_pattern ||
@@ -225,7 +189,6 @@ export const generateStyleProfileWithClaude = async (
 
     return styleProfile;
   } catch (error) {
-    // 원본 에러 로깅 (디버깅용)
     console.error('스타일 분석 상세 에러:', error);
 
     if (error instanceof StyleAnalysisError) {
@@ -238,7 +201,6 @@ export const generateStyleProfileWithClaude = async (
       );
     }
 
-    // 에러 메시지를 포함하여 더 자세한 정보 제공
     const errorMessage =
       error instanceof Error
         ? `스타일 분석 중 오류: ${error.message}`

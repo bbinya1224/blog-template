@@ -46,7 +46,7 @@ export default function RootLayout({
   return (
     <html lang='ko'>
       <body
-        className={`${inter.variable} ${notoSans.variable} bg-[var(--background)] text-[var(--foreground)] antialiased`}
+        className={`${inter.variable} ${notoSans.variable} bg-(--background) text-(--foreground) antialiased`}
       >
         <Providers>{children}</Providers>
         <Analytics />

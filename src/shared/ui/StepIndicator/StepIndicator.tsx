@@ -42,7 +42,7 @@ export function StepIndicator() {
         const content = (
           <>
             <span
-              className={`mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${badgeStyles}`}
+              className={`mr-2 inline-flex size-7  items-center justify-center rounded-full text-xs font-semibold ${badgeStyles}`}
             >
               {index + 1}
             </span>

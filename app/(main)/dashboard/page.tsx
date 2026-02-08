@@ -32,7 +32,7 @@ export default async function DashboardPage() {
     <div className='space-y-10'>
       <section className='space-y-4'>
         <div className='flex items-center justify-between'>
-          <p className='text-sm font-semibold uppercase tracking-[0.3em] text-[var(--primary)]'>
+          <p className='text-sm font-semibold uppercase tracking-[0.3em] text-(--primary)'>
             Dashboard
           </p>
         </div>
@@ -53,7 +53,7 @@ export default async function DashboardPage() {
             <p className='text-gray-600 h-20'>{action.body}</p>
             <Link
               href={action.href}
-              className='mt-4 inline-flex items-center justify-center rounded-lg bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover)]'
+              className='mt-4 inline-flex items-center justify-center rounded-lg bg-(--primary) px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-(--primary-hover)'
             >
               {action.cta}
             </Link>

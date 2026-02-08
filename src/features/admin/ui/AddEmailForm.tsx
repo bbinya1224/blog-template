@@ -22,7 +22,7 @@ export function AddEmailForm({ onAdd, loading }: Props) {
   };
 
   return (
-    <div className="mb-8 rounded-lg bg-white p-6 shadow">
+    <div className="mb-8 rounded-lg bg-white p-6 shadow-sm">
       <h2 className="mb-4 text-xl font-semibold">이메일 추가</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -33,7 +33,7 @@ export function AddEmailForm({ onAdd, loading }: Props) {
             type="email"
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
-            className="w-full rounded border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-sm border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500"
             placeholder="user@example.com"
             required
           />
@@ -47,7 +47,7 @@ export function AddEmailForm({ onAdd, loading }: Props) {
             type="text"
             value={newNotes}
             onChange={(e) => setNewNotes(e.target.value)}
-            className="w-full rounded border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-sm border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-500"
             placeholder="예: 친구 요청"
           />
         </div>
@@ -55,7 +55,7 @@ export function AddEmailForm({ onAdd, loading }: Props) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded bg-green-600 px-4 py-2 text-white transition hover:bg-green-700 disabled:bg-gray-400"
+          className="w-full rounded-sm bg-green-600 px-4 py-2 text-white transition hover:bg-green-700 disabled:bg-gray-400"
         >
           {loading ? '추가 중...' : '추가'}
         </button>

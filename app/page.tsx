@@ -2,7 +2,7 @@ import { getSession } from '@/shared/lib/auth-utils';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import { ChatPageContent } from './ChatPageContent';
 import { PublicChatView } from './PublicChatView';
-import { UserProfile } from '@/entities/user/ui/UserProfile';
+import { AppShell } from '@/widgets/app-shell';
 
 export const metadata = {
   title: '오롯이 — 경험 기록 도구',
@@ -25,19 +25,11 @@ export default async function HomePage() {
     .maybeSingle();
 
   return (
-    <div className='flex flex-col h-dvh'>
-      <header className='flex items-center justify-between px-6 py-3 border-b border-stone-100 bg-white/80 backdrop-blur-md'>
-        <span className='text-lg font-bold tracking-tight text-stone-800'>
-          오롯이
-        </span>
-        <UserProfile />
-      </header>
-      <div className='flex-1'>
-        <ChatPageContent
-          userEmail={userEmail}
-          existingStyleProfile={styleProfile}
-        />
-      </div>
-    </div>
+    <AppShell>
+      <ChatPageContent
+        userEmail={userEmail}
+        existingStyleProfile={styleProfile}
+      />
+    </AppShell>
   );
 }

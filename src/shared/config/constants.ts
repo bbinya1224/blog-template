@@ -1,15 +1,9 @@
-/**
- * 애플리케이션 전역 상수
- */
-
-// LocalStorage 키
 export const STORAGE_KEYS = {
   STYLE_PROFILE: 'styleProfile',
   STYLE_PROFILE_DATE: 'styleProfileDate',
   LAST_REVIEW: 'lastReview',
 } as const;
 
-// API 엔드포인트
 export const API_ENDPOINTS = {
   FETCH_RSS: '/api/fetch-rss',
   ANALYZE_STYLE: '/api/analyze-style',
@@ -18,7 +12,6 @@ export const API_ENDPOINTS = {
   STYLE_PROFILE: '/api/style-profile',
 } as const;
 
-// 분석 설정
 export const ANALYSIS_CONFIG = {
   DEFAULT_MAX_POSTS: 15,
   MIN_POSTS: 5,
@@ -27,7 +20,6 @@ export const ANALYSIS_CONFIG = {
   RECOMMENDED_MAX: 20,
 } as const;
 
-// 상태 메시지
 export const STATUS_MESSAGES = {
   FETCHING_RSS: 'RSS에서 글을 읽어오는 중입니다…',
   ANALYZING_STYLE: '스타일 분석을 시작합니다…',
@@ -43,7 +35,6 @@ export const STATUS_MESSAGES = {
   EDIT_COMPLETE: '리뷰가 수정되었습니다!',
 } as const;
 
-// 사용량 제한
 export const USAGE_LIMITS = {
   PREVIEW_MAX_USES: 2,
 } as const;

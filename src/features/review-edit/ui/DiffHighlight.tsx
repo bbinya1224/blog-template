@@ -40,7 +40,7 @@ export function DiffHighlight({
           return (
             <span
               key={key}
-              className='bg-green-100 text-green-800 rounded px-1'
+              className='bg-green-100 text-green-800 rounded-sm px-1'
             >
               {part.value}
             </span>
@@ -49,7 +49,7 @@ export function DiffHighlight({
 
         if (part.removed && mode === 'before') {
           return (
-            <span key={key} className='bg-red-100 text-red-700 rounded px-1'>
+            <span key={key} className='bg-red-100 text-red-700 rounded-sm px-1'>
               {part.value}
             </span>
           );

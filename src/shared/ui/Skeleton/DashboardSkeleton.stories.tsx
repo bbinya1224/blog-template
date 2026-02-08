@@ -17,21 +17,21 @@ type Story = StoryObj<typeof meta>;
 const MockStepIndicator = () => (
   <ol className='flex flex-wrap gap-3 text-sm font-medium text-gray-500'>
     <li className='flex items-center text-sm'>
-      <span className='mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--primary)] text-xs font-semibold text-white'>
+      <span className='mr-2 inline-flex size-7 items-center justify-center rounded-full bg-(--primary) text-xs font-semibold text-white'>
         1
       </span>
       <span className='text-gray-900'>스타일 분석</span>
       <span className='mx-3 text-gray-300'>—</span>
     </li>
     <li className='flex items-center text-sm'>
-      <span className='mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500'>
+      <span className='mr-2 inline-flex size-7 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500'>
         2
       </span>
       <span>리뷰 생성</span>
       <span className='mx-3 text-gray-300'>—</span>
     </li>
     <li className='flex items-center text-sm'>
-      <span className='mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500'>
+      <span className='mr-2 inline-flex size-7 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500'>
         3
       </span>
       <span>수정/보관</span>
@@ -43,12 +43,12 @@ export const Default: Story = {};
 
 export const WithLayout: Story = {
   render: () => (
-    <div className='min-h-screen bg-[var(--background)]'>
+    <div className='min-h-screen bg-(--background)'>
       {/* Header */}
       <header className='border-b border-gray-200 bg-white'>
         <div className='mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5 md:px-12'>
           <div>
-            <p className='text-xs font-semibold uppercase tracking-[0.2em] text-[var(--primary)]'>
+            <p className='text-xs font-semibold tracking-[0.2em] text-(--primary) uppercase'>
               오롯이
             </p>
             <p className='text-lg font-semibold text-gray-900'>
@@ -56,13 +56,13 @@ export const WithLayout: Story = {
             </p>
           </div>
           <div className='flex items-center gap-4'>
-            <div className='h-8 w-8 rounded-full bg-gray-300' />
+            <div className='size-8 rounded-full bg-gray-300' />
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className='mx-auto w-full max-w-5xl px-6 pb-16 pt-10 md:px-12'>
+      <main className='mx-auto w-full max-w-5xl px-6 pt-10 pb-16 md:px-12'>
         <div className='mb-10'>
           <MockStepIndicator />
         </div>
@@ -74,7 +74,7 @@ export const WithLayout: Story = {
 
 export const SkeletonOnly: Story = {
   render: () => (
-    <div className='bg-[var(--background)] p-6'>
+    <div className='bg-(--background) p-6'>
       <DashboardSkeleton />
     </div>
   ),
@@ -88,11 +88,11 @@ export const Comparison: Story = {
           Full Layout Context (권장 - 실제 사용 환경)
         </h2>
         <div className='overflow-hidden rounded-lg border'>
-          <div className='min-h-screen bg-[var(--background)]'>
+          <div className='min-h-screen bg-(--background)'>
             <header className='border-b border-gray-200 bg-white'>
               <div className='mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5 md:px-12'>
                 <div>
-                  <p className='text-xs font-semibold uppercase tracking-[0.2em] text-[var(--primary)]'>
+                  <p className='text-xs font-semibold tracking-[0.2em] text-(--primary) uppercase'>
                     오롯이
                   </p>
                   <p className='text-lg font-semibold text-gray-900'>
@@ -100,11 +100,11 @@ export const Comparison: Story = {
                   </p>
                 </div>
                 <div className='flex items-center gap-4'>
-                  <div className='h-8 w-8 rounded-full bg-gray-300' />
+                  <div className='size-8 rounded-full bg-gray-300' />
                 </div>
               </div>
             </header>
-            <main className='mx-auto w-full max-w-5xl px-6 pb-16 pt-10 md:px-12'>
+            <main className='mx-auto w-full max-w-5xl px-6 pt-10 pb-16 md:px-12'>
               <div className='mb-10'>
                 <MockStepIndicator />
               </div>
@@ -116,7 +116,7 @@ export const Comparison: Story = {
 
       <div className='border-t pt-8'>
         <h2 className='mb-4 text-xl font-bold'>Skeleton Only (참고용)</h2>
-        <div className='rounded-lg border bg-[var(--background)] p-6'>
+        <div className='rounded-lg border bg-(--background) p-6'>
           <DashboardSkeleton />
         </div>
       </div>

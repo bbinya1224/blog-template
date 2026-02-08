@@ -44,18 +44,22 @@ export function MessageList({
         'pt-4 pb-2',
         // Custom scrollbar styling
         'scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent',
-        className
+        className,
       )}
     >
       {/* Messages container - flex-col-reverse for bottom alignment */}
-      <div className="max-w-2xl mx-auto min-h-full flex flex-col justify-end">
-        <div className="space-y-4">
+      <div className='flex min-h-full w-full flex-col justify-end'>
+        <div className='space-y-4'>
           {messages.map((message, index) => (
             <MessageBubble
               key={message.id}
               message={message}
-              onChoiceSelect={(optionId) => onChoiceSelect?.(message.id, optionId)}
-              onPlaceConfirm={(confirmed) => onPlaceConfirm?.(message.id, confirmed)}
+              onChoiceSelect={(optionId) =>
+                onChoiceSelect?.(message.id, optionId)
+              }
+              onPlaceConfirm={(confirmed) =>
+                onPlaceConfirm?.(message.id, confirmed)
+              }
               onReviewAction={(action) => onReviewAction?.(message.id, action)}
               style={{
                 animationDelay: `${Math.min(index, 3) * 50}ms`,
@@ -63,9 +67,7 @@ export function MessageList({
             />
           ))}
 
-          {isTyping && (
-            <TypingIndicator />
-          )}
+          {isTyping && <TypingIndicator />}
 
           <div ref={bottomRef} />
         </div>

@@ -9,7 +9,7 @@ export function MainLayoutSkeleton() {
             <Skeleton className='h-3 w-24' />
             <Skeleton className='h-5 w-48' />
           </div>
-          <Skeleton className='h-8 w-8 rounded-full' />
+          <Skeleton className='size-8  rounded-full' />
         </div>
       </header>
 

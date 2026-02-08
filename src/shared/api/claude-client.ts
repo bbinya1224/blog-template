@@ -7,7 +7,6 @@ import type { ReviewPayload } from '@/shared/types/review';
 export const CLAUDE_SONNET = 'claude-sonnet-4-5-20250929';
 export const CLAUDE_HAIKU = 'claude-3-haiku-20240307';
 
-// Lazy initialization
 let anthropic: Anthropic | null = null;
 
 const getAnthropicClient = (): Anthropic => {
@@ -37,8 +36,8 @@ const CLAUDE_RETRY_OPTIONS = {
   maxAttempts: 3,
   initialDelayMs: 2000,
   maxDelayMs: 10000,
+  // Don't retry 429s - they should be handled by callers
   retryableErrors: (error: unknown) => {
-    // Don't retry 429s - they should be handled by callers
     if (error instanceof Anthropic.APIError && error.status === 429) {
       return false;
     }
@@ -55,9 +54,6 @@ const CLAUDE_RETRY_OPTIONS = {
   },
 };
 
-/**
- * Claude API 호출 (범용)
- */
 export const callClaude = async (
   systemPrompt: string,
   userPrompt: string,
@@ -107,8 +103,7 @@ export const callClaude = async (
         );
       }
       if (error.status === 429) {
-        // Extract Retry-After header (in seconds or HTTP-date)
-        // Headers is a WHATWG Headers instance, use .get() method
+        // Parse Retry-After header (seconds or HTTP-date format)
         let retryAfterSeconds: string | null = null;
         if (error.headers && typeof error.headers.get === 'function') {
           retryAfterSeconds = error.headers.get('retry-after');
@@ -118,12 +113,10 @@ export const callClaude = async (
 
         let retryAfterMs: number | undefined = undefined;
         if (retryAfterSeconds) {
-          // Try parsing as numeric seconds first
           const parsedSeconds = parseInt(retryAfterSeconds, 10);
           if (!isNaN(parsedSeconds) && parsedSeconds > 0) {
             retryAfterMs = parsedSeconds * 1000;
           } else {
-            // Try parsing as HTTP-date
             const dateMs = Date.parse(retryAfterSeconds);
             if (!isNaN(dateMs)) {
               const delaySeconds = (dateMs - Date.now()) / 1000;
@@ -154,9 +147,6 @@ export const callClaude = async (
   }
 };
 
-/**
- * 스타일 분석용 Claude Sonnet 호출
- */
 export const analyzeStyleWithClaude = async (
   blogText: string,
   systemPrompt: string,
@@ -170,19 +160,12 @@ export const analyzeStyleWithClaude = async (
   return callClaude(systemPrompt, userPrompt, CLAUDE_SONNET, 8192);
 };
 
-/**
- * 리뷰 생성용 데이터 인터페이스 정의
- * ReviewPayload를 확장하여 타입 중복 제거
- */
 export interface ReviewGenerationData extends ReviewPayload {
   kakao_place_info?: string;
   tavily_search_result_context?: string;
   writing_samples?: string;
 }
 
-/**
- * 리뷰 생성용 Claude Haiku 호출
- */
 export const generateReviewWithClaude = async (
   styleProfileJson: string,
   reviewData: ReviewGenerationData,
@@ -213,9 +196,6 @@ export const generateReviewWithClaude = async (
   return callClaude(systemPrompt, userPrompt, CLAUDE_SONNET, 4096);
 };
 
-/**
- * 리뷰 수정용 Claude Haiku 호출
- */
 export const editReviewWithClaude = async (
   originalReview: string,
   editRequest: string,

@@ -1,7 +1,3 @@
-/**
- * 프롬프트 데이터 액세스 레이어
- */
-
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import { invalidatePromptCache } from '@/shared/api/prompt-service';
 
@@ -51,9 +47,6 @@ export type UpdatePromptData = {
 // Category Operations
 // ============================================
 
-/**
- * 모든 카테고리 조회
- */
 export const getAllCategories = async (): Promise<PromptCategory[]> => {
   const { data, error } = await supabaseAdmin
     .from('prompt_categories')
@@ -72,9 +65,6 @@ export const getAllCategories = async (): Promise<PromptCategory[]> => {
 // Prompt Operations
 // ============================================
 
-/**
- * 프롬프트 목록 조회 (카테고리 필터 가능)
- */
 export const getAllPrompts = async (
   categorySlug?: string
 ): Promise<PromptWithCategory[]> => {
@@ -102,9 +92,6 @@ export const getAllPrompts = async (
   return (data || []) as PromptWithCategory[];
 };
 
-/**
- * 프롬프트 상세 조회
- */
 export const getPromptById = async (
   id: string
 ): Promise<PromptWithCategory | null> => {
@@ -127,9 +114,6 @@ export const getPromptById = async (
   return data as PromptWithCategory | null;
 };
 
-/**
- * 프롬프트 생성
- */
 export const createPrompt = async (
   promptData: CreatePromptData
 ): Promise<string> => {
@@ -154,9 +138,6 @@ export const createPrompt = async (
   return data.id;
 };
 
-/**
- * 프롬프트 수정
- */
 export const updatePrompt = async (
   id: string,
   updates: UpdatePromptData
@@ -178,9 +159,6 @@ export const updatePrompt = async (
   invalidatePromptCache();
 };
 
-/**
- * 프롬프트 삭제
- */
 export const deletePrompt = async (id: string): Promise<void> => {
   const { error } = await supabaseAdmin
     .from('prompts')

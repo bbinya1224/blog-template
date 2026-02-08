@@ -1,15 +1,7 @@
-/**
- * Book Category Configuration
- * 책 카테고리 설정
- */
-
 import type { CategoryConfig } from './types';
 import type { BookPayload } from '@/shared/types/review';
 import type { BookInfoStep } from '../../model/types';
 
-/**
- * 책 정보 수집 단계별 선택지 옵션
- */
 export const BOOK_CHOICE_OPTIONS = {
   readDate: [
     { id: 'recent', label: '최근에' },
@@ -33,9 +25,6 @@ export const BOOK_CHOICE_OPTIONS = {
   ],
 };
 
-/**
- * 책 카테고리 설정
- */
 export const bookConfig: CategoryConfig<BookPayload, BookInfoStep> = {
   id: 'book',
   name: '책',

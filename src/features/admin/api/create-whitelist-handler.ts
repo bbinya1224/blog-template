@@ -24,9 +24,6 @@ type WhitelistDeps = {
   deleteUser: (email: string) => Promise<void>;
 };
 
-/**
- * GET /api/admin/whitelist
- */
 export const createWhitelistGetHandler = (deps: WhitelistDeps) => {
   const handler = async (): Promise<Response> => {
     try {
@@ -41,9 +38,6 @@ export const createWhitelistGetHandler = (deps: WhitelistDeps) => {
   return withAdmin(handler);
 };
 
-/**
- * POST /api/admin/whitelist
- */
 export const createWhitelistPostHandler = (deps: WhitelistDeps) => {
   const handler = async (request: Request): Promise<Response> => {
     try {
@@ -54,7 +48,6 @@ export const createWhitelistPostHandler = (deps: WhitelistDeps) => {
         return ApiResponse.validationError('유효하지 않은 이메일 형식입니다.');
       }
 
-      // 중복 확인
       const existing = await deps.getUserByEmail(email);
       if (existing) {
         return ApiResponse.conflict('이미 존재하는 이메일입니다.');
@@ -73,20 +66,15 @@ export const createWhitelistPostHandler = (deps: WhitelistDeps) => {
   return withAdmin(handler);
 };
 
-/**
- * PUT /api/admin/whitelist
- */
 export const createWhitelistPutHandler = (deps: WhitelistDeps) => {
   const handler = async (request: Request): Promise<Response> => {
     try {
       const { email, is_preview, usage_count } = await request.json();
 
-      // 이메일 필수 검증
       if (!email || typeof email !== 'string') {
         return ApiResponse.validationError('이메일이 필요합니다.');
       }
 
-      // 업데이트할 필드 구성
       const updates: { is_preview?: boolean; usage_count?: number } = {};
       if (typeof is_preview === 'boolean') updates.is_preview = is_preview;
       if (typeof usage_count === 'number') updates.usage_count = usage_count;
@@ -108,15 +96,11 @@ export const createWhitelistPutHandler = (deps: WhitelistDeps) => {
   return withAdmin(handler);
 };
 
-/**
- * DELETE /api/admin/whitelist
- */
 export const createWhitelistDeleteHandler = (deps: WhitelistDeps) => {
   const handler = async (request: Request): Promise<Response> => {
     try {
       const { email } = await request.json();
 
-      // 이메일 필수 검증
       if (!email || typeof email !== 'string') {
         return ApiResponse.validationError('이메일이 필요합니다.');
       }

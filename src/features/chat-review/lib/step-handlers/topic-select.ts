@@ -1,8 +1,3 @@
-/**
- * Topic Select Step Handler
- * 주제 선택 단계 처리
- */
-
 import type { ConversationState, ReviewTopic } from '../../model/types';
 import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
 import type { StepHandlerResult } from './onboarding';
@@ -46,7 +41,6 @@ export function handleTopicSelect(
     };
   }
 
-  // MVP: 맛집만 지원
   if (topic !== 'restaurant') {
     return {
       messages: [
@@ -66,7 +60,6 @@ export function handleTopicSelect(
     };
   }
 
-  // 맛집 선택
   return {
     messages: [
       {

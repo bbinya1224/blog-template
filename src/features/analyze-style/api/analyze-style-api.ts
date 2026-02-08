@@ -1,10 +1,6 @@
 import type { StyleProfile } from '@/shared/types/style-profile';
 import { API_ENDPOINTS, STATUS_MESSAGES } from '@/shared/config/constants';
 
-/**
- * RSS 크롤링 및 스타일 분석 실행
- * @throws {Error} API 요청 실패 시
- */
 export const analyzeStyle = async (
   rssUrl: string,
   maxPosts: number,
@@ -38,9 +34,6 @@ export const analyzeStyle = async (
   return data.styleProfile;
 };
 
-/**
- * localStorage에 스타일 프로필 저장
- */
 export const saveStyleProfileToStorage = (profile: StyleProfile): void => {
   if (typeof window === 'undefined') return;
 
