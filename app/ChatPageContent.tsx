@@ -7,6 +7,7 @@ import {
   conversationStateAtom,
   hasExistingStyleAtom,
   styleProfileAtom,
+  selectedTopicAtom,
   useRecentReviews,
   useChatHandlers,
   useReviewGeneration,
@@ -18,6 +19,7 @@ import { MESSAGES, CHOICE_OPTIONS } from '@/features/chat-review/constants/messa
 import type { StyleProfile } from '@/entities/style-profile';
 import type { StyleSetupContext } from '@/features/chat-review/lib/step-handlers';
 import type { ChatMessage } from '@/entities/chat-message';
+import type { ReviewTopic } from '@/features/chat-review/model';
 
 interface ChatPageContentProps {
   userEmail: string;
@@ -32,6 +34,7 @@ export function ChatPageContent({
   const state = useAtomValue(conversationStateAtom);
   const setStyleProfile = useSetAtom(styleProfileAtom);
   const setHasExistingStyle = useSetAtom(hasExistingStyleAtom);
+  const setSelectedTopic = useSetAtom(selectedTopicAtom);
   const [styleSetupContext, setStyleSetupContext] = useState<StyleSetupContext>(
     {},
   );
@@ -97,6 +100,13 @@ export function ChatPageContent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.step]);
 
+  // Reset initialized flag when conversation is reset
+  useEffect(() => {
+    if (messages.length === 0) {
+      isInitializedRef.current = false;
+    }
+  }, [messages.length]);
+
   // Handle category selection - starts chat without onboarding
   const handleCategorySelect = (categoryId: string) => {
     if (isInitializedRef.current) return;
@@ -110,6 +120,7 @@ export function ChatPageContent({
     const message = categoryMessages[categoryId];
     if (message) {
       isInitializedRef.current = true;
+      setSelectedTopic(categoryId as ReviewTopic);
       addAssistantMessage(message, 'text');
     }
   };
@@ -130,6 +141,7 @@ export function ChatPageContent({
     <ChatContainer
       messages={messages}
       currentStep={state.step}
+      selectedTopic={state.selectedTopic}
       isTyping={isStreaming || isProcessing}
       isInputDisabled={isStreaming}
       inputPlaceholder={inputPlaceholder}
