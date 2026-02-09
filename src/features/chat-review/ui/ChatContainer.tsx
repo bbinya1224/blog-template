@@ -7,8 +7,8 @@ import type { ConversationStep } from '../model/types';
 import type { Review } from '@/entities/review';
 import { MessageList } from './MessageList';
 import { InputArea } from './InputArea';
+import { Utensils, ShoppingCart } from 'lucide-react';
 
-// Extensible category configuration
 interface CategoryOption {
   id: string;
   label: string;
@@ -30,40 +30,12 @@ const REVIEW_CATEGORIES: CategoryOption[] = [
   {
     id: 'restaurant',
     label: '맛집',
-    icon: (
-      <svg
-        className='size-5'
-        fill='none'
-        stroke='currentColor'
-        viewBox='0 0 24 24'
-      >
-        <path
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          strokeWidth={2}
-          d='M3 3v6h3V3M9 3v18m0-18c0 3.314 2.686 6 6 6M21 3v6h-3V3m0 18v-8h3v8'
-        />
-      </svg>
-    ),
+    icon: <Utensils />,
   },
   {
     id: 'product',
     label: '제품',
-    icon: (
-      <svg
-        className='size-5'
-        fill='none'
-        stroke='currentColor'
-        viewBox='0 0 24 24'
-      >
-        <path
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          strokeWidth={2}
-          d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
-        />
-      </svg>
-    ),
+    icon: <ShoppingCart />,
     disabled: true,
     disabledLabel: '준비중',
   },
@@ -152,10 +124,10 @@ export function ChatContainer({
   };
 
   return (
-    <>
+    <div className='flex h-full flex-col'>
       {/* Review type header */}
       {hasMessages && selectedTopic && (
-        <div className='absolute flex items-center gap-2 px-6 py-3'>
+        <div className='flex shrink-0 items-center gap-2 px-6 py-3'>
           <span className='text-orange-400'>
             {REVIEW_CATEGORIES.find((c) => c.id === selectedTopic)?.icon}
           </span>
@@ -166,7 +138,7 @@ export function ChatContainer({
       )}
       <div
         className={cn(
-          'flex size-full flex-col',
+          'flex min-h-0 w-full flex-1 flex-col',
           'md:mx-auto md:max-w-3xl',
           className,
         )}
@@ -297,6 +269,6 @@ export function ChatContainer({
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

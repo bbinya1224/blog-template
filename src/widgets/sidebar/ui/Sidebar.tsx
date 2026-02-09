@@ -71,9 +71,14 @@ export function Sidebar() {
           </button>
           {showLabels && (
             <>
-              <span className='text-base font-bold tracking-tight whitespace-nowrap text-stone-800'>
+              <button
+                type='button'
+                onClick={handleNewRecord}
+                aria-label='처음 화면으로 돌아가기'
+                className='text-base font-bold tracking-tight whitespace-nowrap text-stone-800 transition-opacity hover:opacity-70'
+              >
                 오롯이
-              </span>
+              </button>
               <div className='flex-1' />
               <button
                 onClick={toggle}

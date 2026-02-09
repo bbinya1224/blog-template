@@ -39,7 +39,7 @@ export function MessageList({
       className={cn(
         'flex-1 overflow-y-auto',
         'px-5 sm:px-6',
-        'pt-12 pb-2',
+        'pt-4 pb-2',
         'scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent',
         className,
       )}
