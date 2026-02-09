@@ -100,6 +100,13 @@ export function ChatPageContent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.step]);
 
+  // Reset initialized flag when conversation is reset
+  useEffect(() => {
+    if (messages.length === 0) {
+      isInitializedRef.current = false;
+    }
+  }, [messages.length]);
+
   // Handle category selection - starts chat without onboarding
   const handleCategorySelect = (categoryId: string) => {
     if (isInitializedRef.current) return;

@@ -52,7 +52,7 @@ export function InputArea({
   const canSend = value.trim().length > 0 && !disabled;
 
   return (
-    <div className={cn('px-4 py-3 sm:px-6', className)}>
+    <div className={cn('px-4 py-8 sm:px-6', className)}>
       <div className='w-full'>
         <div
           className={cn(
