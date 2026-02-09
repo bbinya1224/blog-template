@@ -38,17 +38,13 @@ export function MessageList({
       ref={containerRef}
       className={cn(
         'flex-1 overflow-y-auto',
-        // Horizontal padding
         'px-5 sm:px-6',
-        // Vertical spacing - reduced for tighter layout
-        'pt-4 pb-2',
-        // Custom scrollbar styling
+        'pt-12 pb-2',
         'scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent',
         className,
       )}
     >
-      {/* Messages container - flex-col-reverse for bottom alignment */}
-      <div className='flex min-h-full w-full flex-col justify-end'>
+      <div className='flex w-full flex-col'>
         <div className='space-y-4'>
           {messages.map((message, index) => (
             <MessageBubble

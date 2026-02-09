@@ -17,6 +17,15 @@ interface CategoryOption {
   disabledLabel?: string;
 }
 
+const REVIEW_HEADER_TITLES: Record<string, string> = {
+  restaurant: '맛집 리뷰 작성중',
+  beauty: '나의 뷰티 기록 작성중',
+  product: '제품 리뷰 작성중',
+  movie: '영화 리뷰 작성중',
+  book: '독서 기록 작성중',
+  travel: '여행 기록 작성중',
+};
+
 const REVIEW_CATEGORIES: CategoryOption[] = [
   {
     id: 'restaurant',
@@ -113,6 +122,7 @@ interface ChatContainerProps {
   onPlaceConfirm?: (messageId: string, confirmed: boolean) => void;
   onReviewAction?: (messageId: string, action: 'complete' | 'edit') => void;
   onCategorySelect?: (categoryId: string) => void;
+  selectedTopic?: string | null;
   recentReviews?: Review[];
   userName?: string;
   className?: string;
@@ -129,6 +139,7 @@ export function ChatContainer({
   onPlaceConfirm,
   onReviewAction,
   onCategorySelect,
+  selectedTopic,
   recentReviews = [],
   userName,
   className,
@@ -141,138 +152,151 @@ export function ChatContainer({
   };
 
   return (
-    <div
-      className={cn(
-        'flex size-full flex-col',
-        'md:mx-auto md:max-w-3xl',
-        className,
+    <>
+      {/* Review type header */}
+      {hasMessages && selectedTopic && (
+        <div className='absolute flex items-center gap-2 px-6 py-3'>
+          <span className='text-orange-400'>
+            {REVIEW_CATEGORIES.find((c) => c.id === selectedTopic)?.icon}
+          </span>
+          <h2 className='text-sm font-semibold text-stone-700'>
+            {REVIEW_HEADER_TITLES[selectedTopic] ?? '리뷰 작성중'}
+          </h2>
+        </div>
       )}
-    >
-      {/* Main content area */}
-      <div className='relative flex flex-1 flex-col overflow-hidden'>
-        {/* Welcome content - animates out when messages appear */}
-        <div
-          className={cn(
-            'absolute inset-0 flex flex-col items-center justify-center',
-            'transition-all duration-500 ease-out',
-            hasMessages
-              ? 'pointer-events-none translate-y-8 opacity-0'
-              : 'translate-y-0 opacity-100',
-          )}
-        >
-          <div className='mb-8 text-center'>
-            <h1 className='mb-2 text-2xl font-semibold text-stone-800 sm:text-3xl'>
-              {userName ? `${userName}님, 안녕하세요` : '안녕하세요'}
-            </h1>
-            <p className='text-lg text-stone-400'>
-              오늘은 어떤 경험을 남겨볼까요?
-            </p>
-          </div>
+      <div
+        className={cn(
+          'flex size-full flex-col',
+          'md:mx-auto md:max-w-3xl',
+          className,
+        )}
+      >
+        {/* Main content area */}
+        <div className='relative flex flex-1 flex-col overflow-hidden'>
+          {/* Welcome content - animates out when messages appear */}
+          <div
+            className={cn(
+              'absolute inset-0 flex flex-col items-center justify-center',
+              'transition-all duration-500 ease-out',
+              hasMessages
+                ? 'pointer-events-none translate-y-8 opacity-0'
+                : 'translate-y-0 opacity-100',
+            )}
+          >
+            <div className='mb-8 text-center'>
+              <h1 className='mb-2 text-2xl font-semibold text-stone-800 sm:text-3xl'>
+                {userName ? `${userName}님, 안녕하세요` : '안녕하세요'}
+              </h1>
+              <p className='text-lg text-stone-400'>
+                오늘은 어떤 경험을 남겨볼까요?
+              </p>
+            </div>
 
-          {/* Category selection */}
-          <div className='flex flex-wrap justify-center gap-3'>
-            {REVIEW_CATEGORIES.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => handleCategoryClick(category)}
-                disabled={category.disabled}
-                className={cn(
-                  'group flex items-center gap-2.5 px-5 py-3',
-                  'rounded-xl border-2 transition-all duration-200',
-                  category.disabled
-                    ? `cursor-not-allowed border-stone-100 bg-stone-50 text-stone-300`
-                    : `border-stone-200 bg-white text-stone-700 hover:border-orange-300 hover:shadow-md hover:shadow-orange-100/50`,
-                )}
-              >
-                <span
+            {/* Category selection */}
+            <div className='flex flex-wrap justify-center gap-3'>
+              {REVIEW_CATEGORIES.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => handleCategoryClick(category)}
+                  disabled={category.disabled}
                   className={cn(
-                    'transition-colors',
+                    'group flex items-center gap-2.5 px-5 py-3',
+                    'rounded-xl border-2 transition-all duration-200',
                     category.disabled
-                      ? 'text-stone-300'
-                      : `text-orange-400 group-hover:text-orange-500`,
+                      ? `cursor-not-allowed border-stone-100 bg-stone-50 text-stone-300`
+                      : `border-stone-200 bg-white text-stone-700 hover:border-orange-300 hover:shadow-md hover:shadow-orange-100/50`,
                   )}
                 >
-                  {category.icon}
-                </span>
-                <span className='font-medium'>{category.label}</span>
-                {category.disabled && category.disabledLabel && (
-                  <span className='ml-1 text-xs text-stone-300'>
-                    ({category.disabledLabel})
+                  <span
+                    className={cn(
+                      'transition-colors',
+                      category.disabled
+                        ? 'text-stone-300'
+                        : `text-orange-400 group-hover:text-orange-500`,
+                    )}
+                  >
+                    {category.icon}
                   </span>
-                )}
-              </button>
-            ))}
+                  <span className='font-medium'>{category.label}</span>
+                  {category.disabled && category.disabledLabel && (
+                    <span className='ml-1 text-xs text-stone-300'>
+                      ({category.disabledLabel})
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Message list - animates in when messages appear */}
+          <div
+            className={cn(
+              'min-h-0 flex-1 overflow-hidden transition-all duration-500 ease-out',
+              hasMessages
+                ? 'translate-y-0 opacity-100'
+                : 'pointer-events-none -translate-y-4 opacity-0',
+            )}
+          >
+            {hasMessages && (
+              <MessageList
+                messages={messages}
+                isTyping={isTyping}
+                onChoiceSelect={onChoiceSelect}
+                onPlaceConfirm={onPlaceConfirm}
+                onReviewAction={onReviewAction}
+                className='h-full'
+              />
+            )}
           </div>
         </div>
 
-        {/* Message list - animates in when messages appear */}
-        <div
-          className={cn(
-            'flex-1 transition-all duration-500 ease-out',
-            hasMessages
-              ? 'translate-y-0 opacity-100'
-              : 'pointer-events-none -translate-y-4 opacity-0',
-          )}
-        >
-          {hasMessages && (
-            <MessageList
-              messages={messages}
-              isTyping={isTyping}
-              onChoiceSelect={onChoiceSelect}
-              onPlaceConfirm={onPlaceConfirm}
-              onReviewAction={onReviewAction}
-              className='h-full'
-            />
-          )}
-        </div>
-      </div>
+        {/* Input area - always at bottom */}
+        <InputArea
+          onSend={onSendMessage}
+          disabled={isInputDisabled || isTyping}
+          placeholder={inputPlaceholder}
+        />
 
-      {/* Input area - always at bottom */}
-      <InputArea
-        onSend={onSendMessage}
-        disabled={isInputDisabled || isTyping}
-        placeholder={inputPlaceholder}
-      />
-
-      {/* Recent reviews - only render when no messages */}
-      {!hasMessages && recentReviews.length > 0 && (
-        <div className='border-t border-stone-100 px-6 pb-6'>
-          <div className='flex items-center justify-between py-4'>
-            <h2 className='text-sm font-medium text-stone-500'>
-              최근에는 이런 리뷰를 작성했어요.
-            </h2>
-            <Link
-              href='/reviews'
-              className='text-sm font-medium text-orange-500 transition-colors hover:text-orange-600'
-            >
-              전체보기
-            </Link>
-          </div>
-
-          {/* Horizontal scroll cards */}
-          <div className='scrollbar-hide -mx-6 flex gap-3 overflow-x-auto px-6 pb-2'>
-            {recentReviews.slice(0, 6).map((review) => (
+        {/* Recent reviews - only render when no messages */}
+        {!hasMessages && recentReviews.length > 0 && (
+          <div className='border-t border-stone-100 px-6 pb-6'>
+            <div className='flex items-center justify-between py-4'>
+              <h2 className='text-sm font-medium text-stone-500'>
+                최근에는 이런 리뷰를 작성했어요.
+              </h2>
               <Link
-                key={review.id}
-                href={`/reviews/${review.id}`}
-                className={cn(
-                  'group w-44 shrink-0 p-4',
-                  'rounded-xl border border-stone-200',
-                  'hover:border-orange-300 hover:shadow-md',
-                  'transition-all duration-200',
-                )}
+                href='/reviews'
+                className='text-sm font-medium text-orange-500 transition-colors hover:text-orange-600'
               >
-                <h3 className='mb-1 truncate text-sm font-semibold text-stone-800 transition-colors group-hover:text-orange-600'>
-                  {review.storeName || '맛집 리뷰'}
-                </h3>
-                <p className='text-xs text-stone-400'>
-                  {formatReviewDate(review.date)}
-                </p>
+                전체보기
               </Link>
-            ))}
+            </div>
+
+            {/* Horizontal scroll cards */}
+            <div className='scrollbar-hide -mx-6 flex gap-3 overflow-x-auto px-6 pb-2'>
+              {recentReviews.slice(0, 6).map((review) => (
+                <Link
+                  key={review.id}
+                  href={`/reviews/${review.id}`}
+                  className={cn(
+                    'group w-44 shrink-0 p-4',
+                    'rounded-xl border border-stone-200',
+                    'hover:border-orange-300 hover:shadow-md',
+                    'transition-all duration-200',
+                  )}
+                >
+                  <h3 className='mb-1 truncate text-sm font-semibold text-stone-800 transition-colors group-hover:text-orange-600'>
+                    {review.storeName || '맛집 리뷰'}
+                  </h3>
+                  <p className='text-xs text-stone-400'>
+                    {formatReviewDate(review.date)}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
