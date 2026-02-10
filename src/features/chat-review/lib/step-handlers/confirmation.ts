@@ -61,8 +61,8 @@ export function handleConfirmation(
     '어디': 'place',
     '메뉴': 'menu',
     '음식': 'menu',
-    '맛': 'experience',
-    '분위기': 'experience',
+    '맛': 'taste',
+    '분위기': 'atmosphere',
   };
 
   for (const [keyword, subStep] of Object.entries(fieldKeywords)) {

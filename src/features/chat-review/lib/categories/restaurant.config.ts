@@ -17,12 +17,6 @@ export const RESTAURANT_CHOICE_OPTIONS = {
     { id: 'colleague', label: '직장 동료' },
     { id: 'custom', label: '✏️ 직접 입력' },
   ],
-  additional: [
-    { id: 'waiting', label: '웨이팅 정보' },
-    { id: 'price', label: '가격대' },
-    { id: 'other-menu', label: '다른 메뉴' },
-    { id: 'done', label: '됐어요, 이만하면 충분해요!' },
-  ],
 };
 
 export const restaurantConfig: CategoryConfig<
@@ -38,17 +32,12 @@ export const restaurantConfig: CategoryConfig<
     { id: 'companion', type: 'choice', isRequired: true, field: 'companion' },
     { id: 'place', type: 'search', isRequired: true, field: 'name' },
     { id: 'menu', type: 'input', isRequired: true, field: 'menu' },
-    { id: 'experience', type: 'input', isRequired: true, field: 'pros' },
-    {
-      id: 'additional',
-      type: 'choice',
-      isRequired: false,
-      field: 'extra',
-      skipLabel: '됐어요',
-    },
+    { id: 'taste', type: 'input', isRequired: true, field: 'pros' },
+    { id: 'atmosphere', type: 'input', isRequired: true, field: 'extra' },
+    { id: 'highlight', type: 'input', isRequired: true, field: 'extra' },
   ],
 
-  stepOrder: ['date', 'companion', 'place', 'menu', 'experience', 'additional'],
+  stepOrder: ['date', 'companion', 'place', 'menu', 'taste', 'atmosphere', 'highlight'],
 
   messages: {
     date: '맛집 리뷰군요!\n언제 식사하러 가셨어요?',
@@ -62,14 +51,14 @@ export const restaurantConfig: CategoryConfig<
       return `${companion}이랑 맛있는 거 먹으러 가셨군요!\n\n어느 매장에서 어떤 음식을 드셨어요?\n더 알려주세요.`;
     },
     menu: '뭘 드셨어요? 메뉴 이름을 알려주세요.',
-    experience: '맛이나 분위기, 기억에 남는 거\n자유롭게 얘기해주세요.',
-    additional: '혹시 더 알려주실 내용이 있나요?',
+    taste: '첫 한 입의 느낌이 어땠어요?\n맛, 식감, 비주얼 뭐든 좋아요 🍴',
+    atmosphere: '가게 분위기는 어땠어요?\n인테리어나 음악, 직원 서비스 같은 것도요 ✨',
+    highlight: '가장 기억에 남는 순간이 있어요?\n좋았던 것도, 아쉬웠던 것도요 💭',
   },
 
   choiceOptions: {
     date: RESTAURANT_CHOICE_OPTIONS.date,
     companion: RESTAURANT_CHOICE_OPTIONS.companion,
-    additional: RESTAURANT_CHOICE_OPTIONS.additional,
   },
 
   extractors: {
@@ -157,6 +146,6 @@ export const restaurantConfig: CategoryConfig<
       payload.companion &&
       payload.location &&
       payload.menu &&
-      (payload.pros || payload.extra)
+      payload.pros
     ),
 };

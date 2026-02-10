@@ -55,7 +55,7 @@ export function isInfoGatheringComplete(state: ConversationState): boolean {
     info.companion &&
     info.location &&
     info.menu &&
-    (info.pros || info.extra)
+    info.pros
   );
 }
 
@@ -68,8 +68,9 @@ export function determineInfoSubStep(
   if (!info.companion) return 'companion';
   if (!info.location || !info.name) return 'place';
   if (!info.menu) return 'menu';
-  if (!info.pros && !info.extra) return 'experience';
-  return 'additional';
+  if (!info.pros) return 'taste';
+  if (!info.extra) return 'atmosphere';
+  return 'highlight';
 }
 
 export type UserIntent =
@@ -249,19 +250,25 @@ function createInfoGatheringMessage(
         content: MESSAGES.infoGathering.restaurant.menu,
       };
 
-    case 'experience':
+    case 'taste':
       return {
         ...baseMessage,
         type: 'input',
-        content: MESSAGES.infoGathering.restaurant.experience,
+        content: MESSAGES.infoGathering.restaurant.taste,
       };
 
-    case 'additional':
+    case 'atmosphere':
       return {
         ...baseMessage,
-        type: 'choice',
-        content: MESSAGES.infoGathering.restaurant.additional,
-        options: CHOICE_OPTIONS.additionalInfo,
+        type: 'input',
+        content: MESSAGES.infoGathering.restaurant.atmosphere,
+      };
+
+    case 'highlight':
+      return {
+        ...baseMessage,
+        type: 'input',
+        content: MESSAGES.infoGathering.restaurant.highlight,
       };
 
     default:

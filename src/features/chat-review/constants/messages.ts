@@ -100,19 +100,14 @@ export const MESSAGES = {
 
       menu: '뭘 드셨어요? 메뉴 이름을 알려주세요.',
 
-      experience: `맛이나 분위기, 기억에 남는 거
-자유롭게 얘기해주세요.`,
+      taste: `첫 한 입의 느낌이 어땠어요?
+맛, 식감, 비주얼 뭐든 좋아요 🍴`,
 
-      experienceFollowUp: (keyword: string) =>
-        `${keyword} 좋았군요!\n더 자세히 얘기해주실 수 있어요?`,
+      atmosphere: `가게 분위기는 어땠어요?
+인테리어나 음악, 직원 서비스 같은 것도요 ✨`,
 
-      additional: '혹시 더 알려주실 내용이 있나요?',
-
-      waitingTime: '웨이팅이 있었다고 하셨는데,\n대략 얼마나 기다리셨어요?',
-
-      price: '가격대는 어땠어요?',
-
-      otherMenu: '다른 메뉴도 드셨어요?',
+      highlight: `가장 기억에 남는 순간이 있어요?
+좋았던 것도, 아쉬웠던 것도요 💭`,
     },
   },
 
@@ -233,14 +228,6 @@ export const CHOICE_OPTIONS: Record<string, ChoiceOption[]> = {
     { id: '10000-20000', label: '1-2만원' },
     { id: '20000-30000', label: '2-3만원' },
     { id: 'over-30000', label: '3만원 이상' },
-  ],
-
-  // 추가 정보
-  additionalInfo: [
-    { id: 'waiting', label: '웨이팅 정보' },
-    { id: 'price', label: '가격대' },
-    { id: 'other-menu', label: '다른 메뉴' },
-    { id: 'done', label: '됐어요, 이만하면 충분해요!' },
   ],
 
   // 정보 확인
