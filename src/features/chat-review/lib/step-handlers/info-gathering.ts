@@ -11,6 +11,7 @@ import {
   extractCompanionInfo,
   determineInfoSubStep,
 } from '../conversation-engine';
+import { restaurantConfig } from '../categories/restaurant.config';
 import type { StepHandlerResult } from './onboarding';
 
 export interface InfoGatheringResult extends StepHandlerResult {
@@ -32,10 +33,12 @@ export function handleInfoGathering(
       return handlePlaceInput(userInput, state);
     case 'menu':
       return handleMenuInput(userInput, state);
-    case 'experience':
-      return handleExperienceInput(userInput, state);
-    case 'additional':
-      return handleAdditionalInput(userInput, state);
+    case 'taste':
+      return handleTasteInput(userInput, state);
+    case 'atmosphere':
+      return handleAtmosphereInput(userInput, state);
+    case 'highlight':
+      return handleHighlightInput(userInput, state);
     default:
       return handleDateInput(userInput, state);
   }
@@ -157,155 +160,97 @@ function handleMenuInput(
       {
         role: 'assistant',
         type: 'text',
-        content: MESSAGES.infoGathering.restaurant.experience,
+        content: MESSAGES.infoGathering.restaurant.taste,
       },
     ],
     actions: [
       { type: 'UPDATE_COLLECTED_INFO', payload: { menu: userInput } },
-      { type: 'SET_SUB_STEP', payload: 'experience' },
+      { type: 'SET_SUB_STEP', payload: 'taste' },
     ],
   };
 }
 
-function handleExperienceInput(
+function handleTasteInput(
   userInput: string,
   _state: ConversationState
 ): InfoGatheringResult {
-  const positiveKeywords = [
-    '맛있',
-    '좋',
-    '최고',
-    '친절',
-    '깔끔',
-    '분위기',
-    '예쁜',
-    '싱싱',
-    '쫄깃',
-  ];
-  const negativeKeywords = [
-    '아쉬',
-    '별로',
-    '실망',
-    '비싸',
-    '느린',
-    '불친절',
-    '기다',
-  ];
+  return {
+    messages: [
+      {
+        role: 'assistant',
+        type: 'text',
+        content: MESSAGES.infoGathering.restaurant.atmosphere,
+      },
+    ],
+    actions: [
+      { type: 'UPDATE_COLLECTED_INFO', payload: { pros: userInput } },
+      { type: 'SET_SUB_STEP', payload: 'atmosphere' },
+    ],
+  };
+}
 
-  let hasPositive = false;
-  let hasNegative = false;
+function handleAtmosphereInput(
+  userInput: string,
+  state: ConversationState
+): InfoGatheringResult {
+  const currentExtra = state.collectedInfo.extra || '';
+  const extraValue = currentExtra
+    ? `${currentExtra}\n분위기: ${userInput}`
+    : `분위기: ${userInput}`;
 
-  positiveKeywords.forEach((keyword) => {
-    if (userInput.includes(keyword)) {
-      hasPositive = true;
-    }
-  });
+  return {
+    messages: [
+      {
+        role: 'assistant',
+        type: 'text',
+        content: MESSAGES.infoGathering.restaurant.highlight,
+      },
+    ],
+    actions: [
+      { type: 'UPDATE_COLLECTED_INFO', payload: { extra: extraValue } },
+      { type: 'SET_SUB_STEP', payload: 'highlight' },
+    ],
+  };
+}
 
-  negativeKeywords.forEach((keyword) => {
-    if (userInput.includes(keyword)) {
-      hasNegative = true;
-    }
-  });
+function handleHighlightInput(
+  userInput: string,
+  state: ConversationState
+): InfoGatheringResult {
+  const { positive, negative } = restaurantConfig.experienceKeywords!;
+
+  const hasPositive = positive.some((k) => userInput.includes(k));
+  const hasNegative = negative.some((k) => userInput.includes(k));
 
   const payload: Partial<ReviewPayload> = {};
-  if (hasPositive && !hasNegative) {
-    payload.pros = userInput;
-  } else if (hasNegative && !hasPositive) {
-    payload.cons = userInput;
-  } else {
-    payload.extra = userInput;
+
+  if (hasPositive) {
+    const current = state.collectedInfo.pros || '';
+    payload.pros = current ? `${current}\n${userInput}` : userInput;
+  }
+  if (hasNegative) {
+    const current = state.collectedInfo.cons || '';
+    payload.cons = current ? `${current}\n${userInput}` : userInput;
+  }
+  if (!hasPositive && !hasNegative) {
+    const currentExtra = state.collectedInfo.extra || '';
+    payload.extra = currentExtra
+      ? `${currentExtra}\n하이라이트: ${userInput}`
+      : `하이라이트: ${userInput}`;
   }
 
   return {
     messages: [
       {
         role: 'assistant',
-        type: 'choice',
-        content: MESSAGES.infoGathering.restaurant.additional,
-        options: CHOICE_OPTIONS.additionalInfo,
+        type: 'text',
+        content: '좋아요, 거의 다 됐어요! 정리해볼게요.',
       },
     ],
     actions: [
       { type: 'UPDATE_COLLECTED_INFO', payload },
-      { type: 'SET_SUB_STEP', payload: 'additional' },
+      { type: 'GO_TO_STEP', payload: 'confirmation' },
     ],
-  };
-}
-
-function handleAdditionalInput(
-  userInput: string,
-  state: ConversationState
-): InfoGatheringResult {
-  const lowered = userInput.toLowerCase();
-
-  if (lowered === 'done' || lowered.includes('됐') || lowered.includes('충분')) {
-    return {
-      messages: [],
-      actions: [{ type: 'GO_TO_STEP', payload: 'confirmation' }],
-      nextStep: 'confirmation',
-    };
-  }
-
-  if (
-    lowered === 'waiting' ||
-    lowered.includes('웨이팅') ||
-    lowered.includes('기다')
-  ) {
-    return {
-      messages: [
-        {
-          role: 'assistant',
-          type: 'choice',
-          content: MESSAGES.infoGathering.restaurant.waitingTime,
-          options: CHOICE_OPTIONS.waitingTime,
-        },
-      ],
-      actions: [],
-    };
-  }
-
-  if (lowered === 'price' || lowered.includes('가격')) {
-    return {
-      messages: [
-        {
-          role: 'assistant',
-          type: 'choice',
-          content: MESSAGES.infoGathering.restaurant.price,
-          options: CHOICE_OPTIONS.priceRange,
-        },
-      ],
-      actions: [],
-    };
-  }
-
-  if (lowered === 'other-menu' || lowered.includes('다른 메뉴')) {
-    return {
-      messages: [
-        {
-          role: 'assistant',
-          type: 'text',
-          content: MESSAGES.infoGathering.restaurant.otherMenu,
-        },
-      ],
-      actions: [],
-    };
-  }
-
-  const currentExtra = state.collectedInfo.extra || '';
-  return {
-    messages: [
-      {
-        role: 'assistant',
-        type: 'choice',
-        content: '더 알려주실 내용이 있나요? 😊',
-        options: CHOICE_OPTIONS.additionalInfo,
-      },
-    ],
-    actions: [
-      {
-        type: 'UPDATE_COLLECTED_INFO',
-        payload: { extra: `${currentExtra} ${userInput}`.trim() },
-      },
-    ],
+    nextStep: 'confirmation',
   };
 }

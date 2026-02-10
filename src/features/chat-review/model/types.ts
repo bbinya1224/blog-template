@@ -3,15 +3,15 @@ import type { ReviewPayload } from '@/shared/types/review';
 
 // 대화 단계
 export type ConversationStep =
-  | 'onboarding'      // 인사 & 이름 입력
-  | 'style-check'     // 기존 스타일 확인
-  | 'style-setup'     // 스타일 설정 (URL/직접입력/설문)
-  | 'topic-select'    // 주제 선택
-  | 'info-gathering'  // 정보 수집
-  | 'confirmation'    // 수집 정보 확인
-  | 'generating'      // 리뷰 생성 중
-  | 'review-edit'     // 리뷰 수정
-  | 'complete';       // 완료
+  | 'onboarding'        // 인사 & 이름 입력
+  | 'style-check'       // 기존 스타일 확인
+  | 'style-setup'       // 스타일 설정 (URL/직접입력/설문)
+  | 'topic-select'      // 주제 선택
+  | 'info-gathering'    // 정보 수집
+  | 'confirmation'      // 수집 정보 확인
+  | 'generating'        // 리뷰 생성 중
+  | 'review-edit'       // 리뷰 수정
+  | 'complete';         // 완료
 
 // 맛집 정보 수집 세부 단계
 export type RestaurantInfoStep =
@@ -19,8 +19,9 @@ export type RestaurantInfoStep =
   | 'companion'   // 누구랑 갔는지
   | 'place'       // 어디서 (검색 연동)
   | 'menu'        // 뭘 먹었는지
-  | 'experience'  // 경험 상세 (맛, 분위기, 서비스)
-  | 'additional'; // 추가 정보 (웨이팅, 가격 등)
+  | 'taste'       // 미각/시각 — 맛, 식감, 비주얼
+  | 'atmosphere'  // 공간/분위기 — 인테리어, 음악, 서비스
+  | 'highlight';  // 감정/하이라이트 — 가장 기억에 남는 순간
 
 // 책 정보 수집 세부 단계
 export type BookInfoStep =
