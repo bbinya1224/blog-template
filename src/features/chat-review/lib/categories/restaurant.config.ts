@@ -136,8 +136,10 @@ export const restaurantConfig: CategoryConfig<
       '예쁜',
       '싱싱',
       '쫄깃',
+      '행복',
+      '만족',
     ],
-    negative: ['아쉬', '별로', '실망', '비싸', '느린', '불친절', '기다'],
+    negative: ['아쉬', '별로', '실망', '비싸', '느린', '불친절', '기다', '짜증'],
   },
 
   isComplete: (payload) =>

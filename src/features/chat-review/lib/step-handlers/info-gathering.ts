@@ -11,6 +11,7 @@ import {
   extractCompanionInfo,
   determineInfoSubStep,
 } from '../conversation-engine';
+import { restaurantConfig } from '../categories/restaurant.config';
 import type { StepHandlerResult } from './onboarding';
 
 export interface InfoGatheringResult extends StepHandlerResult {
@@ -216,32 +217,36 @@ function handleHighlightInput(
   userInput: string,
   state: ConversationState
 ): InfoGatheringResult {
-  const positiveKeywords = [
-    '맛있', '좋', '최고', '친절', '깔끔', '예쁜', '싱싱', '쫄깃', '행복', '만족',
-  ];
-  const negativeKeywords = [
-    '아쉬', '별로', '실망', '비싸', '느린', '불친절', '기다', '짜증',
-  ];
+  const { positive, negative } = restaurantConfig.experienceKeywords!;
 
-  const hasPositive = positiveKeywords.some((k) => userInput.includes(k));
-  const hasNegative = negativeKeywords.some((k) => userInput.includes(k));
+  const hasPositive = positive.some((k) => userInput.includes(k));
+  const hasNegative = negative.some((k) => userInput.includes(k));
 
   const payload: Partial<ReviewPayload> = {};
-  const currentExtra = state.collectedInfo.extra || '';
 
+  if (hasPositive) {
+    const current = state.collectedInfo.pros || '';
+    payload.pros = current ? `${current}\n${userInput}` : userInput;
+  }
   if (hasNegative) {
-    payload.cons = userInput;
-  } else if (hasPositive) {
-    const currentPros = state.collectedInfo.pros || '';
-    payload.pros = currentPros ? `${currentPros}\n${userInput}` : userInput;
-  } else {
+    const current = state.collectedInfo.cons || '';
+    payload.cons = current ? `${current}\n${userInput}` : userInput;
+  }
+  if (!hasPositive && !hasNegative) {
+    const currentExtra = state.collectedInfo.extra || '';
     payload.extra = currentExtra
       ? `${currentExtra}\n하이라이트: ${userInput}`
       : `하이라이트: ${userInput}`;
   }
 
   return {
-    messages: [],
+    messages: [
+      {
+        role: 'assistant',
+        type: 'text',
+        content: '좋아요, 거의 다 됐어요! 정리해볼게요.',
+      },
+    ],
     actions: [
       { type: 'UPDATE_COLLECTED_INFO', payload },
       { type: 'GO_TO_STEP', payload: 'confirmation' },
