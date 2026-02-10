@@ -69,6 +69,13 @@ export async function POST(req: NextRequest) {
           const response = await client.messages.stream({
             model: 'claude-sonnet-4-5-20250929',
             max_tokens: 4096,
+            system: [
+              {
+                type: 'text',
+                text: '당신은 블로그 리뷰 수정 전문가입니다. 사용자의 글쓰기 스타일을 유지하면서 요청된 부분만 정확하게 수정합니다. 전체 리뷰의 흐름과 톤을 해치지 않으면서 자연스럽게 수정해주세요.',
+                cache_control: { type: 'ephemeral' },
+              },
+            ],
             messages: [{ role: 'user', content: userPrompt }],
           });
 
