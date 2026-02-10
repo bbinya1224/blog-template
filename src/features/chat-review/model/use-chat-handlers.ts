@@ -47,6 +47,7 @@ export function useChatHandlers({
     onPlaceSearch: searchPlace,
     onReviewEditRequest: editReview,
     smartFollowupRemainingQuestions: getRemainingQuestions,
+    onConsumeSmartFollowup: consumeNextQuestion,
   });
 
   // Main message handler - simplified and declarative

@@ -14,12 +14,11 @@ export function handleSmartFollowup(
 ): SmartFollowupResult {
   const lowered = userInput.toLowerCase();
 
-  // 스킵 처리
+  // 스킵 처리 — 버튼 라벨은 '충분' 포함으로, 직접 입력은 정확 매칭으로 감지
   if (
     lowered.includes('충분') ||
-    lowered.includes('스킵') ||
-    lowered.includes('skip') ||
-    lowered.includes('리뷰 작성')
+    lowered === '스킵' ||
+    lowered === 'skip'
   ) {
     return {
       messages: [],

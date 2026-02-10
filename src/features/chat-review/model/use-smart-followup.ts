@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { ReviewPayload } from '@/shared/types/review';
 
 interface UseSmartFollowupReturn {
@@ -21,6 +21,9 @@ export function useSmartFollowup(): UseSmartFollowupReturn {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
+  const questionsRef = useRef<string[]>([]);
+  const indexRef = useRef(0);
+
   const fetchSmartQuestions = useCallback(
     async (
       collectedInfo: Partial<ReviewPayload>,
@@ -34,13 +37,30 @@ export function useSmartFollowup(): UseSmartFollowupReturn {
           body: JSON.stringify({ collectedInfo, selectedTopic }),
         });
 
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => ({}));
+          console.error(
+            `Smart followup API error: ${response.status}`,
+            errorBody
+          );
+          questionsRef.current = [];
+          indexRef.current = 0;
+          setQuestions([]);
+          setCurrentQuestionIndex(0);
+          return [];
+        }
+
         const data = await response.json();
         const fetchedQuestions: string[] = data.questions || [];
+        questionsRef.current = fetchedQuestions;
+        indexRef.current = 0;
         setQuestions(fetchedQuestions);
         setCurrentQuestionIndex(0);
         return fetchedQuestions;
       } catch (error) {
         console.error('Smart followup fetch error:', error);
+        questionsRef.current = [];
+        indexRef.current = 0;
         setQuestions([]);
         return [];
       } finally {
@@ -51,17 +71,20 @@ export function useSmartFollowup(): UseSmartFollowupReturn {
   );
 
   const consumeNextQuestion = useCallback((): string | null => {
-    if (currentQuestionIndex >= questions.length) return null;
-    const question = questions[currentQuestionIndex];
-    setCurrentQuestionIndex((prev) => prev + 1);
+    if (indexRef.current >= questionsRef.current.length) return null;
+    const question = questionsRef.current[indexRef.current];
+    indexRef.current += 1;
+    setCurrentQuestionIndex(indexRef.current);
     return question;
-  }, [questions, currentQuestionIndex]);
+  }, []);
 
   const getRemainingQuestions = useCallback((): string[] => {
-    return questions.slice(currentQuestionIndex + 1);
-  }, [questions, currentQuestionIndex]);
+    return questionsRef.current.slice(indexRef.current);
+  }, []);
 
   const reset = useCallback(() => {
+    questionsRef.current = [];
+    indexRef.current = 0;
     setQuestions([]);
     setCurrentQuestionIndex(0);
     setIsLoading(false);

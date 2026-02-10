@@ -28,6 +28,7 @@ interface UseMessageProcessorProps {
   onPlaceSearch: (query: string) => Promise<void>;
   onReviewEditRequest: (request: string) => Promise<void>;
   smartFollowupRemainingQuestions: () => string[];
+  onConsumeSmartFollowup: () => void;
 }
 
 interface UseMessageProcessorReturn {
@@ -46,6 +47,7 @@ export function useMessageProcessor({
   onPlaceSearch,
   onReviewEditRequest,
   smartFollowupRemainingQuestions,
+  onConsumeSmartFollowup,
 }: UseMessageProcessorProps): UseMessageProcessorReturn {
 
   const addResultMessages = useCallback((messages: Partial<ChatMessage>[]) => {
@@ -105,6 +107,9 @@ export function useMessageProcessor({
       case 'smart-followup': {
         const remaining = smartFollowupRemainingQuestions();
         result = handleSmartFollowup(content, state, remaining);
+        if (!(result as SmartFollowupResult).skipFollowup && remaining.length > 0) {
+          onConsumeSmartFollowup();
+        }
         break;
       }
 
@@ -141,6 +146,7 @@ export function useMessageProcessor({
     onPlaceSearch,
     onReviewEditRequest,
     smartFollowupRemainingQuestions,
+    onConsumeSmartFollowup,
   ]);
 
   return { processMessage };

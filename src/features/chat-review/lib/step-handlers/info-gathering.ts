@@ -244,7 +244,7 @@ function handleHighlightInput(
       {
         role: 'assistant',
         type: 'text',
-        content: '좋아요, 거의 다 됐어요! 정리해볼게요.',
+        content: '좋아요, 거의 다 됐어요! 조금만 더 물어볼게요.',
       },
     ],
     actions: [

@@ -88,10 +88,8 @@ export function ChatPageContent({
               state.selectedTopic || 'restaurant'
             );
             if (questions.length > 0) {
-              const firstQuestion = consumeNextQuestion();
-              if (firstQuestion) {
-                addAssistantMessage(firstQuestion, 'choice', CHOICE_OPTIONS.smartFollowupSkip);
-              }
+              addAssistantMessage(questions[0], 'choice', CHOICE_OPTIONS.smartFollowupSkip);
+              consumeNextQuestion();
             } else {
               addAssistantMessage(MESSAGES.smartFollowup.error, 'text');
             }

@@ -73,8 +73,22 @@ export async function POST(req: NextRequest) {
 
     console.log(`[Smart Followup API] 응답: ${text}`);
 
-    const parsed = JSON.parse(text);
-    const questions: string[] = parsed.questions || [];
+    let jsonText = text
+      .replace(/^```(?:json)?\s*\n?/, '')
+      .replace(/\n?```\s*$/, '')
+      .trim();
+
+    let questions: string[] = [];
+    try {
+      const parsed = JSON.parse(jsonText);
+      questions = parsed.questions || [];
+    } catch {
+      const jsonMatch = jsonText.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[1]);
+        questions = parsed.questions || [];
+      }
+    }
 
     return Response.json({ questions });
   } catch (error) {
