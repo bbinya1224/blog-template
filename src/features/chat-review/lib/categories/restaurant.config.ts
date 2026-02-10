@@ -34,7 +34,7 @@ export const restaurantConfig: CategoryConfig<
     { id: 'menu', type: 'input', isRequired: true, field: 'menu' },
     { id: 'taste', type: 'input', isRequired: true, field: 'pros' },
     { id: 'atmosphere', type: 'input', isRequired: true, field: 'extra' },
-    { id: 'highlight', type: 'input', isRequired: true, field: 'extra' },
+    { id: 'highlight', type: 'input', isRequired: true, field: 'dynamic' },
   ],
 
   stepOrder: ['date', 'companion', 'place', 'menu', 'taste', 'atmosphere', 'highlight'],

@@ -10,3 +10,4 @@ export * from './use-blog-analysis';
 export * from './use-place-search';
 export * from './use-review-generation';
 export * from './use-chat-handlers';
+export { useSmartFollowup } from './use-smart-followup';

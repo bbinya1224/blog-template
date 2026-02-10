@@ -49,6 +49,8 @@ export function ChatPageContent({
     handleChoiceSelect,
     handlePlaceConfirmation,
     handleReviewAction,
+    fetchSmartQuestions,
+    consumeNextQuestion,
     isProcessing,
     isStreaming,
   } = useChatHandlers({ userEmail, styleSetupContext, setStyleSetupContext });
@@ -78,6 +80,24 @@ export function ChatPageContent({
             addMessage(createInitialMessage('info-gathering', state));
           }
           break;
+        case 'smart-followup': {
+          addAssistantMessage(MESSAGES.smartFollowup.intro, 'text');
+          try {
+            const questions = await fetchSmartQuestions(
+              state.collectedInfo,
+              state.selectedTopic || 'restaurant'
+            );
+            if (questions.length > 0) {
+              addAssistantMessage(questions[0], 'choice', CHOICE_OPTIONS.smartFollowupSkip);
+              consumeNextQuestion();
+            } else {
+              addAssistantMessage(MESSAGES.smartFollowup.error, 'text');
+            }
+          } catch {
+            addAssistantMessage(MESSAGES.smartFollowup.error, 'text');
+          }
+          break;
+        }
         case 'confirmation':
           addMessage({
             ...createSummaryMessage(state),
@@ -165,6 +185,7 @@ function getInputPlaceholder(step: string, isInitial: boolean): string {
     onboarding: '이름 또는 닉네임을 입력해주세요',
     'style-setup': '블로그 URL 또는 내용을 입력해주세요',
     'info-gathering': '자유롭게 입력해주세요',
+    'smart-followup': '자유롭게 답변해주세요',
     'review-edit': '수정할 내용을 입력해주세요',
   };
   return placeholders[step] || '메시지를 입력해주세요';

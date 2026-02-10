@@ -10,6 +10,7 @@ import { useStreamMessage } from './use-stream-message';
 import { useBlogAnalysis } from './use-blog-analysis';
 import { usePlaceSearch } from './use-place-search';
 import { useReviewGeneration } from './use-review-generation';
+import { useSmartFollowup } from './use-smart-followup';
 import { handlePlaceConfirmed } from '../lib/step-handlers';
 import { MESSAGES } from '../constants/messages';
 import type { StyleSetupContext } from '../lib/step-handlers';
@@ -35,6 +36,7 @@ export function useChatHandlers({
   const { analyzeBlogUrl } = useBlogAnalysis(state.userName);
   const { searchPlace } = usePlaceSearch();
   const { editReview } = useReviewGeneration({ userEmail });
+  const { fetchSmartQuestions, consumeNextQuestion, getRemainingQuestions, reset: resetSmartFollowup } = useSmartFollowup();
 
   const { processMessage } = useMessageProcessor({
     state,
@@ -44,6 +46,8 @@ export function useChatHandlers({
     onBlogUrlAnalysis: analyzeBlogUrl,
     onPlaceSearch: searchPlace,
     onReviewEditRequest: editReview,
+    smartFollowupRemainingQuestions: getRemainingQuestions,
+    onConsumeSmartFollowup: consumeNextQuestion,
   });
 
   // Main message handler - simplified and declarative
@@ -121,6 +125,9 @@ export function useChatHandlers({
     handleChoiceSelect,
     handlePlaceConfirmation,
     handleReviewAction,
+    fetchSmartQuestions,
+    consumeNextQuestion,
+    resetSmartFollowup,
     isProcessing,
     isStreaming,
   };
