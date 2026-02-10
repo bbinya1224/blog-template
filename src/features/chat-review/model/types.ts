@@ -8,6 +8,7 @@ export type ConversationStep =
   | 'style-setup'       // 스타일 설정 (URL/직접입력/설문)
   | 'topic-select'      // 주제 선택
   | 'info-gathering'    // 정보 수집
+  | 'smart-followup'    // 스마트 후속 질문 (Haiku)
   | 'confirmation'      // 수집 정보 확인
   | 'generating'        // 리뷰 생성 중
   | 'review-edit'       // 리뷰 수정
@@ -73,7 +74,8 @@ export const stepTransitions: Record<ConversationStep, ConversationStep[]> = {
   'style-check': ['style-setup', 'topic-select'],
   'style-setup': ['topic-select'],
   'topic-select': ['info-gathering'],
-  'info-gathering': ['confirmation', 'info-gathering'],
+  'info-gathering': ['smart-followup', 'info-gathering'],
+  'smart-followup': ['confirmation', 'smart-followup'],
   'confirmation': ['generating', 'info-gathering'],
   'generating': ['review-edit'],
   'review-edit': ['review-edit', 'complete'],

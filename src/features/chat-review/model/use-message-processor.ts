@@ -10,10 +10,12 @@ import {
   handleTopicSelect,
   handleInfoGathering,
   handleConfirmation,
+  handleSmartFollowup,
   handleReviewEdit,
   type StepHandlerResult,
   type StyleSetupContext,
   type InfoGatheringResult,
+  type SmartFollowupResult,
   type ReviewEditResult,
 } from '../lib/step-handlers';
 
@@ -25,6 +27,7 @@ interface UseMessageProcessorProps {
   onBlogUrlAnalysis: (url: string) => Promise<void>;
   onPlaceSearch: (query: string) => Promise<void>;
   onReviewEditRequest: (request: string) => Promise<void>;
+  smartFollowupRemainingQuestions: () => string[];
 }
 
 interface UseMessageProcessorReturn {
@@ -42,6 +45,7 @@ export function useMessageProcessor({
   onBlogUrlAnalysis,
   onPlaceSearch,
   onReviewEditRequest,
+  smartFollowupRemainingQuestions,
 }: UseMessageProcessorProps): UseMessageProcessorReturn {
 
   const addResultMessages = useCallback((messages: Partial<ChatMessage>[]) => {
@@ -58,7 +62,7 @@ export function useMessageProcessor({
     actions: ConversationAction[];
     messages: Partial<ChatMessage>[];
   } | null> => {
-    let result: StepHandlerResult | InfoGatheringResult | ReviewEditResult;
+    let result: StepHandlerResult | InfoGatheringResult | SmartFollowupResult | ReviewEditResult;
 
     switch (state.step) {
       case 'onboarding':
@@ -98,6 +102,12 @@ export function useMessageProcessor({
         break;
       }
 
+      case 'smart-followup': {
+        const remaining = smartFollowupRemainingQuestions();
+        result = handleSmartFollowup(content, state, remaining);
+        break;
+      }
+
       case 'confirmation':
         result = handleConfirmation(content, state);
         break;
@@ -130,6 +140,7 @@ export function useMessageProcessor({
     onBlogUrlAnalysis,
     onPlaceSearch,
     onReviewEditRequest,
+    smartFollowupRemainingQuestions,
   ]);
 
   return { processMessage };

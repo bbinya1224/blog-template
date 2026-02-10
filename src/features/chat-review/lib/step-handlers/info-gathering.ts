@@ -249,8 +249,8 @@ function handleHighlightInput(
     ],
     actions: [
       { type: 'UPDATE_COLLECTED_INFO', payload },
-      { type: 'GO_TO_STEP', payload: 'confirmation' },
+      { type: 'GO_TO_STEP', payload: 'smart-followup' },
     ],
-    nextStep: 'confirmation',
+    nextStep: 'smart-followup',
   };
 }

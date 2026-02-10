@@ -111,6 +111,13 @@ export const MESSAGES = {
     },
   },
 
+  // 스마트 후속 질문
+  smartFollowup: {
+    intro: '조금 더 물어봐도 될까요? 리뷰를 더 생생하게 만들어줄 거예요!',
+    loading: '어떤 걸 더 물어볼지 생각 중이에요... 🤔',
+    error: '후속 질문을 만들지 못했어요. 바로 리뷰를 작성할게요!',
+  },
+
   // 확인
   confirmation: {
     summary: '지금까지 얘기해주신 내용 정리해볼게요.',
@@ -228,6 +235,11 @@ export const CHOICE_OPTIONS: Record<string, ChoiceOption[]> = {
     { id: '10000-20000', label: '1-2만원' },
     { id: '20000-30000', label: '2-3만원' },
     { id: 'over-30000', label: '3만원 이상' },
+  ],
+
+  // 스마트 후속 질문 스킵
+  smartFollowupSkip: [
+    { id: 'skip', label: '충분해요! 리뷰 작성해주세요' },
   ],
 
   // 정보 확인

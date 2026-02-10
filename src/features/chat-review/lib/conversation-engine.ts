@@ -32,7 +32,10 @@ export function determineNextStep(state: ConversationState): ConversationStep {
       return state.selectedTopic ? 'info-gathering' : 'topic-select';
 
     case 'info-gathering':
-      return isInfoGatheringComplete(state) ? 'confirmation' : 'info-gathering';
+      return isInfoGatheringComplete(state) ? 'smart-followup' : 'info-gathering';
+
+    case 'smart-followup':
+      return 'confirmation';
 
     case 'confirmation':
       return 'generating';
@@ -165,6 +168,13 @@ export function createInitialMessage(
     case 'info-gathering':
       const subStep = determineInfoSubStep(state);
       return createInfoGatheringMessage(subStep);
+
+    case 'smart-followup':
+      return {
+        ...baseMessage,
+        type: 'loading',
+        content: MESSAGES.smartFollowup.loading,
+      };
 
     case 'confirmation':
       return {
