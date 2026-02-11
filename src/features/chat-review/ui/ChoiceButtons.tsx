@@ -19,9 +19,8 @@ export function ChoiceButtons({
   return (
     <div
       className={cn(
-        'grid gap-2',
-        columns === 3 ? 'grid-cols-3' : 'grid-cols-2',
-        className
+        'flex flex-wrap gap-2',
+        className,
       )}
     >
       {options.map((option) => (
@@ -30,17 +29,17 @@ export function ChoiceButtons({
           onClick={() => onSelect?.(option.id)}
           disabled={option.disabled}
           className={cn(
-            'px-4 py-2 rounded-lg text-sm',
-            'bg-stone-100 text-stone-700',
+            'px-4 py-2 rounded-xl text-sm font-medium',
+            'bg-white border border-stone-200 text-stone-700',
             'transition-all duration-150',
-            'hover:bg-stone-200',
+            'hover:border-[var(--primary)]/50 hover:bg-[var(--surface)] hover:text-[var(--primary)]',
             'active:scale-[0.98]',
             'disabled:opacity-40 disabled:cursor-not-allowed',
-            option.icon && 'flex items-center gap-2'
+            option.icon && 'flex items-center gap-2',
           )}
         >
           {option.icon && (
-            <span className="text-base">{option.icon}</span>
+            <span className='text-base'>{option.icon}</span>
           )}
           <span>{option.label}</span>
         </button>

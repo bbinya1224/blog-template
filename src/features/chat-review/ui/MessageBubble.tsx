@@ -1,14 +1,8 @@
-'use client';
-
 import { cn } from '@/shared/lib/utils';
 import type { ChatMessage } from '@/entities/chat-message';
 import type { CSSProperties } from 'react';
+import { OrotiLogo } from '@/shared/ui/Icons';
 import { MessageContent } from './message-renderers';
-
-const BUBBLE_STYLES = {
-  assistant: 'max-w-[85%] sm:max-w-[75%] bg-white rounded-3xl p-5',
-  user: 'max-w-[85%] sm:max-w-[75%] bg-stone-100 px-4 py-2.5 rounded-2xl',
-} as const;
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -28,7 +22,6 @@ export function MessageBubble({
   style,
 }: MessageBubbleProps) {
   const isAssistant = message.role === 'assistant';
-  const bubbleStyle = isAssistant ? BUBBLE_STYLES.assistant : BUBBLE_STYLES.user;
 
   return (
     <div
@@ -38,9 +31,11 @@ export function MessageBubble({
       )}
       style={style}
     >
-      <div className={cn('flex', isAssistant ? 'justify-start' : 'justify-end')}>
-        <div className={bubbleStyle}>
-          {isAssistant ? (
+      {isAssistant ? (
+        /* Claude-style: Avatar + full-width content, no bubble */
+        <div className='flex items-start gap-3'>
+          <OrotiLogo className='size-7 shrink-0' />
+          <div className='min-w-0 flex-1 pt-0.5'>
             <MessageContent
               message={message}
               enableTyping={message.type === 'text'}
@@ -48,13 +43,18 @@ export function MessageBubble({
               onPlaceConfirm={onPlaceConfirm}
               onReviewAction={onReviewAction}
             />
-          ) : (
-            <p className="text-stone-800 leading-7 whitespace-pre-wrap text-[15px]">
+          </div>
+        </div>
+      ) : (
+        /* User message: right-aligned pill */
+        <div className='flex justify-end'>
+          <div className='max-w-[80%] rounded-2xl bg-[var(--surface)] px-4 py-2.5'>
+            <p className='text-[15px] leading-7 whitespace-pre-wrap text-stone-800'>
               {message.content}
             </p>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

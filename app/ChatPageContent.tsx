@@ -39,6 +39,8 @@ export function ChatPageContent({
     {},
   );
   const isInitializedRef = useRef(false);
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   // Hooks
   const { reviews: recentReviews } = useRecentReviews(5);
@@ -52,7 +54,6 @@ export function ChatPageContent({
     fetchSmartQuestions,
     consumeNextQuestion,
     isProcessing,
-    isStreaming,
   } = useChatHandlers({ userEmail, styleSetupContext, setStyleSetupContext });
 
   // Initialize existing style profile
@@ -63,29 +64,32 @@ export function ChatPageContent({
     }
   }, [existingStyleProfile, setStyleProfile, setHasExistingStyle]);
 
-  // Handle step changes
+  // Handle step changes (only when chat is active on this page)
   useEffect(() => {
+    if (!isInitializedRef.current) return;
+    const s = stateRef.current;
+
     const handleStepChange = async () => {
-      switch (state.step) {
+      switch (s.step) {
         case 'style-check':
-          if (state.hasExistingStyle && state.styleProfile) {
-            addMessage(createInitialMessage('style-check', state));
+          if (s.hasExistingStyle && s.styleProfile) {
+            addMessage(createInitialMessage('style-check', s));
           }
           break;
         case 'topic-select':
-          addMessage(createInitialMessage('topic-select', state));
+          addMessage(createInitialMessage('topic-select', s));
           break;
         case 'info-gathering':
-          if (!state.subStep) {
-            addMessage(createInitialMessage('info-gathering', state));
+          if (!s.subStep) {
+            addMessage(createInitialMessage('info-gathering', s));
           }
           break;
         case 'smart-followup': {
           addAssistantMessage(MESSAGES.smartFollowup.intro, 'text');
           try {
             const questions = await fetchSmartQuestions(
-              state.collectedInfo,
-              state.selectedTopic || 'restaurant'
+              s.collectedInfo,
+              s.selectedTopic || 'restaurant'
             );
             if (questions.length > 0) {
               addAssistantMessage(questions[0], 'choice', CHOICE_OPTIONS.smartFollowupSkip);
@@ -100,7 +104,7 @@ export function ChatPageContent({
         }
         case 'confirmation':
           addMessage({
-            ...createSummaryMessage(state),
+            ...createSummaryMessage(s),
             id: `msg_${Date.now()}`,
             timestamp: new Date(),
           } as ChatMessage);
@@ -117,8 +121,7 @@ export function ChatPageContent({
     };
 
     handleStepChange();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.step]);
+  }, [state.step, addMessage, addAssistantMessage, fetchSmartQuestions, consumeNextQuestion, generateReview]);
 
   // Reset initialized flag when conversation is reset
   useEffect(() => {
@@ -162,14 +165,16 @@ export function ChatPageContent({
       messages={messages}
       currentStep={state.step}
       selectedTopic={state.selectedTopic}
-      isTyping={isStreaming || isProcessing}
-      isInputDisabled={isStreaming}
+      isTyping={isProcessing}
+      isInputDisabled={isProcessing}
       inputPlaceholder={inputPlaceholder}
       onSendMessage={handleSendMessage}
       onChoiceSelect={handleChoiceSelect}
       onPlaceConfirm={handlePlaceConfirmation}
       onReviewAction={handleReviewAction}
       onCategorySelect={handleCategorySelect}
+      hasExistingStyle={state.hasExistingStyle}
+      styleProfile={state.styleProfile}
       recentReviews={recentReviews}
       userName={state.userName ?? undefined}
     />

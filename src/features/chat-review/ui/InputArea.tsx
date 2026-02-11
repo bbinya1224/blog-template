@@ -52,14 +52,16 @@ export function InputArea({
   const canSend = value.trim().length > 0 && !disabled;
 
   return (
-    <div className={cn('px-4 py-8 sm:px-6', className)}>
-      <div className='w-full'>
+    <div className={cn('px-4 py-4 sm:px-6', className)}>
+      <div className='mx-auto w-full max-w-3xl'>
         <div
           className={cn(
             'relative flex items-end gap-2',
-            'rounded-xl bg-stone-50',
-            'border transition-all duration-200',
-            isFocused ? 'border-stone-300 bg-white' : 'border-stone-200',
+            'rounded-2xl bg-white',
+            'border shadow-sm transition-all duration-200',
+            isFocused
+              ? 'border-[var(--primary)]/40 shadow-md shadow-[var(--primary)]/5'
+              : 'border-stone-200',
             disabled && 'opacity-60',
           )}
         >
@@ -84,7 +86,7 @@ export function InputArea({
             )}
           />
 
-          {/* Send button - only visible when there's content */}
+          {/* Send button - Claude style arrow up */}
           <button
             onClick={handleSubmit}
             disabled={!canSend}
@@ -94,21 +96,30 @@ export function InputArea({
               'flex items-center justify-center',
               'transition-all duration-150',
               canSend
-                ? 'bg-stone-800 text-white hover:bg-stone-700 active:scale-95'
-                : 'bg-transparent text-stone-300',
+                ? 'bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] active:scale-95'
+                : 'bg-stone-100 text-stone-300',
             )}
             aria-label='메시지 전송'
           >
+            {/* Arrow up icon (Claude style) */}
             <svg
               xmlns='http://www.w3.org/2000/svg'
               viewBox='0 0 24 24'
-              fill='currentColor'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth={2.5}
+              strokeLinecap='round'
+              strokeLinejoin='round'
               className='size-4'
             >
-              <path d='M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z' />
+              <path d='M12 19V5' />
+              <path d='m5 12 7-7 7 7' />
             </svg>
           </button>
         </div>
+        <p className='mt-1.5 text-center text-[11px] text-stone-300'>
+          경험은 당신이, 표현은 오롯이가
+        </p>
       </div>
     </div>
   );

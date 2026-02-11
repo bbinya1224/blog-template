@@ -3,7 +3,6 @@ export * from './atoms';
 export * from './use-conversation-actions';
 export { useChatMessages, type UseChatMessagesReturn } from './use-chat-messages';
 export { useChatMessagesJotai, type UseChatMessagesReturn as UseChatMessagesJotaiReturn } from './use-chat-messages-jotai';
-export { useStreamMessage, type UseStreamMessageReturn } from './use-stream-message';
 export { useMessageProcessor } from './use-message-processor';
 export * from './use-recent-reviews';
 export * from './use-blog-analysis';
