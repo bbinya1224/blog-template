@@ -5,17 +5,12 @@ import { useRecentReviews } from '@/features/chat-review/model/use-recent-review
 import { formatReviewDate } from '@/shared/lib/utils';
 import { useSidebar } from '../model/sidebar-context';
 
-function getIsDesktop() {
-  if (typeof window === 'undefined') return true;
-  return window.matchMedia('(min-width: 768px)').matches;
-}
-
 export function SidebarReviewList() {
   const { reviews, isLoading } = useRecentReviews(20);
-  const { showLabels, expand, collapse } = useSidebar();
+  const { isDesktop, showLabels, expand, collapse } = useSidebar();
 
   const handleClick = () => {
-    if (!getIsDesktop()) collapse();
+    if (!isDesktop) collapse();
   };
 
   if (!showLabels) {

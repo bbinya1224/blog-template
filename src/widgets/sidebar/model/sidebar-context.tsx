@@ -10,9 +10,11 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
+import { useIsDesktop } from '@/shared/lib/hooks';
 
 interface SidebarContextValue {
   isExpanded: boolean;
+  isDesktop: boolean;
   showLabels: boolean;
   toggle: () => void;
   expand: () => void;
@@ -23,18 +25,17 @@ const SidebarContext = createContext<SidebarContextValue | null>(null);
 
 const STORAGE_KEY = 'oroti-sidebar';
 
-function getIsDesktop() {
-  if (typeof window === 'undefined') return true;
-  return window.matchMedia('(min-width: 768px)').matches;
-}
-
 export function SidebarProvider({ children }: { children: ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const isDesktop = useIsDesktop();
+  const hydratedRef = useRef(false);
 
-  // Hydrate from localStorage / screen size
+  // Hydrate from localStorage / screen size (mount-only via ref guard)
   useEffect(() => {
-    const isDesktop = getIsDesktop();
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored !== null) {
       setIsExpanded(stored === 'true');
@@ -42,27 +43,22 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       setIsExpanded(isDesktop);
     }
     setHydrated(true);
-  }, []);
+  }, [isDesktop]);
 
   // Persist to localStorage (desktop only)
   useEffect(() => {
     if (!hydrated) return;
-    if (getIsDesktop()) {
+    if (isDesktop) {
       localStorage.setItem(STORAGE_KEY, String(isExpanded));
     }
-  }, [isExpanded, hydrated]);
+  }, [isExpanded, hydrated, isDesktop]);
 
-  // Listen for screen resize: collapse on mobile
+  // Collapse on mobile resize
   useEffect(() => {
-    const mql = window.matchMedia('(min-width: 768px)');
-    const handler = (e: MediaQueryListEvent) => {
-      if (!e.matches) {
-        setIsExpanded(false);
-      }
-    };
-    mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
-  }, []);
+    if (!isDesktop) {
+      setIsExpanded(false);
+    }
+  }, [isDesktop]);
 
   const [showLabels, setShowLabels] = useState(false);
   const initializedRef = useRef(false);
@@ -87,8 +83,8 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const collapse = useCallback(() => setIsExpanded(false), []);
 
   const value = useMemo(
-    () => ({ isExpanded, showLabels, toggle, expand, collapse }),
-    [isExpanded, showLabels, toggle, expand, collapse],
+    () => ({ isExpanded, isDesktop, showLabels, toggle, expand, collapse }),
+    [isExpanded, isDesktop, showLabels, toggle, expand, collapse],
   );
 
   return (
