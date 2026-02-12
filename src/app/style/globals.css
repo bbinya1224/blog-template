@@ -15,6 +15,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
   --font-sans: var(--font-inter), var(--font-noto-sans), ui-sans-serif,
     system-ui;
 }
@@ -32,7 +37,7 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply rounded-xl bg-[var(--primary)] py-3 px-6 text-base font-semibold text-white shadow-sm transition hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:bg-orange-200;
+    @apply rounded-xl bg-primary py-3 px-6 text-base font-semibold text-white shadow-sm transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-orange-200;
   }
 
   .btn-secondary {
@@ -48,11 +53,11 @@ body {
   }
 
   .input-base {
-    @apply mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 text-base shadow-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30;
+    @apply mt-2 w-full rounded-xl border border-stone-300 px-4 py-3 text-base shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30;
   }
 
   .card-info {
-    @apply rounded-xl border-2 border-orange-100 bg-[var(--surface)] p-4;
+    @apply rounded-xl border-2 border-orange-100 bg-surface p-4;
   }
 
   .card-success {

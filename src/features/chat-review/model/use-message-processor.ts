@@ -4,7 +4,6 @@ import { useCallback } from 'react';
 import type { ConversationState, ConversationAction } from './types';
 import type { ChatMessage } from '@/entities/chat-message';
 import {
-  handleOnboarding,
   handleStyleSetup,
   handleStyleCheck,
   handleTopicSelect,
@@ -67,10 +66,6 @@ export function useMessageProcessor({
     let result: StepHandlerResult | InfoGatheringResult | SmartFollowupResult | ReviewEditResult;
 
     switch (state.step) {
-      case 'onboarding':
-        result = handleOnboarding(content, state);
-        break;
-
       case 'style-check':
         result = handleStyleCheck(content, state);
         if (result.nextStep === 'style-setup') {

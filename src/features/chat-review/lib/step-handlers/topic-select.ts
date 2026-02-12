@@ -1,6 +1,6 @@
 import type { ConversationState, ReviewTopic } from '../../model/types';
 import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
-import type { StepHandlerResult } from './onboarding';
+import type { StepHandlerResult } from '.';
 
 const TOPIC_MAP: Record<string, ReviewTopic> = {
   restaurant: 'restaurant',

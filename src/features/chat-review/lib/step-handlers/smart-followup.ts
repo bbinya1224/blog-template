@@ -1,7 +1,7 @@
 import type { ConversationState } from '../../model/types';
 import type { ReviewPayload } from '@/shared/types/review';
 import { CHOICE_OPTIONS } from '../../constants/messages';
-import type { StepHandlerResult } from './onboarding';
+import type { StepHandlerResult } from '.';
 
 export interface SmartFollowupResult extends StepHandlerResult {
   skipFollowup?: boolean;
