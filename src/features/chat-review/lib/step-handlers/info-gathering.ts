@@ -12,7 +12,7 @@ import {
   determineInfoSubStep,
 } from '../conversation-engine';
 import { restaurantConfig } from '../categories/restaurant.config';
-import type { StepHandlerResult } from './onboarding';
+import type { StepHandlerResult } from '.';
 
 export interface InfoGatheringResult extends StepHandlerResult {
   placeSearchQuery?: string;
@@ -110,7 +110,8 @@ export function handlePlaceConfirmed(
   confirmed: boolean,
   placeName: string,
   placeAddress: string,
-  _state: ConversationState
+  _state: ConversationState,
+  category?: string
 ): InfoGatheringResult {
   if (!confirmed) {
     return {
@@ -130,12 +131,7 @@ export function handlePlaceConfirmed(
       {
         role: 'assistant',
         type: 'text',
-        content: MESSAGES.infoGathering.restaurant.placeConfirmed(placeName),
-      },
-      {
-        role: 'assistant',
-        type: 'text',
-        content: MESSAGES.infoGathering.restaurant.menu,
+        content: MESSAGES.infoGathering.restaurant.placeConfirmed(placeName, category),
       },
     ],
     actions: [
@@ -160,7 +156,7 @@ function handleMenuInput(
       {
         role: 'assistant',
         type: 'text',
-        content: MESSAGES.infoGathering.restaurant.taste,
+        content: MESSAGES.infoGathering.restaurant.taste(userInput),
       },
     ],
     actions: [
@@ -240,13 +236,7 @@ function handleHighlightInput(
   }
 
   return {
-    messages: [
-      {
-        role: 'assistant',
-        type: 'text',
-        content: '좋아요, 거의 다 됐어요! 조금만 더 물어볼게요.',
-      },
-    ],
+    messages: [],
     actions: [
       { type: 'UPDATE_COLLECTED_INFO', payload },
       { type: 'GO_TO_STEP', payload: 'smart-followup' },

@@ -4,7 +4,7 @@ import type {
 } from '../../model/types';
 import type { StyleProfile } from '@/entities/style-profile';
 import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
-import type { StepHandlerResult } from './onboarding';
+import type { StepHandlerResult } from '.';
 
 export interface StyleSetupContext {
   method?: StyleSetupMethod;

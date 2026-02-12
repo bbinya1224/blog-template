@@ -20,10 +20,12 @@ export function InputArea({
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-focus on mount
+  // Focus on mount and refocus when re-enabled (after response received)
   useEffect(() => {
-    textareaRef.current?.focus();
-  }, []);
+    if (!disabled) {
+      textareaRef.current?.focus();
+    }
+  }, [disabled]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -52,7 +54,7 @@ export function InputArea({
   const canSend = value.trim().length > 0 && !disabled;
 
   return (
-    <div className={cn('px-4 py-4 sm:px-6', className)}>
+    <div className={cn('p-4 sm:px-6', className)}>
       <div className='mx-auto w-full max-w-3xl'>
         <div
           className={cn(
@@ -60,7 +62,7 @@ export function InputArea({
             'rounded-2xl bg-white',
             'border shadow-sm transition-all duration-200',
             isFocused
-              ? 'border-[var(--primary)]/40 shadow-md shadow-[var(--primary)]/5'
+              ? 'border-primary/40 shadow-md shadow-primary/5'
               : 'border-stone-200',
             disabled && 'opacity-60',
           )}
@@ -96,7 +98,7 @@ export function InputArea({
               'flex items-center justify-center',
               'transition-all duration-150',
               canSend
-                ? 'bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] active:scale-95'
+                ? 'bg-primary text-white hover:bg-primary-hover active:scale-95'
                 : 'bg-stone-100 text-stone-300',
             )}
             aria-label='메시지 전송'

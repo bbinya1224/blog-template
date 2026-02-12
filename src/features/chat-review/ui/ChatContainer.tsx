@@ -145,7 +145,7 @@ export function ChatContainer({
 
       {/* Main scrollable content */}
       <div className='min-h-0 flex-1 overflow-y-auto'>
-        <div className='mx-auto flex h-full w-full max-w-3xl flex-col'>
+        <div className='mx-auto flex size-full max-w-3xl flex-col'>
           {!hasMessages ? (
             /* ===== Claude-style Welcome Screen ===== */
             <div className='flex flex-1 flex-col items-center justify-center px-6 py-8'>
@@ -174,7 +174,7 @@ export function ChatContainer({
                       'rounded-2xl border transition-all duration-200',
                       category.disabled
                         ? 'cursor-not-allowed border-stone-100 bg-stone-50/50 text-stone-300'
-                        : 'border-stone-200 bg-white text-stone-700 shadow-sm hover:border-[var(--primary)]/40 hover:shadow-md hover:shadow-[var(--primary)]/5',
+                        : 'border-stone-200 bg-white text-stone-700 shadow-sm hover:border-primary/40 hover:shadow-primary/5 hover:shadow-md',
                     )}
                   >
                     <span
@@ -182,7 +182,7 @@ export function ChatContainer({
                         'transition-colors',
                         category.disabled
                           ? 'text-stone-300'
-                          : 'text-[var(--primary)] group-hover:text-[var(--primary-hover)]',
+                          : 'text-primary group-hover:text-primary-hover',
                       )}
                     >
                       {category.icon}
@@ -201,9 +201,9 @@ export function ChatContainer({
               <div className='mt-10 w-full max-w-lg break-keep'>
                 <div className='border-t border-stone-100 pt-6'>
                   {hasExistingStyle && styleProfile ? (
-                    <div className='rounded-2xl border border-stone-100 bg-gradient-to-br from-white to-[var(--surface)]/50 p-4'>
+                    <div className='rounded-2xl border border-stone-100 bg-linear-to-br from-white to-surface/50 p-4'>
                       <div className='mb-2 flex items-center gap-2'>
-                        <Sparkles className='size-4 text-[var(--primary)]' />
+                        <Sparkles className='size-4 text-primary' />
                         <span className='text-sm font-medium text-stone-700'>
                           내 글 스타일
                         </span>
@@ -217,7 +217,7 @@ export function ChatContainer({
                       </p>
                       <Link
                         href='/analyze-style'
-                        className='mt-2 inline-block text-xs text-[var(--primary)] transition-colors hover:text-[var(--primary-hover)]'
+                        className='mt-2 inline-block text-xs text-primary transition-colors hover:text-primary-hover'
                       >
                         자세히 보기
                       </Link>
@@ -232,7 +232,7 @@ export function ChatContainer({
                         className={cn(
                           'inline-flex items-center gap-2 px-5 py-2.5',
                           'rounded-xl border border-stone-200 bg-white text-sm font-medium text-stone-600',
-                          'transition-all duration-200 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]',
+                          'transition-all duration-200 hover:border-primary/40 hover:text-primary',
                         )}
                       >
                         <Sparkles className='size-4' />내 글 스타일 분석하기
@@ -276,7 +276,7 @@ export function ChatContainer({
               </h2>
               <Link
                 href='/reviews'
-                className='text-sm font-medium text-[var(--primary)] transition-colors hover:text-[var(--primary-hover)]'
+                className='text-sm font-medium text-primary transition-colors hover:text-primary-hover'
               >
                 전체보기
               </Link>
@@ -291,11 +291,11 @@ export function ChatContainer({
                   className={cn(
                     'group w-44 shrink-0 p-4',
                     'rounded-xl border border-stone-200',
-                    'hover:border-[var(--primary)]/40 hover:shadow-md',
+                    'hover:border-primary/40 hover:shadow-md',
                     'transition-all duration-200',
                   )}
                 >
-                  <h3 className='mb-1 truncate text-sm font-semibold text-stone-800 transition-colors group-hover:text-[var(--primary)]'>
+                  <h3 className='mb-1 truncate text-sm font-semibold text-stone-800 transition-colors group-hover:text-primary'>
                     {review.storeName || '맛집 리뷰'}
                   </h3>
                   <p className='text-xs text-stone-400'>

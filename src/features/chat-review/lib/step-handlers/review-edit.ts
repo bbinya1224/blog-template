@@ -1,6 +1,6 @@
 import type { ConversationState } from '../../model/types';
 import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
-import type { StepHandlerResult } from './onboarding';
+import type { StepHandlerResult } from '.';
 
 export interface ReviewEditResult extends StepHandlerResult {
   editRequest?: string;

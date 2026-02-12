@@ -13,16 +13,6 @@ export const MESSAGES = {
 책 제목이나 저자를 알려주세요.`,
   },
 
-  // 온보딩
-  onboarding: {
-    welcome: `안녕하세요!
-
-먼저, 어떻게 불러드릴까요?`,
-
-    nameReceived: (name: string) =>
-      `${name}님, 반가워요!\n오늘부터 함께 멋진 블로그 글을 써봐요!`,
-  },
-
   // 스타일 체크
   styleCheck: {
     hasStyle: (name: string) =>
@@ -95,13 +85,18 @@ export const MESSAGES = {
       placeNotFound:
         '검색 결과가 없네요.\n매장 이름과 위치를 더 자세히 알려주실 수 있나요?',
 
-      placeConfirmed: (placeName: string) =>
-        `${placeName}! 여기 요즘 핫하잖아요!`,
+      placeConfirmed: (placeName: string, category?: string) => {
+        const subcategory = category?.split(' > ')[1];
+        const detail = subcategory ? ` ${subcategory} 전문점이네요!` : '';
+        return `${placeName}에서 식사하셨군요!${detail}\n어떤 음식을 드셨어요? 메뉴 이름을 알려주세요.`;
+      },
 
-      menu: '뭘 드셨어요? 메뉴 이름을 알려주세요.',
+      menu: '어떤 음식을 드셨어요? 메뉴 이름을 알려주세요.',
 
-      taste: `첫 한 입의 느낌이 어땠어요?
-맛, 식감, 비주얼 뭐든 좋아요 🍴`,
+      taste: (menu?: string) =>
+        menu
+          ? `${menu}! 맛은 어떠셨어요?\n기억나는 대로 편하게 알려주세요 🍴`
+          : `맛은 어떠셨어요?\n기억나는 대로 편하게 알려주세요 🍴`,
 
       atmosphere: `가게 분위기는 어땠어요?
 인테리어나 음악, 직원 서비스 같은 것도요 ✨`,
@@ -245,9 +240,7 @@ export const CHOICE_OPTIONS: Record<string, ChoiceOption[]> = {
   ],
 
   // 스마트 후속 질문 스킵
-  smartFollowupSkip: [
-    { id: 'skip', label: '충분해요! 리뷰 작성해주세요' },
-  ],
+  smartFollowupSkip: [{ id: 'skip', label: '충분해요! 리뷰 작성해주세요' }],
 
   // 정보 확인
   confirmInfo: [

@@ -37,9 +37,6 @@ export function useConversationActions() {
   const dispatchAction = useCallback(
     (action: ConversationAction) => {
       switch (action.type) {
-        case 'SET_USER_NAME':
-          setUserName(action.payload);
-          break;
         case 'SET_STYLE_PROFILE':
           setStyleProfile(action.payload);
           break;

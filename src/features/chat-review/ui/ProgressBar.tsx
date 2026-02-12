@@ -4,12 +4,11 @@ import { cn } from '@/shared/lib/utils';
 import type { ConversationStep } from '../model/types';
 
 const STEPS: { key: ConversationStep; label: string; icon: string }[] = [
-  { key: 'onboarding', label: '시작', icon: '1' },
-  { key: 'style-check', label: '스타일', icon: '2' },
-  { key: 'topic-select', label: '주제', icon: '3' },
-  { key: 'info-gathering', label: '정보', icon: '4' },
-  { key: 'confirmation', label: '확인', icon: '5' },
-  { key: 'complete', label: '완료', icon: '6' },
+  { key: 'style-check', label: '스타일', icon: '1' },
+  { key: 'topic-select', label: '주제', icon: '2' },
+  { key: 'info-gathering', label: '정보', icon: '3' },
+  { key: 'confirmation', label: '확인', icon: '4' },
+  { key: 'complete', label: '완료', icon: '5' },
 ];
 
 interface ProgressBarProps {

@@ -8,6 +8,8 @@ import {
   hasExistingStyleAtom,
   styleProfileAtom,
   selectedTopicAtom,
+  stepAtom,
+  subStepAtom,
   useRecentReviews,
   useChatHandlers,
   useReviewGeneration,
@@ -15,11 +17,14 @@ import {
 import { useChatMessagesJotai } from '@/features/chat-review/model/use-chat-messages-jotai';
 import { createInitialMessage } from '@/features/chat-review/lib/conversation-engine';
 import { createSummaryMessage } from '@/features/chat-review/lib/step-handlers';
-import { MESSAGES, CHOICE_OPTIONS } from '@/features/chat-review/constants/messages';
+import {
+  MESSAGES,
+  CHOICE_OPTIONS,
+} from '@/features/chat-review/constants/messages';
 import type { StyleProfile } from '@/entities/style-profile';
 import type { StyleSetupContext } from '@/features/chat-review/lib/step-handlers';
 import type { ChatMessage } from '@/entities/chat-message';
-import type { ReviewTopic } from '@/features/chat-review/model';
+import type { ReviewTopic, ConversationStep } from '@/features/chat-review/model';
 
 interface ChatPageContentProps {
   userEmail: string;
@@ -35,12 +40,18 @@ export function ChatPageContent({
   const setStyleProfile = useSetAtom(styleProfileAtom);
   const setHasExistingStyle = useSetAtom(hasExistingStyleAtom);
   const setSelectedTopic = useSetAtom(selectedTopicAtom);
+  const setStep = useSetAtom(stepAtom);
+  const setSubStep = useSetAtom(subStepAtom);
   const [styleSetupContext, setStyleSetupContext] = useState<StyleSetupContext>(
     {},
   );
   const isInitializedRef = useRef(false);
+  const prevStepRef = useRef<ConversationStep | null>(null);
   const stateRef = useRef(state);
-  stateRef.current = state;
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   // Hooks
   const { reviews: recentReviews } = useRecentReviews(5);
@@ -67,6 +78,8 @@ export function ChatPageContent({
   // Handle step changes (only when chat is active on this page)
   useEffect(() => {
     if (!isInitializedRef.current) return;
+    if (state.step === prevStepRef.current) return;
+    prevStepRef.current = state.step;
     const s = stateRef.current;
 
     const handleStepChange = async () => {
@@ -85,14 +98,18 @@ export function ChatPageContent({
           }
           break;
         case 'smart-followup': {
-          addAssistantMessage(MESSAGES.smartFollowup.intro, 'text');
           try {
             const questions = await fetchSmartQuestions(
               s.collectedInfo,
-              s.selectedTopic || 'restaurant'
+              s.selectedTopic || 'restaurant',
             );
             if (questions.length > 0) {
-              addAssistantMessage(questions[0], 'choice', CHOICE_OPTIONS.smartFollowupSkip);
+              const combined = `${MESSAGES.smartFollowup.intro}\n\n${questions[0]}`;
+              addAssistantMessage(
+                combined,
+                'choice',
+                CHOICE_OPTIONS.smartFollowupSkip,
+              );
               consumeNextQuestion();
             } else {
               addAssistantMessage(MESSAGES.smartFollowup.error, 'text');
@@ -121,12 +138,20 @@ export function ChatPageContent({
     };
 
     handleStepChange();
-  }, [state.step, addMessage, addAssistantMessage, fetchSmartQuestions, consumeNextQuestion, generateReview]);
+  }, [
+    state.step,
+    addMessage,
+    addAssistantMessage,
+    fetchSmartQuestions,
+    consumeNextQuestion,
+    generateReview,
+  ]);
 
   // Reset initialized flag when conversation is reset
   useEffect(() => {
     if (messages.length === 0) {
       isInitializedRef.current = false;
+      prevStepRef.current = null;
     }
   }, [messages.length]);
 
@@ -144,6 +169,8 @@ export function ChatPageContent({
     if (message) {
       isInitializedRef.current = true;
       setSelectedTopic(categoryId as ReviewTopic);
+      setStep('info-gathering');
+      setSubStep('place');
       addAssistantMessage(message, 'text');
     }
   };
@@ -158,7 +185,10 @@ export function ChatPageContent({
   };
 
   // Input placeholder based on step
-  const inputPlaceholder = getInputPlaceholder(state.step, messages.length === 0);
+  const inputPlaceholder = getInputPlaceholder(
+    state.step,
+    messages.length === 0,
+  );
 
   return (
     <ChatContainer
@@ -187,9 +217,7 @@ function getInputPlaceholder(step: string, isInitial: boolean): string {
     return '리뷰를 작성하고 싶은 맛집을 알려주세요...';
   }
   const placeholders: Record<string, string> = {
-    onboarding: '이름 또는 닉네임을 입력해주세요',
     'style-setup': '블로그 URL 또는 내용을 입력해주세요',
-    'info-gathering': '자유롭게 입력해주세요',
     'smart-followup': '자유롭게 답변해주세요',
     'review-edit': '수정할 내용을 입력해주세요',
   };

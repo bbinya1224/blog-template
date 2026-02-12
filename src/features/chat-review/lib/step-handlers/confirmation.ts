@@ -1,7 +1,7 @@
 import type { ChatMessage } from '@/entities/chat-message';
 import type { ConversationState, RestaurantInfoStep } from '../../model/types';
 import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
-import type { StepHandlerResult } from './onboarding';
+import type { StepHandlerResult } from '.';
 
 export function handleConfirmation(
   userInput: string,

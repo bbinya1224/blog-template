@@ -3,7 +3,6 @@ import type { ReviewPayload } from '@/shared/types/review';
 
 // 대화 단계
 export type ConversationStep =
-  | 'onboarding'        // 인사 & 이름 입력
   | 'style-check'       // 기존 스타일 확인
   | 'style-setup'       // 스타일 설정 (URL/직접입력/설문)
   | 'topic-select'      // 주제 선택
@@ -57,7 +56,7 @@ export interface ConversationState {
 
 // 초기 상태
 export const initialConversationState: ConversationState = {
-  step: 'onboarding',
+  step: 'info-gathering',
   subStep: undefined,
   userName: null,
   hasExistingStyle: false,
@@ -70,7 +69,6 @@ export const initialConversationState: ConversationState = {
 
 // 상태 전이 규칙
 export const stepTransitions: Record<ConversationStep, ConversationStep[]> = {
-  'onboarding': ['style-check'],
   'style-check': ['style-setup', 'topic-select'],
   'style-setup': ['topic-select'],
   'topic-select': ['info-gathering'],
@@ -84,7 +82,6 @@ export const stepTransitions: Record<ConversationStep, ConversationStep[]> = {
 
 // 대화 액션 타입
 export type ConversationAction =
-  | { type: 'SET_USER_NAME'; payload: string }
   | { type: 'SET_STYLE_PROFILE'; payload: StyleProfile }
   | { type: 'SET_HAS_EXISTING_STYLE'; payload: boolean }
   | { type: 'SET_TOPIC'; payload: ReviewTopic }

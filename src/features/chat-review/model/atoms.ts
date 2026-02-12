@@ -10,7 +10,7 @@ import type { ChatMessage } from '@/entities/chat-message';
 import type { ReviewPayload } from '@/shared/types/review';
 
 // Conversation state atoms
-export const stepAtom = atom<ConversationStep>('onboarding');
+export const stepAtom = atom<ConversationStep>('info-gathering');
 export const subStepAtom = atom<RestaurantInfoStep | undefined>(undefined);
 export const userNameAtom = atom<string | null>(null);
 export const hasExistingStyleAtom = atom<boolean>(false);
@@ -58,7 +58,7 @@ export const updateCollectedInfoAtom = atom(
 export const resetConversationAtom = atom(
   null,
   (_get, set) => {
-    set(stepAtom, 'onboarding');
+    set(stepAtom, 'info-gathering');
     set(subStepAtom, undefined);
     set(userNameAtom, null);
     set(selectedTopicAtom, null);

@@ -19,9 +19,6 @@ export function canTransition(
 
 export function determineNextStep(state: ConversationState): ConversationStep {
   switch (state.step) {
-    case 'onboarding':
-      return state.userName ? 'style-check' : 'onboarding';
-
     case 'style-check':
       return state.hasExistingStyle ? 'topic-select' : 'style-setup';
 
@@ -133,13 +130,6 @@ export function createInitialMessage(
   };
 
   switch (step) {
-    case 'onboarding':
-      return {
-        ...baseMessage,
-        type: 'text',
-        content: MESSAGES.onboarding.welcome,
-      };
-
     case 'style-check':
       if (state.hasExistingStyle && state.styleProfile) {
         return {
@@ -167,7 +157,7 @@ export function createInitialMessage(
 
     case 'info-gathering':
       const subStep = determineInfoSubStep(state);
-      return createInfoGatheringMessage(subStep);
+      return createInfoGatheringMessage(subStep, state.collectedInfo.menu);
 
     case 'smart-followup':
       return {
@@ -220,7 +210,8 @@ export function createInitialMessage(
 }
 
 function createInfoGatheringMessage(
-  subStep: RestaurantInfoStep
+  subStep: RestaurantInfoStep,
+  menu?: string
 ): ChatMessage {
   const timestamp = new Date();
   const baseMessage = {
@@ -264,7 +255,7 @@ function createInfoGatheringMessage(
       return {
         ...baseMessage,
         type: 'input',
-        content: MESSAGES.infoGathering.restaurant.taste,
+        content: MESSAGES.infoGathering.restaurant.taste(menu),
       };
 
     case 'atmosphere':

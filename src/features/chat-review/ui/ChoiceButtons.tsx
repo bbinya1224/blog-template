@@ -32,7 +32,7 @@ export function ChoiceButtons({
             'px-4 py-2 rounded-xl text-sm font-medium',
             'bg-white border border-stone-200 text-stone-700',
             'transition-all duration-150',
-            'hover:border-[var(--primary)]/50 hover:bg-[var(--surface)] hover:text-[var(--primary)]',
+            'hover:border-primary/50 hover:bg-surface hover:text-primary',
             'active:scale-[0.98]',
             'disabled:opacity-40 disabled:cursor-not-allowed',
             option.icon && 'flex items-center gap-2',

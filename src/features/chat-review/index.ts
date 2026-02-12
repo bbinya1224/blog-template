@@ -41,7 +41,6 @@ export {
 
 // Lib - Step Handlers
 export {
-  handleOnboarding,
   handleStyleSetup,
   handleStyleCheck,
   handleTopicSelect,

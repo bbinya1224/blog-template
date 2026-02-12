@@ -94,7 +94,8 @@ export function useChatHandlers({
         confirmed,
         metadata.name,
         metadata.roadAddress || metadata.address,
-        state
+        state,
+        metadata.category
       );
 
       result.messages.forEach((msg) => {
