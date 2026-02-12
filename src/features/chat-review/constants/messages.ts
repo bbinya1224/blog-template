@@ -153,6 +153,13 @@ export const MESSAGES = {
     copied: '클립보드에 복사했어요!',
   },
 
+  // 스타일 분석 (채팅 내)
+  styleAnalyze: {
+    welcome: '글 스타일을 분석해볼게요!\n어떤 방법으로 진행할까요?',
+    complete: (name: string) =>
+      `${name}님의 글 스타일을 파악했어요! ✨\n이 스타일로 리뷰를 작성해드릴게요.\n\n원하실 때 카테고리를 선택해서 리뷰를 시작해주세요!`,
+  },
+
   // 에러
   error: {
     network: `연결이 끊어졌어요.
@@ -252,6 +259,12 @@ export const CHOICE_OPTIONS: Record<string, ChoiceOption[]> = {
   reviewComplete: [
     { id: 'complete', label: '✨ 완벽해요!' },
     { id: 'edit', label: '✏️ 수정해주세요' },
+  ],
+
+  // 스타일 분석 페이지 액션
+  styleAnalyzeAction: [
+    { id: 'modify', label: '수정하고 싶은 내용이 있어요' },
+    { id: 'go-home', label: '경험 기록하러 가기' },
   ],
 
   // 에러 복구

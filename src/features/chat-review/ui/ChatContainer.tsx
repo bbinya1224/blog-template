@@ -4,10 +4,12 @@ import { cn, formatReviewDate } from '@/shared/lib/utils';
 import Link from 'next/link';
 import type { ChatMessage } from '@/entities/chat-message';
 import type { ConversationStep } from '../model/types';
+import type { StyleProfile } from '@/entities/style-profile';
 import type { Review } from '@/entities/review';
 import { MessageList } from './MessageList';
 import { InputArea } from './InputArea';
-import { Utensils, ShoppingCart } from 'lucide-react';
+import { Utensils, ShoppingCart, Sparkles } from 'lucide-react';
+import { OrotiLogo } from '@/shared/ui/Icons';
 
 interface CategoryOption {
   id: string;
@@ -94,6 +96,8 @@ interface ChatContainerProps {
   onPlaceConfirm?: (messageId: string, confirmed: boolean) => void;
   onReviewAction?: (messageId: string, action: 'complete' | 'edit') => void;
   onCategorySelect?: (categoryId: string) => void;
+  hasExistingStyle?: boolean;
+  styleProfile?: StyleProfile | null;
   selectedTopic?: string | null;
   recentReviews?: Review[];
   userName?: string;
@@ -111,6 +115,8 @@ export function ChatContainer({
   onPlaceConfirm,
   onReviewAction,
   onCategorySelect,
+  hasExistingStyle,
+  styleProfile,
   selectedTopic,
   recentReviews = [],
   userName,
@@ -124,7 +130,7 @@ export function ChatContainer({
   };
 
   return (
-    <div className='flex h-full flex-col'>
+    <div className={cn('flex h-full flex-col', className)}>
       {/* Review type header */}
       {hasMessages && selectedTopic && (
         <div className='flex shrink-0 items-center gap-2 px-6 py-3'>
@@ -136,109 +142,141 @@ export function ChatContainer({
           </h2>
         </div>
       )}
-      <div
-        className={cn(
-          'flex min-h-0 w-full flex-1 flex-col',
-          'md:mx-auto md:max-w-3xl',
-          className,
-        )}
-      >
-        {/* Main content area */}
-        <div className='relative flex flex-1 flex-col overflow-hidden'>
-          {/* Welcome content - animates out when messages appear */}
-          <div
-            className={cn(
-              'absolute inset-0 flex flex-col items-center justify-center',
-              'transition-all duration-500 ease-out',
-              hasMessages
-                ? 'pointer-events-none translate-y-8 opacity-0'
-                : 'translate-y-0 opacity-100',
-            )}
-          >
-            <div className='mb-8 text-center'>
+
+      {/* Main scrollable content */}
+      <div className='min-h-0 flex-1 overflow-y-auto'>
+        <div className='mx-auto flex h-full w-full max-w-3xl flex-col'>
+          {!hasMessages ? (
+            /* ===== Claude-style Welcome Screen ===== */
+            <div className='flex flex-1 flex-col items-center justify-center px-6 py-8'>
+              {/* Brand icon - large */}
+              <div className='mb-6'>
+                <OrotiLogo className='size-16' />
+              </div>
+
+              {/* Greeting */}
               <h1 className='mb-2 text-2xl font-semibold text-stone-800 sm:text-3xl'>
                 {userName ? `${userName}님, 안녕하세요` : '안녕하세요'}
               </h1>
-              <p className='text-lg text-stone-400'>
+              <p className='mb-10 text-lg text-stone-400'>
                 오늘은 어떤 경험을 남겨볼까요?
               </p>
-            </div>
 
-            {/* Category selection */}
-            <div className='flex flex-wrap justify-center gap-3'>
-              {REVIEW_CATEGORIES.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => handleCategoryClick(category)}
-                  disabled={category.disabled}
-                  className={cn(
-                    'group flex items-center gap-2.5 px-5 py-3',
-                    'rounded-xl border-2 transition-all duration-200',
-                    category.disabled
-                      ? `cursor-not-allowed border-stone-100 bg-stone-50 text-stone-300`
-                      : `border-stone-200 bg-white text-stone-700 hover:border-orange-300 hover:shadow-md hover:shadow-orange-100/50`,
-                  )}
-                >
-                  <span
+              {/* Category chips - Claude prompt suggestion style */}
+              <div className='flex flex-wrap justify-center gap-3'>
+                {REVIEW_CATEGORIES.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => handleCategoryClick(category)}
+                    disabled={category.disabled}
                     className={cn(
-                      'transition-colors',
+                      'group flex items-center gap-2.5 px-5 py-3',
+                      'rounded-2xl border transition-all duration-200',
                       category.disabled
-                        ? 'text-stone-300'
-                        : `text-orange-400 group-hover:text-orange-500`,
+                        ? 'cursor-not-allowed border-stone-100 bg-stone-50/50 text-stone-300'
+                        : 'border-stone-200 bg-white text-stone-700 shadow-sm hover:border-[var(--primary)]/40 hover:shadow-md hover:shadow-[var(--primary)]/5',
                     )}
                   >
-                    {category.icon}
-                  </span>
-                  <span className='font-medium'>{category.label}</span>
-                  {category.disabled && category.disabledLabel && (
-                    <span className='ml-1 text-xs text-stone-300'>
-                      ({category.disabledLabel})
+                    <span
+                      className={cn(
+                        'transition-colors',
+                        category.disabled
+                          ? 'text-stone-300'
+                          : 'text-[var(--primary)] group-hover:text-[var(--primary-hover)]',
+                      )}
+                    >
+                      {category.icon}
                     </span>
+                    <span className='font-medium'>{category.label}</span>
+                    {category.disabled && category.disabledLabel && (
+                      <span className='ml-1 text-xs text-stone-300'>
+                        ({category.disabledLabel})
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Style analysis section */}
+              <div className='mt-10 w-full max-w-lg break-keep'>
+                <div className='border-t border-stone-100 pt-6'>
+                  {hasExistingStyle && styleProfile ? (
+                    <div className='rounded-2xl border border-stone-100 bg-gradient-to-br from-white to-[var(--surface)]/50 p-4'>
+                      <div className='mb-2 flex items-center gap-2'>
+                        <Sparkles className='size-4 text-[var(--primary)]' />
+                        <span className='text-sm font-medium text-stone-700'>
+                          내 글 스타일
+                        </span>
+                      </div>
+                      <p className='text-sm leading-relaxed text-stone-500'>
+                        {styleProfile.writing_style?.tone || '친근한 톤'}
+                        {' · '}
+                        이모지{' '}
+                        {styleProfile.writing_style?.emoji_usage ||
+                          '적당히 사용'}
+                      </p>
+                      <Link
+                        href='/analyze-style'
+                        className='mt-2 inline-block text-xs text-[var(--primary)] transition-colors hover:text-[var(--primary-hover)]'
+                      >
+                        자세히 보기
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className='text-center'>
+                      <p className='mb-3 text-sm text-stone-400'>
+                        아직 글 스타일을 분석하지 않으셨네요!
+                      </p>
+                      <Link
+                        href='/analyze-style'
+                        className={cn(
+                          'inline-flex items-center gap-2 px-5 py-2.5',
+                          'rounded-xl border border-stone-200 bg-white text-sm font-medium text-stone-600',
+                          'transition-all duration-200 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]',
+                        )}
+                      >
+                        <Sparkles className='size-4' />내 글 스타일 분석하기
+                      </Link>
+                    </div>
                   )}
-                </button>
-              ))}
+                </div>
+              </div>
             </div>
-          </div>
-
-          {/* Message list - animates in when messages appear */}
-          <div
-            className={cn(
-              'min-h-0 flex-1 overflow-hidden transition-all duration-500 ease-out',
-              hasMessages
-                ? 'translate-y-0 opacity-100'
-                : 'pointer-events-none -translate-y-4 opacity-0',
-            )}
-          >
-            {hasMessages && (
-              <MessageList
-                messages={messages}
-                isTyping={isTyping}
-                onChoiceSelect={onChoiceSelect}
-                onPlaceConfirm={onPlaceConfirm}
-                onReviewAction={onReviewAction}
-                className='h-full'
-              />
-            )}
-          </div>
+          ) : (
+            /* ===== Message list ===== */
+            <MessageList
+              messages={messages}
+              isTyping={isTyping}
+              onChoiceSelect={onChoiceSelect}
+              onPlaceConfirm={onPlaceConfirm}
+              onReviewAction={onReviewAction}
+            />
+          )}
         </div>
+      </div>
 
-        {/* Input area - always at bottom */}
-        <InputArea
-          onSend={onSendMessage}
-          disabled={isInputDisabled || isTyping}
-          placeholder={inputPlaceholder}
-        />
+      {/* Input area - only when chat is active */}
+      {hasMessages && (
+        <div className='shrink-0'>
+          <InputArea
+            onSend={onSendMessage}
+            disabled={isInputDisabled || isTyping}
+            placeholder={inputPlaceholder}
+          />
+        </div>
+      )}
 
-        {/* Recent reviews - only render when no messages */}
-        {!hasMessages && recentReviews.length > 0 && (
-          <div className='border-t border-stone-100 px-6 pb-6'>
+      {/* Recent reviews - only render when no messages */}
+      {!hasMessages && recentReviews.length > 0 && (
+        <div className='shrink-0 border-t border-stone-100 px-6 pb-6'>
+          <div className='mx-auto max-w-3xl'>
             <div className='flex items-center justify-between py-4'>
               <h2 className='text-sm font-medium text-stone-500'>
                 최근에는 이런 리뷰를 작성했어요.
               </h2>
               <Link
                 href='/reviews'
-                className='text-sm font-medium text-orange-500 transition-colors hover:text-orange-600'
+                className='text-sm font-medium text-[var(--primary)] transition-colors hover:text-[var(--primary-hover)]'
               >
                 전체보기
               </Link>
@@ -253,11 +291,11 @@ export function ChatContainer({
                   className={cn(
                     'group w-44 shrink-0 p-4',
                     'rounded-xl border border-stone-200',
-                    'hover:border-orange-300 hover:shadow-md',
+                    'hover:border-[var(--primary)]/40 hover:shadow-md',
                     'transition-all duration-200',
                   )}
                 >
-                  <h3 className='mb-1 truncate text-sm font-semibold text-stone-800 transition-colors group-hover:text-orange-600'>
+                  <h3 className='mb-1 truncate text-sm font-semibold text-stone-800 transition-colors group-hover:text-[var(--primary)]'>
                     {review.storeName || '맛집 리뷰'}
                   </h3>
                   <p className='text-xs text-stone-400'>
@@ -267,8 +305,8 @@ export function ChatContainer({
               ))}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
