@@ -6,7 +6,6 @@ import { conversationStateAtom, isProcessingAtom } from './atoms';
 import { useConversationActions } from './use-conversation-actions';
 import { useChatMessagesJotai } from './use-chat-messages-jotai';
 import { useMessageProcessor } from './use-message-processor';
-import { useStreamMessage } from './use-stream-message';
 import { useBlogAnalysis } from './use-blog-analysis';
 import { usePlaceSearch } from './use-place-search';
 import { useReviewGeneration } from './use-review-generation';
@@ -29,7 +28,6 @@ export function useChatHandlers({
 }: UseChatHandlersProps) {
   const state = useAtomValue(conversationStateAtom);
   const [isProcessing, setIsProcessing] = useAtom(isProcessingAtom);
-  const { isStreaming } = useStreamMessage();
   const { dispatchActions } = useConversationActions();
   const { messages, addMessage, addUserMessage, addAssistantMessage } = useChatMessagesJotai();
 
@@ -53,7 +51,7 @@ export function useChatHandlers({
   // Main message handler - simplified and declarative
   const handleSendMessage = useCallback(
     async (content: string) => {
-      if (isProcessing || isStreaming) return;
+      if (isProcessing) return;
 
       setIsProcessing(true);
       addUserMessage(content);
@@ -70,7 +68,7 @@ export function useChatHandlers({
 
       setIsProcessing(false);
     },
-    [isProcessing, isStreaming, setIsProcessing, addUserMessage, processMessage, dispatchActions, addAssistantMessage]
+    [isProcessing, setIsProcessing, addUserMessage, processMessage, dispatchActions, addAssistantMessage]
   );
 
   // Choice selection handler
@@ -129,6 +127,5 @@ export function useChatHandlers({
     consumeNextQuestion,
     resetSmartFollowup,
     isProcessing,
-    isStreaming,
   };
 }

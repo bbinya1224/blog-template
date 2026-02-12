@@ -3,35 +3,21 @@
 import { useRouter } from 'next/navigation';
 import { useSetAtom } from 'jotai';
 import { cn } from '@/shared/lib/utils';
+import { OrotiLogo } from '@/shared/ui/Icons';
 import { resetConversationAtom } from '@/features/chat-review/model/atoms';
 import { useSidebar } from '../model/sidebar-context';
 import { SidebarReviewList } from './SidebarReviewList';
 import { SidebarUserProfile } from './SidebarUserProfile';
 
-function getIsDesktop() {
-  if (typeof window === 'undefined') return true;
-  return window.matchMedia('(min-width: 768px)').matches;
-}
-
-function OrotiIcon() {
-  return (
-    <svg viewBox='0 0 32 32' fill='none' className='size-8 shrink-0'>
-      <circle cx='16' cy='16' r='14' fill='#E8825C' />
-      <circle cx='16' cy='16' r='9' fill='#FFFBF7' />
-      <circle cx='16' cy='16' r='5' fill='#F4A261' />
-    </svg>
-  );
-}
-
 export function Sidebar() {
-  const { isExpanded, showLabels, toggle, collapse } = useSidebar();
+  const { isExpanded, isDesktop, showLabels, toggle, collapse } = useSidebar();
   const router = useRouter();
   const resetConversation = useSetAtom(resetConversationAtom);
 
   const handleNewRecord = () => {
     router.push('/');
     resetConversation();
-    if (!getIsDesktop()) collapse();
+    if (!isDesktop) collapse();
   };
 
   return (
@@ -67,7 +53,7 @@ export function Sidebar() {
             aria-expanded={isExpanded}
             className='flex w-16 shrink-0 justify-center transition-opacity hover:opacity-80'
           >
-            <OrotiIcon />
+            <OrotiLogo className='size-8 shrink-0' />
           </button>
           {showLabels && (
             <>
@@ -133,7 +119,12 @@ export function Sidebar() {
         </div>
 
         {/* Review List (scrollable) */}
-        <div className='sidebar-scrollbar min-h-0 flex-1 overflow-y-auto'>
+        <div
+          className={cn(
+            'sidebar-scrollbar min-h-0 flex-1',
+            isExpanded ? 'overflow-y-auto' : 'overflow-hidden',
+          )}
+        >
           {showLabels && (
             <div className='px-4 pt-3 pb-1'>
               <p className='text-xs font-semibold tracking-wider text-stone-400 uppercase'>

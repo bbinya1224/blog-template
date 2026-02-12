@@ -25,7 +25,6 @@ export const messagesAtom = atom<ChatMessage[]>([]);
 
 // UI state atoms
 export const isProcessingAtom = atom<boolean>(false);
-export const isStreamingAtom = atom<boolean>(false);
 
 // Derived atom for full conversation state (for compatibility)
 export const conversationStateAtom = atom<ConversationState>((get) => ({

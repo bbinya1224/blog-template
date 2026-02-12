@@ -16,7 +16,6 @@ export {
 // Model (Hooks & Types)
 export {
   useChatMessages,
-  useStreamMessage,
   type ConversationState,
   type ConversationStep,
   type ConversationAction,
@@ -25,16 +24,7 @@ export {
   initialConversationState,
   stepTransitions,
   type UseChatMessagesReturn,
-  type UseStreamMessageReturn,
 } from './model';
-
-// API
-export {
-  streamChatMessage,
-  buildContextFromState,
-  type StreamMessageInput,
-  type StreamCallbacks,
-} from './api/chat-api';
 
 // Lib - Conversation Engine
 export {

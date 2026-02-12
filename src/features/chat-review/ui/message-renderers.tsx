@@ -63,7 +63,7 @@ export function TextRenderer({
       {/* Invisible full text to reserve space */}
       {enableTyping && (
         <p
-          className='invisible text-[15px] leading-7 whitespace-pre-wrap text-stone-800'
+          className='invisible text-[15px] leading-7 break-keep whitespace-pre-wrap text-stone-700'
           aria-hidden
         >
           {fullText}
@@ -73,8 +73,8 @@ export function TextRenderer({
       <p
         className={
           enableTyping
-            ? 'absolute inset-0 text-[15px] leading-7 whitespace-pre-wrap text-stone-800'
-            : 'text-[15px] leading-7 whitespace-pre-wrap text-stone-800'
+            ? 'absolute inset-0 text-[15px] leading-7 break-keep whitespace-pre-wrap text-stone-700'
+            : 'text-[15px] leading-7 break-keep whitespace-pre-wrap text-stone-700'
         }
       >
         {enableTyping ? displayedText : content}
@@ -130,11 +130,11 @@ export function ReviewPreviewRenderer({
 
 export function LoadingRenderer() {
   return (
-    <div className='flex items-center gap-1'>
+    <div className='flex items-center gap-1.5'>
       {[0, 150, 300].map((delay) => (
         <span
           key={delay}
-          className='size-2 animate-bounce rounded-full bg-stone-300'
+          className='size-1.5 animate-bounce rounded-full bg-stone-400'
           style={{ animationDelay: `${delay}ms` }}
         />
       ))}
@@ -195,7 +195,13 @@ export function MessageContent({
         onConfirm={onPlaceConfirm}
       />
     ),
-    'style-summary': () => <StyleSummaryRenderer metadata={message.metadata} />,
+    'style-summary': () => (
+      <>
+        <TextRenderer content={message.content || ''} />
+        <StyleSummaryRenderer metadata={message.metadata} />
+        <ChoiceRenderer options={message.options} onSelect={onChoiceSelect} />
+      </>
+    ),
     'review-preview': () => (
       <ReviewPreviewRenderer
         metadata={message.metadata}

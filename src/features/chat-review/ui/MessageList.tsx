@@ -37,15 +37,13 @@ export function MessageList({
     <div
       ref={containerRef}
       className={cn(
-        'flex-1 overflow-y-auto',
         'px-5 sm:px-6',
         'pt-4 pb-2',
-        'scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-transparent',
         className,
       )}
     >
       <div className='flex w-full flex-col'>
-        <div className='space-y-4'>
+        <div className='space-y-6'>
           {messages.map((message, index) => (
             <MessageBubble
               key={message.id}

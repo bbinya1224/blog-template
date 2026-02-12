@@ -1,0 +1,1 @@
+export { OrotiLogo } from './OrotiLogo';
