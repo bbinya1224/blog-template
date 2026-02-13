@@ -1,14 +1,13 @@
-import type { ConversationState } from '../../model/types';
+import type {
+  ConversationState,
+  StepHandlerResult,
+  ReviewEditResult,
+} from '../../model/types';
 import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
-import type { StepHandlerResult } from '.';
-
-export interface ReviewEditResult extends StepHandlerResult {
-  editRequest?: string;
-}
 
 export function handleReviewEdit(
   userInput: string,
-  state: ConversationState
+  state: ConversationState,
 ): ReviewEditResult {
   const lowered = userInput.toLowerCase();
 
@@ -73,10 +72,7 @@ export function handleReviewEdit(
   };
 }
 
-export function handleReviewEdited(
-  editedReview: string,
-  _state: ConversationState
-): StepHandlerResult {
+export function handleReviewEdited(editedReview: string): StepHandlerResult {
   return {
     messages: [
       {

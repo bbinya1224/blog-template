@@ -1,26 +1,15 @@
 import type {
   ConversationState,
-  StyleSetupMethod,
+  StepHandlerResult,
+  StyleSetupContext,
+  StyleSetupHandlerResult,
 } from '../../model/types';
-import type { StyleProfile } from '@/entities/style-profile';
 import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
-import type { StepHandlerResult } from '.';
-
-export interface StyleSetupContext {
-  method?: StyleSetupMethod;
-  blogUrl?: string;
-  pastedTexts?: string[];
-  questionnaireStep?: number;
-}
-
-export interface StyleSetupHandlerResult extends StepHandlerResult {
-  asyncAction?: () => Promise<{ styleProfile?: StyleProfile; error?: string }>;
-}
 
 export function handleStyleSetup(
   userInput: string,
   state: ConversationState,
-  context: StyleSetupContext = {}
+  context: StyleSetupContext = {},
 ): StyleSetupHandlerResult {
   if (!context.method) {
     return handleMethodSelection(userInput, state);
@@ -40,7 +29,7 @@ export function handleStyleSetup(
 
 function handleMethodSelection(
   userInput: string,
-  state: ConversationState
+  state: ConversationState,
 ): StyleSetupHandlerResult {
   const methodId = userInput.toLowerCase();
 
@@ -119,7 +108,7 @@ function handleMethodSelection(
 
 function handleBlogUrlInput(
   userInput: string,
-  _state: ConversationState
+  _state: ConversationState,
 ): StyleSetupHandlerResult {
   const urlPattern =
     /https?:\/\/(blog\.naver\.com|m\.blog\.naver\.com)\/[a-zA-Z0-9_-]+/;
@@ -156,7 +145,7 @@ function handleBlogUrlInput(
 function handlePasteText(
   userInput: string,
   _state: ConversationState,
-  context: StyleSetupContext
+  context: StyleSetupContext,
 ): StyleSetupHandlerResult {
   const texts = context.pastedTexts || [];
   texts.push(userInput);
@@ -189,7 +178,7 @@ function handlePasteText(
 function handleQuestionnaire(
   userInput: string,
   _state: ConversationState,
-  context: StyleSetupContext
+  context: StyleSetupContext,
 ): StyleSetupHandlerResult {
   const step = context.questionnaireStep || 0;
 
@@ -238,19 +227,27 @@ function handleQuestionnaire(
 
 export function handleStyleCheck(
   userInput: string,
-  state: ConversationState
+  state: ConversationState,
 ): StepHandlerResult {
   const lowered = userInput.toLowerCase();
 
   if (state.hasExistingStyle) {
-    if (lowered === 'yes' || lowered.includes('좋아') || lowered.includes('네')) {
+    if (
+      lowered === 'yes' ||
+      lowered.includes('좋아') ||
+      lowered.includes('네')
+    ) {
       return {
         messages: [],
         actions: [{ type: 'GO_TO_STEP', payload: 'topic-select' }],
         nextStep: 'topic-select',
       };
     }
-    if (lowered === 'no' || lowered.includes('수정') || lowered.includes('아니')) {
+    if (
+      lowered === 'no' ||
+      lowered.includes('수정') ||
+      lowered.includes('아니')
+    ) {
       return {
         messages: [
           {

@@ -13,9 +13,9 @@ import {
   useRecentReviews,
   useChatHandlers,
   useReviewGeneration,
+  useChatMessages,
 } from '@/features/chat-review/model';
-import { useChatMessagesJotai } from '@/features/chat-review/model/use-chat-messages-jotai';
-import { createInitialMessage } from '@/features/chat-review/lib/conversation-engine';
+import { createInitialMessage } from '@/features/chat-review/lib/conversationEngine';
 import { createSummaryMessage } from '@/features/chat-review/lib/step-handlers';
 import {
   MESSAGES,
@@ -55,7 +55,7 @@ export function ChatPageContent({
 
   // Hooks
   const { reviews: recentReviews } = useRecentReviews(5);
-  const { messages, addMessage, addAssistantMessage } = useChatMessagesJotai();
+  const { messages, addMessage, addAssistantMessage } = useChatMessages();
   const { generateReview } = useReviewGeneration({ userEmail });
   const {
     handleSendMessage: originalHandleSendMessage,

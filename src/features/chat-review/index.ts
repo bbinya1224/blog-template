@@ -15,7 +15,6 @@ export {
 
 // Model (Hooks & Types)
 export {
-  useChatMessages,
   type ConversationState,
   type ConversationStep,
   type ConversationAction,
@@ -37,7 +36,7 @@ export {
   extractDateInfo,
   extractCompanionInfo,
   type UserIntent,
-} from './lib/conversation-engine';
+} from './lib/conversationEngine';
 
 // Lib - Step Handlers
 export {

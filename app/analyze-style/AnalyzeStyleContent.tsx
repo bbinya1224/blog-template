@@ -11,8 +11,8 @@ import {
   stepAtom,
   messagesAtom,
   useChatHandlers,
+  useChatMessages,
 } from '@/features/chat-review/model';
-import { useChatMessagesJotai } from '@/features/chat-review/model/use-chat-messages-jotai';
 import {
   MESSAGES,
   CHOICE_OPTIONS,
@@ -66,7 +66,7 @@ function AnalyzeStyleContentInner({
   const isInitializedRef = useRef(false);
   const redirectTimerRef = useRef<NodeJS.Timeout>(undefined);
 
-  const { messages, addAssistantMessage } = useChatMessagesJotai();
+  const { messages, addAssistantMessage } = useChatMessages();
   const {
     handleSendMessage,
     handleChoiceSelect: originalHandleChoiceSelect,

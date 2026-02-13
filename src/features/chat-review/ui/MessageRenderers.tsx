@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { cn } from '@/shared/lib/utils';
 import type {
   ChatMessage,
   PlaceCardMetadata,
@@ -11,78 +11,48 @@ import { ChoiceButtons } from './ChoiceButtons';
 import { PlaceCard } from './PlaceCard';
 import { StyleSummaryCard } from './StyleSummaryCard';
 import { ReviewPreview } from './ReviewPreview';
-
-function useTypingEffect(text: string, enabled: boolean, speed: number = 15) {
-  const [displayedText, setDisplayedText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-
-  useEffect(() => {
-    if (!enabled || !text) {
-      setDisplayedText(text);
-      return;
-    }
-
-    setIsTyping(true);
-    setDisplayedText('');
-    let index = 0;
-
-    const timer = setInterval(() => {
-      if (index < text.length) {
-        setDisplayedText(text.slice(0, index + 1));
-        index++;
-      } else {
-        setIsTyping(false);
-        clearInterval(timer);
-      }
-    }, speed);
-
-    return () => clearInterval(timer);
-  }, [text, enabled, speed]);
-
-  return { displayedText, isTyping, fullText: text };
-}
+import { useTypingEffect, useStreamingText } from '../model/useTextAnimation';
 
 interface TextRendererProps {
   content: string;
   enableTyping?: boolean;
+  isStreaming?: boolean;
 }
 
 export function TextRenderer({
   content,
   enableTyping = false,
+  isStreaming = false,
 }: TextRendererProps) {
-  const { displayedText, isTyping, fullText } = useTypingEffect(
+  const { displayedText: typedText, isTyping } = useTypingEffect(
     content,
     enableTyping,
   );
+  const { displayedText: streamedText, isAnimating } = useStreamingText(
+    content,
+    isStreaming,
+  );
+
+  const displayedText = isStreaming
+    ? streamedText
+    : enableTyping
+      ? typedText
+      : content;
+  const showCursor = isStreaming ? isAnimating : isTyping;
 
   if (!content) return null;
 
   return (
-    <div className='relative'>
-      {/* Invisible full text to reserve space */}
-      {enableTyping && (
-        <p
-          className='invisible text-[15px] leading-7 break-keep whitespace-pre-wrap text-stone-700'
-          aria-hidden
-        >
-          {fullText}
-        </p>
-      )}
-      {/* Visible text */}
-      <p
-        className={
-          enableTyping
-            ? 'absolute inset-0 text-[15px] leading-7 break-keep whitespace-pre-wrap text-stone-700'
-            : 'text-[15px] leading-7 break-keep whitespace-pre-wrap text-stone-700'
-        }
-      >
-        {enableTyping ? displayedText : content}
-        {isTyping && (
-          <span className='ml-0.5 inline-block h-5 w-0.5 animate-pulse bg-stone-400 align-middle' />
+    <p className='text-[15px] leading-7 break-keep whitespace-pre-wrap text-stone-700'>
+      {displayedText}
+      <span
+        aria-hidden
+        className={cn(
+          'inline-block h-[1em] w-0.5 translate-y-[0.1em] bg-stone-400 transition-opacity duration-300',
+          showCursor ? 'animate-pulse opacity-100' : 'opacity-0',
         )}
-      </p>
-    </div>
+      />
+    </p>
   );
 }
 
@@ -101,31 +71,28 @@ export function PlaceCardRenderer({
   metadata,
   onConfirm,
 }: {
-  metadata: unknown;
+  metadata: PlaceCardMetadata;
   onConfirm?: (confirmed: boolean) => void;
 }) {
-  return (
-    <PlaceCard metadata={metadata as PlaceCardMetadata} onConfirm={onConfirm} />
-  );
+  return <PlaceCard metadata={metadata} onConfirm={onConfirm} />;
 }
 
-export function StyleSummaryRenderer({ metadata }: { metadata: unknown }) {
-  return <StyleSummaryCard metadata={metadata as StyleSummaryMetadata} />;
+export function StyleSummaryRenderer({
+  metadata,
+}: {
+  metadata: StyleSummaryMetadata;
+}) {
+  return <StyleSummaryCard metadata={metadata} />;
 }
 
 export function ReviewPreviewRenderer({
   metadata,
   onAction,
 }: {
-  metadata: unknown;
+  metadata: ReviewPreviewMetadata;
   onAction?: (action: 'complete' | 'edit') => void;
 }) {
-  return (
-    <ReviewPreview
-      metadata={metadata as ReviewPreviewMetadata}
-      onAction={onAction}
-    />
-  );
+  return <ReviewPreview metadata={metadata} onAction={onAction} />;
 }
 
 export function LoadingRenderer() {
@@ -181,6 +148,7 @@ export function MessageContent({
       <TextRenderer
         content={message.content || ''}
         enableTyping={enableTyping}
+        isStreaming={!!message.metadata?.streaming}
       />
     ),
     choice: () => (
@@ -191,20 +159,22 @@ export function MessageContent({
     ),
     'place-card': () => (
       <PlaceCardRenderer
-        metadata={message.metadata}
+        metadata={message.metadata as unknown as PlaceCardMetadata}
         onConfirm={onPlaceConfirm}
       />
     ),
     'style-summary': () => (
       <>
         <TextRenderer content={message.content || ''} />
-        <StyleSummaryRenderer metadata={message.metadata} />
+        <StyleSummaryRenderer
+          metadata={message.metadata as unknown as StyleSummaryMetadata}
+        />
         <ChoiceRenderer options={message.options} onSelect={onChoiceSelect} />
       </>
     ),
     'review-preview': () => (
       <ReviewPreviewRenderer
-        metadata={message.metadata}
+        metadata={message.metadata as unknown as ReviewPreviewMetadata}
         onAction={onReviewAction}
       />
     ),

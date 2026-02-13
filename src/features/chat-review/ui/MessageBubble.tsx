@@ -2,7 +2,7 @@ import { cn } from '@/shared/lib/utils';
 import type { ChatMessage } from '@/entities/chat-message';
 import type { CSSProperties } from 'react';
 import { OrotiLogo } from '@/shared/ui/Icons';
-import { MessageContent } from './message-renderers';
+import { MessageContent } from './MessageRenderers';
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -37,7 +37,9 @@ export function MessageBubble({
           <div className='flex-1 rounded-2xl bg-white p-3'>
             <MessageContent
               message={message}
-              enableTyping={message.type === 'text'}
+              enableTyping={
+                message.type === 'text' && !message.metadata?.streaming
+              }
               onChoiceSelect={onChoiceSelect}
               onPlaceConfirm={onPlaceConfirm}
               onReviewAction={onReviewAction}

@@ -1,28 +1,31 @@
-import type { ConversationState, ReviewTopic } from '../../model/types';
+import type {
+  ConversationState,
+  ReviewTopic,
+  StepHandlerResult,
+} from '../../model/types';
 import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
-import type { StepHandlerResult } from '.';
 
 const TOPIC_MAP: Record<string, ReviewTopic> = {
   restaurant: 'restaurant',
-  '맛집': 'restaurant',
-  '음식': 'restaurant',
+  맛집: 'restaurant',
+  음식: 'restaurant',
   '1': 'restaurant',
   beauty: 'beauty',
-  '뷰티': 'beauty',
-  '화장품': 'beauty',
+  뷰티: 'beauty',
+  화장품: 'beauty',
   product: 'product',
-  '제품': 'product',
+  제품: 'product',
   movie: 'movie',
-  '영화': 'movie',
+  영화: 'movie',
   book: 'book',
-  '책': 'book',
+  책: 'book',
   travel: 'travel',
-  '여행': 'travel',
+  여행: 'travel',
 };
 
 export function handleTopicSelect(
   userInput: string,
-  _state: ConversationState
+  _state: ConversationState,
 ): StepHandlerResult {
   const lowered = userInput.toLowerCase().trim();
   const topic = TOPIC_MAP[lowered];

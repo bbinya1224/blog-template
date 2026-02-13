@@ -3,13 +3,13 @@
 import { useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import { conversationStateAtom, isProcessingAtom } from './atoms';
-import { useConversationActions } from './use-conversation-actions';
-import { useChatMessagesJotai } from './use-chat-messages-jotai';
-import { useMessageProcessor } from './use-message-processor';
-import { useBlogAnalysis } from './use-blog-analysis';
-import { usePlaceSearch } from './use-place-search';
-import { useReviewGeneration } from './use-review-generation';
-import { useSmartFollowup } from './use-smart-followup';
+import { useConversationActions } from './useConversationActions';
+import { useChatMessages } from './useChatMessages';
+import { useMessageProcessor } from './useMessageProcessor';
+import { useBlogAnalysis } from './useBlogAnalysis';
+import { usePlaceSearch } from './usePlaceSearch';
+import { useReviewGeneration } from './useReviewGeneration';
+import { useSmartFollowup } from './useSmartFollowup';
 import { handlePlaceConfirmed } from '../lib/step-handlers';
 import { MESSAGES } from '../constants/messages';
 import type { StyleSetupContext } from '../lib/step-handlers';
@@ -29,12 +29,18 @@ export function useChatHandlers({
   const state = useAtomValue(conversationStateAtom);
   const [isProcessing, setIsProcessing] = useAtom(isProcessingAtom);
   const { dispatchActions } = useConversationActions();
-  const { messages, addMessage, addUserMessage, addAssistantMessage } = useChatMessagesJotai();
+  const { messages, addMessage, addUserMessage, addAssistantMessage } =
+    useChatMessages();
 
   const { analyzeBlogUrl } = useBlogAnalysis(state.userName);
   const { searchPlace } = usePlaceSearch();
   const { editReview } = useReviewGeneration({ userEmail });
-  const { fetchSmartQuestions, consumeNextQuestion, getRemainingQuestions, reset: resetSmartFollowup } = useSmartFollowup();
+  const {
+    fetchSmartQuestions,
+    consumeNextQuestion,
+    getRemainingQuestions,
+    reset: resetSmartFollowup,
+  } = useSmartFollowup();
 
   const { processMessage } = useMessageProcessor({
     state,
@@ -68,7 +74,14 @@ export function useChatHandlers({
 
       setIsProcessing(false);
     },
-    [isProcessing, setIsProcessing, addUserMessage, processMessage, dispatchActions, addAssistantMessage]
+    [
+      isProcessing,
+      setIsProcessing,
+      addUserMessage,
+      processMessage,
+      dispatchActions,
+      addAssistantMessage,
+    ],
   );
 
   // Choice selection handler
@@ -80,7 +93,7 @@ export function useChatHandlers({
         handleSendMessage(option.label);
       }
     },
-    [messages, handleSendMessage]
+    [messages, handleSendMessage],
   );
 
   // Place confirmation handler
@@ -95,7 +108,7 @@ export function useChatHandlers({
         metadata.name,
         metadata.roadAddress || metadata.address,
         state,
-        metadata.category
+        metadata.category,
       );
 
       result.messages.forEach((msg) => {
@@ -108,7 +121,7 @@ export function useChatHandlers({
 
       dispatchActions(result.actions);
     },
-    [messages, state, addMessage, dispatchActions]
+    [messages, state, addMessage, dispatchActions],
   );
 
   // Review action handler
@@ -116,7 +129,7 @@ export function useChatHandlers({
     (_messageId: string, action: 'complete' | 'edit') => {
       handleSendMessage(action === 'complete' ? '완벽해요!' : '수정해주세요');
     },
-    [handleSendMessage]
+    [handleSendMessage],
   );
 
   return {

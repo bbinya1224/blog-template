@@ -1,11 +1,14 @@
 import type { ChatMessage } from '@/entities/chat-message';
-import type { ConversationState, RestaurantInfoStep } from '../../model/types';
+import type {
+  ConversationState,
+  RestaurantInfoStep,
+  StepHandlerResult,
+} from '../../model/types';
 import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
-import type { StepHandlerResult } from '.';
 
 export function handleConfirmation(
   userInput: string,
-  _state: ConversationState
+  _state: ConversationState,
 ): StepHandlerResult {
   const lowered = userInput.toLowerCase();
 
@@ -52,17 +55,17 @@ export function handleConfirmation(
   }
 
   const fieldKeywords: Record<string, RestaurantInfoStep> = {
-    '날짜': 'date',
-    '언제': 'date',
-    '누구': 'companion',
-    '동행': 'companion',
-    '장소': 'place',
-    '매장': 'place',
-    '어디': 'place',
-    '메뉴': 'menu',
-    '음식': 'menu',
-    '맛': 'taste',
-    '분위기': 'atmosphere',
+    날짜: 'date',
+    언제: 'date',
+    누구: 'companion',
+    동행: 'companion',
+    장소: 'place',
+    매장: 'place',
+    어디: 'place',
+    메뉴: 'menu',
+    음식: 'menu',
+    맛: 'taste',
+    분위기: 'atmosphere',
   };
 
   for (const [keyword, subStep] of Object.entries(fieldKeywords)) {
@@ -98,7 +101,7 @@ export function handleConfirmation(
 }
 
 export function createSummaryMessage(
-  state: ConversationState
+  state: ConversationState,
 ): Omit<ChatMessage, 'id' | 'timestamp'> {
   const info = state.collectedInfo;
 
