@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file.
 
+<!-- CHANGELOG:AUTO:START -->
+## [2026.02.13] - Modify/sse chat ux implement
+
+### ✨ New Features
+- Chat UI v2 리디자인 및 코드 품질 개선
+- 스마트 후속 질문 기능 추가
+- 뇌과학 기반 감각별 질문 리디자인
+- widgets 레이어 추가 (app-shell, sidebar)
+- 채팅 API 클라이언트, 카테고리 설정, Mock 데이터 추가
+- 채팅 UI 컴포넌트 구현 (Claude Desktop 스타일)
+- add chat API routes
+- add constants and utilities
+- add domain-specific hooks
+- add message processor hook
+- add core chat hooks
+- add conversation types and Jotai atoms
+- add chat-message entity types
+
+### 🐛 Bug Fixes
+- 코드 리뷰 피드백 반영 — smart-followup 버그 수정
+- PR 피드백 반영 - className 중복 공백, 타입 안전성, 접근성 개선
+- 사이드바 UX 개선 - 아이콘 위치 고정 및 접힌 상태 클릭 지원
+- ESLint 수정, Tailwind canonical 클래스 변환, 주석 정리
+- 3차 코드리뷰 피드백 반영
+- 보안 이슈 수정 - 인증 이메일 사용 및 에러 메시지 마스킹
+- 2차 코드리뷰 피드백 반영
+- 코드리뷰 피드백 반영
+
+### ♻️ Refactoring
+- 온보딩 단계 제거 및 채팅 UX 개선
+- useIsDesktop 훅 및 OrotiLogo 공유 컴포넌트 추출
+
+### ⚡ Performance
+- Anthropic prompt caching 적용
+
+### 🔧 Chores
+- Prettier + Tailwind CSS 자동 정렬/정리 설정
+
+### 📦 Other Changes
+- modify: SSE > Chat UX 개선
+- modify: 코드리뷰 반영
+- modify: 스타일 수정
+- modify: 코드리뷰반영
+- modify:  채팅컨테이너, 메세지 컴포넌트 스타일 작업
+- modify: 일부 UI 스타일 수정
+- modify: 오롯이 리브랜딩
+
+<!-- CHANGELOG:AUTO:END -->
+
 ## [2026.01.14] - Kakao Local API Migration
 
 ### 🚀 Highlights
