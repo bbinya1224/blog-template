@@ -1,13 +1,13 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useChatMessagesJotai } from './use-chat-messages-jotai';
+import { useChatMessages } from './useChatMessages';
 import { MESSAGES } from '../constants/messages';
 import type { PlaceCardMetadata } from '@/entities/chat-message';
 import type { SearchResult } from '@/shared/lib/search';
 
 export function usePlaceSearch() {
-  const { addAssistantMessage } = useChatMessagesJotai();
+  const { addAssistantMessage } = useChatMessages();
 
   const searchPlace = useCallback(
     async (query: string) => {

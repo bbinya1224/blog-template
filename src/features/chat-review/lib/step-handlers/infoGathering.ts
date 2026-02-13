@@ -1,4 +1,4 @@
-import type { ConversationState } from '../../model/types';
+import type { ConversationState, InfoGatheringResult } from '../../model/types';
 import type { ReviewPayload } from '@/shared/types/review';
 import {
   MESSAGES,
@@ -10,17 +10,12 @@ import {
   extractDateInfo,
   extractCompanionInfo,
   determineInfoSubStep,
-} from '../conversation-engine';
+} from '../conversationEngine';
 import { restaurantConfig } from '../categories/restaurant.config';
-import type { StepHandlerResult } from '.';
-
-export interface InfoGatheringResult extends StepHandlerResult {
-  placeSearchQuery?: string;
-}
 
 export function handleInfoGathering(
   userInput: string,
-  state: ConversationState
+  state: ConversationState,
 ): InfoGatheringResult {
   const subStep = state.subStep || determineInfoSubStep(state);
 
@@ -46,7 +41,7 @@ export function handleInfoGathering(
 
 function handleDateInput(
   userInput: string,
-  _state: ConversationState
+  _state: ConversationState,
 ): InfoGatheringResult {
   const dateLabel = getDateLabel(userInput) || userInput;
   const dateValue = extractDateInfo(dateLabel);
@@ -69,7 +64,7 @@ function handleDateInput(
 
 function handleCompanionInput(
   userInput: string,
-  _state: ConversationState
+  _state: ConversationState,
 ): InfoGatheringResult {
   const companionLabel = getCompanionLabel(userInput) || userInput;
   const companionValue = extractCompanionInfo(companionLabel);
@@ -91,7 +86,7 @@ function handleCompanionInput(
 
 function handlePlaceInput(
   userInput: string,
-  _state: ConversationState
+  _state: ConversationState,
 ): InfoGatheringResult {
   return {
     messages: [
@@ -111,7 +106,7 @@ export function handlePlaceConfirmed(
   placeName: string,
   placeAddress: string,
   _state: ConversationState,
-  category?: string
+  category?: string,
 ): InfoGatheringResult {
   if (!confirmed) {
     return {
@@ -131,7 +126,10 @@ export function handlePlaceConfirmed(
       {
         role: 'assistant',
         type: 'text',
-        content: MESSAGES.infoGathering.restaurant.placeConfirmed(placeName, category),
+        content: MESSAGES.infoGathering.restaurant.placeConfirmed(
+          placeName,
+          category,
+        ),
       },
     ],
     actions: [
@@ -149,7 +147,7 @@ export function handlePlaceConfirmed(
 
 function handleMenuInput(
   userInput: string,
-  _state: ConversationState
+  _state: ConversationState,
 ): InfoGatheringResult {
   return {
     messages: [
@@ -168,7 +166,7 @@ function handleMenuInput(
 
 function handleTasteInput(
   userInput: string,
-  _state: ConversationState
+  _state: ConversationState,
 ): InfoGatheringResult {
   return {
     messages: [
@@ -187,7 +185,7 @@ function handleTasteInput(
 
 function handleAtmosphereInput(
   userInput: string,
-  state: ConversationState
+  state: ConversationState,
 ): InfoGatheringResult {
   const currentExtra = state.collectedInfo.extra || '';
   const extraValue = currentExtra
@@ -211,7 +209,7 @@ function handleAtmosphereInput(
 
 function handleHighlightInput(
   userInput: string,
-  state: ConversationState
+  state: ConversationState,
 ): InfoGatheringResult {
   const { positive, negative } = restaurantConfig.experienceKeywords!;
 

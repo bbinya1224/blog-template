@@ -2,9 +2,13 @@
 
 import { useCallback } from 'react';
 import { useAtomValue } from 'jotai';
-import { conversationStateAtom } from './atoms';
-import { useConversationActions } from './use-conversation-actions';
-import { useChatMessagesJotai } from './use-chat-messages-jotai';
+import {
+  collectedInfoAtom,
+  styleProfileAtom,
+  generatedReviewAtom,
+} from './atoms';
+import { useConversationActions } from './useConversationActions';
+import { useChatMessages } from './useChatMessages';
 import { handleReviewEdited } from '../lib/step-handlers';
 import { MESSAGES } from '../constants/messages';
 
@@ -13,20 +17,25 @@ interface UseReviewGenerationProps {
 }
 
 export function useReviewGeneration({ userEmail }: UseReviewGenerationProps) {
-  const state = useAtomValue(conversationStateAtom);
-  const { setGeneratedReview, goToStep, dispatchActions } = useConversationActions();
-  const { addAssistantMessage, updateMessage } = useChatMessagesJotai();
+  const collectedInfo = useAtomValue(collectedInfoAtom);
+  const styleProfile = useAtomValue(styleProfileAtom);
+  const generatedReview = useAtomValue(generatedReviewAtom);
+  const { setGeneratedReview, goToStep, dispatchActions } =
+    useConversationActions();
+  const { addAssistantMessage, updateMessage } = useChatMessages();
 
   const generateReview = useCallback(async () => {
-    const msgId = addAssistantMessage('', 'text');
+    const msgId = addAssistantMessage('', 'text', undefined, {
+      streaming: true,
+    });
 
     try {
       const response = await fetch('/api/chat/generate-review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          payload: state.collectedInfo,
-          styleProfile: state.styleProfile,
+          payload: collectedInfo,
+          styleProfile,
           userEmail,
         }),
       });
@@ -34,7 +43,11 @@ export function useReviewGeneration({ userEmail }: UseReviewGenerationProps) {
       if (!response.ok) throw new Error('Failed to generate review');
 
       const fullText = await processStream(response, (text) => {
-        updateMessage(msgId, { content: text, type: 'text' });
+        updateMessage(msgId, {
+          content: text,
+          type: 'text',
+          metadata: { streaming: true },
+        });
       });
 
       setGeneratedReview(fullText);
@@ -45,39 +58,67 @@ export function useReviewGeneration({ userEmail }: UseReviewGenerationProps) {
         content: MESSAGES.reviewEdit.complete,
         metadata: { review: fullText, characterCount: fullText.length },
       });
-    } catch {
+    } catch (error) {
+      console.error('[generateReview] Failed:', error);
       addAssistantMessage(MESSAGES.error.unknown, 'text');
     }
-  }, [state.collectedInfo, state.styleProfile, userEmail, setGeneratedReview, goToStep, addAssistantMessage, updateMessage]);
+  }, [
+    collectedInfo,
+    styleProfile,
+    userEmail,
+    setGeneratedReview,
+    goToStep,
+    addAssistantMessage,
+    updateMessage,
+  ]);
 
   const editReview = useCallback(
     async (request: string) => {
-      const msgId = addAssistantMessage('', 'text');
+      const msgId = addAssistantMessage('', 'text', undefined, {
+        streaming: true,
+      });
 
       try {
         const response = await fetch('/api/chat/edit-review', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            originalReview: state.generatedReview || '',
+            originalReview: generatedReview || '',
             editRequest: request,
-            styleProfile: state.styleProfile,
+            styleProfile,
           }),
         });
 
         if (!response.ok) throw new Error('Failed to edit review');
 
         const fullText = await processStream(response, (text) => {
-          updateMessage(msgId, { content: text, type: 'text' });
+          updateMessage(msgId, {
+            content: text,
+            type: 'text',
+            metadata: { streaming: true },
+          });
         });
 
-        const result = handleReviewEdited(fullText, state);
+        updateMessage(msgId, {
+          type: 'review-preview',
+          content: MESSAGES.reviewEdit.complete,
+          metadata: { review: fullText, characterCount: fullText.length },
+        });
+
+        const result = handleReviewEdited(fullText);
         dispatchActions(result.actions);
-      } catch {
+      } catch (error) {
+        console.error('[editReview] Failed:', error);
         addAssistantMessage(MESSAGES.error.unknown, 'text');
       }
     },
-    [state, dispatchActions, addAssistantMessage, updateMessage]
+    [
+      generatedReview,
+      styleProfile,
+      dispatchActions,
+      addAssistantMessage,
+      updateMessage,
+    ],
   );
 
   return { generateReview, editReview };
@@ -86,7 +127,7 @@ export function useReviewGeneration({ userEmail }: UseReviewGenerationProps) {
 // Pure function for stream processing
 async function processStream(
   response: Response,
-  onChunk: (text: string) => void
+  onChunk: (text: string) => void,
 ): Promise<string> {
   const reader = response.body?.getReader();
   if (!reader) throw new Error('No response body');

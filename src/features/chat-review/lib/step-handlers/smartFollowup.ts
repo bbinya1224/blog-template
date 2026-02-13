@@ -1,25 +1,16 @@
-import type { ConversationState } from '../../model/types';
+import type { ConversationState, SmartFollowupResult } from '../../model/types';
 import type { ReviewPayload } from '@/shared/types/review';
 import { CHOICE_OPTIONS } from '../../constants/messages';
-import type { StepHandlerResult } from '.';
-
-export interface SmartFollowupResult extends StepHandlerResult {
-  skipFollowup?: boolean;
-}
 
 export function handleSmartFollowup(
   userInput: string,
   state: ConversationState,
-  remainingQuestions: string[]
+  remainingQuestions: string[],
 ): SmartFollowupResult {
   const lowered = userInput.toLowerCase();
 
   // 스킵 처리 — 버튼 라벨은 '충분' 포함으로, 직접 입력은 정확 매칭으로 감지
-  if (
-    lowered.includes('충분') ||
-    lowered === '스킵' ||
-    lowered === 'skip'
-  ) {
+  if (lowered.includes('충분') || lowered === '스킵' || lowered === 'skip') {
     return {
       messages: [],
       actions: [{ type: 'GO_TO_STEP', payload: 'confirmation' }],

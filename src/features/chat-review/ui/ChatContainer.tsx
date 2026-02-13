@@ -10,6 +10,7 @@ import { MessageList } from './MessageList';
 import { InputArea } from './InputArea';
 import { Utensils, ShoppingCart, Sparkles } from 'lucide-react';
 import { OrotiLogo } from '@/shared/ui/Icons';
+import { useScrollToBottom } from '../model/useScrollToBottom';
 
 interface CategoryOption {
   id: string;
@@ -123,6 +124,7 @@ export function ChatContainer({
   className,
 }: ChatContainerProps) {
   const hasMessages = messages.length > 0;
+  const { containerRef } = useScrollToBottom<HTMLDivElement>();
 
   const handleCategoryClick = (category: CategoryOption) => {
     if (category.disabled) return;
@@ -144,7 +146,7 @@ export function ChatContainer({
       )}
 
       {/* Main scrollable content */}
-      <div className='min-h-0 flex-1 overflow-y-auto'>
+      <div ref={containerRef} className='min-h-0 flex-1 overflow-y-auto'>
         <div className='mx-auto flex size-full max-w-3xl flex-col'>
           {!hasMessages ? (
             /* ===== Claude-style Welcome Screen ===== */
@@ -174,7 +176,7 @@ export function ChatContainer({
                       'rounded-2xl border transition-all duration-200',
                       category.disabled
                         ? 'cursor-not-allowed border-stone-100 bg-stone-50/50 text-stone-300'
-                        : 'border-stone-200 bg-white text-stone-700 shadow-sm hover:border-primary/40 hover:shadow-primary/5 hover:shadow-md',
+                        : 'border-stone-200 bg-white text-stone-700 shadow-sm hover:border-primary/40 hover:shadow-md hover:shadow-primary/5',
                     )}
                   >
                     <span

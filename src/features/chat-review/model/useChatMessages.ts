@@ -3,10 +3,14 @@
 import { useCallback } from 'react';
 import { useAtom } from 'jotai';
 import { messagesAtom } from './atoms';
-import type { ChatMessage, MessageType, ChoiceOption } from '@/entities/chat-message';
+import type {
+  ChatMessage,
+  MessageType,
+  ChoiceOption,
+} from '@/entities/chat-message';
 
 function generateId(): string {
-  return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `msg_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 }
 
 export interface UseChatMessagesReturn {
@@ -16,7 +20,7 @@ export interface UseChatMessagesReturn {
     content: string,
     type?: MessageType,
     options?: ChoiceOption[],
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
   ) => string;
   addUserMessage: (content: string) => string;
   updateMessage: (id: string, updates: Partial<ChatMessage>) => void;
@@ -24,7 +28,7 @@ export interface UseChatMessagesReturn {
   clearMessages: () => void;
 }
 
-export function useChatMessagesJotai(): UseChatMessagesReturn {
+export function useChatMessages(): UseChatMessagesReturn {
   const [messages, setMessages] = useAtom(messagesAtom);
 
   const addMessage = useCallback(
@@ -38,7 +42,7 @@ export function useChatMessagesJotai(): UseChatMessagesReturn {
       setMessages((prev) => [...prev, newMessage]);
       return id;
     },
-    [setMessages]
+    [setMessages],
   );
 
   const addAssistantMessage = useCallback(
@@ -46,7 +50,7 @@ export function useChatMessagesJotai(): UseChatMessagesReturn {
       content: string,
       type: MessageType = 'text',
       options?: ChoiceOption[],
-      metadata?: Record<string, unknown>
+      metadata?: Record<string, unknown>,
     ): string => {
       return addMessage({
         role: 'assistant',
@@ -56,7 +60,7 @@ export function useChatMessagesJotai(): UseChatMessagesReturn {
         metadata,
       });
     },
-    [addMessage]
+    [addMessage],
   );
 
   const addUserMessage = useCallback(
@@ -67,23 +71,23 @@ export function useChatMessagesJotai(): UseChatMessagesReturn {
         content,
       });
     },
-    [addMessage]
+    [addMessage],
   );
 
   const updateMessage = useCallback(
     (id: string, updates: Partial<ChatMessage>): void => {
       setMessages((prev) =>
-        prev.map((msg) => (msg.id === id ? { ...msg, ...updates } : msg))
+        prev.map((msg) => (msg.id === id ? { ...msg, ...updates } : msg)),
       );
     },
-    [setMessages]
+    [setMessages],
   );
 
   const removeMessage = useCallback(
     (id: string): void => {
       setMessages((prev) => prev.filter((msg) => msg.id !== id));
     },
-    [setMessages]
+    [setMessages],
   );
 
   const clearMessages = useCallback((): void => {

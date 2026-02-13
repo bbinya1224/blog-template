@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import { cn } from '@/shared/lib/utils';
 import type { ChatMessage } from '@/entities/chat-message';
 import { MessageBubble } from './MessageBubble';
 import { TypingIndicator } from './TypingIndicator';
+
+const MAX_STAGGER_INDEX = 3;
+const STAGGER_DELAY_MS = 50;
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -23,25 +25,8 @@ export function MessageList({
   onReviewAction,
   className,
 }: MessageListProps) {
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Scroll to bottom when new messages arrive
-  useEffect(() => {
-    if (messages.length > 0) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages.length, isTyping]);
-
   return (
-    <div
-      ref={containerRef}
-      className={cn(
-        'px-5 sm:px-6',
-        'pt-4 pb-2',
-        className,
-      )}
-    >
+    <div className={cn('px-5 sm:px-6', 'pt-4 pb-2', className)}>
       <div className='flex w-full flex-col'>
         <div className='space-y-6'>
           {messages.map((message, index) => (
@@ -56,14 +41,12 @@ export function MessageList({
               }
               onReviewAction={(action) => onReviewAction?.(message.id, action)}
               style={{
-                animationDelay: `${Math.min(index, 3) * 50}ms`,
+                animationDelay: `${Math.min(index, MAX_STAGGER_INDEX) * STAGGER_DELAY_MS}ms`,
               }}
             />
           ))}
 
           {isTyping && <TypingIndicator />}
-
-          <div ref={bottomRef} />
         </div>
       </div>
     </div>

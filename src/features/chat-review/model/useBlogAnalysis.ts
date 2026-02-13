@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useConversationActions } from './use-conversation-actions';
-import { useChatMessagesJotai } from './use-chat-messages-jotai';
+import { useConversationActions } from './useConversationActions';
+import { useChatMessages } from './useChatMessages';
 import { analyzeStyle } from '@/features/analyze-style';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
 import type { StyleProfile } from '@/shared/types/style-profile';
@@ -27,7 +27,7 @@ function formatStyleForDisplay(profile: StyleProfile): Record<string, unknown> {
 export function useBlogAnalysis(userName: string | null) {
   const { setStyleProfile, setHasExistingStyle, goToStep } =
     useConversationActions();
-  const { addAssistantMessage } = useChatMessagesJotai();
+  const { addAssistantMessage } = useChatMessages();
 
   const analyzeBlogUrl = useCallback(
     async (url: string) => {
