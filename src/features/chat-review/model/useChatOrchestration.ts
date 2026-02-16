@@ -158,19 +158,9 @@ export function useChatOrchestration({
     [setSelectedTopic, setStep, setSubStep, addAssistantMessage],
   );
 
-  // handleCategorySelect가 store를 동기 업데이트하지만, useChatHandlers의 셀렉터는
-  // 리렌더 후에야 최신 값을 반영하므로 queueMicrotask로 다음 마이크로태스크에서 호출
-  const handleSendMessage = useCallback(
-    (message: string) => {
-      if (messages.length === 0 && !isInitializedRef.current) {
-        handleCategorySelect('restaurant');
-        queueMicrotask(() => originalHandleSendMessage(message));
-        return;
-      }
-      originalHandleSendMessage(message);
-    },
-    [messages.length, handleCategorySelect, originalHandleSendMessage],
-  );
+  // 초기 화면에서 InputArea가 렌더되지 않으므로 (ChatContainer의 hasMessages 조건)
+  // messages.length === 0 분기는 도달 불가 — originalHandleSendMessage를 직접 사용
+  const handleSendMessage = originalHandleSendMessage;
 
   const state = useChatStore(
     useShallow((s) => ({
