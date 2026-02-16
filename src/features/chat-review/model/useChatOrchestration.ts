@@ -43,6 +43,7 @@ export function useChatOrchestration({
   const prevStepRef = useRef<ConversationStep | null>(null);
   const stateRef = useRef(state);
 
+  // step change 이펙트보다 먼저 선언되어야 stateRef.current가 최신 상태를 보장함
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
@@ -115,7 +116,7 @@ export function useChatOrchestration({
         case 'confirmation':
           addMessage(createSummaryMessage(s));
           addAssistantMessage(
-            '내용이 맞나요?',
+            MESSAGES.confirmation.ask,
             'choice',
             CHOICE_OPTIONS.confirmInfo,
           );

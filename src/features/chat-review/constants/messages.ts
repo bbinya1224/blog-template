@@ -117,6 +117,8 @@ export const MESSAGES = {
   confirmation: {
     summary: '지금까지 얘기해주신 내용 정리해볼게요.',
 
+    ask: '내용이 맞나요?',
+
     correct: '좋아요! 그럼 리뷰를 작성해볼게요.',
 
     needsEdit: '어떤 부분을 수정할까요?',
