@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { useShallow } from 'zustand/shallow';
 import { useChatStore } from './store';
 import { useRecentReviews } from './useRecentReviews';
 import { useChatMessages } from './useChatMessages';
@@ -170,7 +171,19 @@ export function useChatOrchestration({
     [messages.length, handleCategorySelect, originalHandleSendMessage],
   );
 
-  const state = useChatStore.getState();
+  const state = useChatStore(
+    useShallow((s) => ({
+      step: s.step,
+      subStep: s.subStep,
+      userName: s.userName,
+      hasExistingStyle: s.hasExistingStyle,
+      styleProfile: s.styleProfile,
+      selectedTopic: s.selectedTopic,
+      collectedInfo: s.collectedInfo,
+      generatedReview: s.generatedReview,
+      sessionId: s.sessionId,
+    })),
+  );
   const inputPlaceholder = getInputPlaceholder(step, messages.length === 0);
 
   return {

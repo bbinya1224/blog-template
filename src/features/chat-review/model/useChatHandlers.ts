@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { useShallow } from 'zustand/shallow';
 import { useChatStore } from './store';
 import { useConversationActions } from './useConversationActions';
 import { useChatMessages } from './useChatMessages';
@@ -26,17 +27,19 @@ export function useChatHandlers({
   styleSetupContext,
   setStyleSetupContext,
 }: UseChatHandlersProps) {
-  const state = useChatStore((s) => ({
-    step: s.step,
-    subStep: s.subStep,
-    userName: s.userName,
-    hasExistingStyle: s.hasExistingStyle,
-    styleProfile: s.styleProfile,
-    selectedTopic: s.selectedTopic,
-    collectedInfo: s.collectedInfo,
-    generatedReview: s.generatedReview,
-    sessionId: s.sessionId,
-  }));
+  const state = useChatStore(
+    useShallow((s) => ({
+      step: s.step,
+      subStep: s.subStep,
+      userName: s.userName,
+      hasExistingStyle: s.hasExistingStyle,
+      styleProfile: s.styleProfile,
+      selectedTopic: s.selectedTopic,
+      collectedInfo: s.collectedInfo,
+      generatedReview: s.generatedReview,
+      sessionId: s.sessionId,
+    })),
+  );
   const isProcessing = useChatStore((s) => s.isProcessing);
   const setIsProcessing = useChatStore((s) => s.setIsProcessing);
   const { dispatchActions } = useConversationActions();
@@ -122,7 +125,7 @@ export function useChatHandlers({
       result.messages.forEach((msg) => {
         addMessage({
           ...msg,
-          id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
           timestamp: new Date(),
         } as ChatMessage);
       });

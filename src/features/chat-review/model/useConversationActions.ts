@@ -1,5 +1,6 @@
 'use client';
 
+import { useShallow } from 'zustand/shallow';
 import { useChatStore } from './store';
 import type { ConversationState } from './types';
 
@@ -37,17 +38,19 @@ export function useConversationActions() {
 }
 
 export function useConversationState(): ConversationState {
-  return useChatStore((s) => ({
-    step: s.step,
-    subStep: s.subStep,
-    userName: s.userName,
-    hasExistingStyle: s.hasExistingStyle,
-    styleProfile: s.styleProfile,
-    selectedTopic: s.selectedTopic,
-    collectedInfo: s.collectedInfo,
-    generatedReview: s.generatedReview,
-    sessionId: s.sessionId,
-  }));
+  return useChatStore(
+    useShallow((s) => ({
+      step: s.step,
+      subStep: s.subStep,
+      userName: s.userName,
+      hasExistingStyle: s.hasExistingStyle,
+      styleProfile: s.styleProfile,
+      selectedTopic: s.selectedTopic,
+      collectedInfo: s.collectedInfo,
+      generatedReview: s.generatedReview,
+      sessionId: s.sessionId,
+    })),
+  );
 }
 
 export function useMessages() {
