@@ -5,11 +5,11 @@ import { isRetryableError } from '@/shared/lib/retry';
 import type { ReviewPayload } from '@/shared/types/review';
 
 export const CLAUDE_SONNET = 'claude-sonnet-4-5-20250929';
-export const CLAUDE_HAIKU = 'claude-3-haiku-20240307';
+export const CLAUDE_HAIKU = 'claude-haiku-4-5-20251001';
 
 let anthropic: Anthropic | null = null;
 
-const getAnthropicClient = (): Anthropic => {
+export const getAnthropicClient = (): Anthropic => {
   if (anthropic) {
     return anthropic;
   }

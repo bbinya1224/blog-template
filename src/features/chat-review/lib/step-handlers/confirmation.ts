@@ -102,7 +102,7 @@ export function handleConfirmation(
 
 export function createSummaryMessage(
   state: ConversationState,
-): Omit<ChatMessage, 'id' | 'timestamp'> {
+): ChatMessage {
   const info = state.collectedInfo;
 
   const summaryLines = [
@@ -128,6 +128,8 @@ export function createSummaryMessage(
   }
 
   return {
+    id: `summary_${Date.now()}`,
+    timestamp: new Date(),
     role: 'assistant',
     type: 'summary',
     content: MESSAGES.confirmation.summary,

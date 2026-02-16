@@ -3,13 +3,13 @@ import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import type { ReviewPayload } from '@/shared/types/review';
+import { ApiResponse } from '@/shared/api/response';
+import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claude-client';
 import {
-  shouldUseMock,
-} from '@/shared/lib/mock/chat-mock';
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
+  formatCollectedInfo,
+  parseQuestions,
+} from '@/features/chat-review/lib/prompt-builder';
+import { shouldUseMock } from '@/shared/lib/mock/chat-mock';
 
 interface SmartFollowupInput {
   collectedInfo: Partial<ReviewPayload>;
@@ -30,10 +30,7 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return new Response(
-        JSON.stringify({ error: '인증이 필요합니다.' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
+      return ApiResponse.unauthorized();
     }
 
     const { collectedInfo, selectedTopic }: SmartFollowupInput =
@@ -52,16 +49,18 @@ export async function POST(req: NextRequest) {
 
     const infoSummary = formatCollectedInfo(collectedInfo);
 
-    console.log(`\n[Smart Followup API] 후속 질문 생성 시작 (${selectedTopic})`);
+    console.log(
+      `\n[Smart Followup API] 후속 질문 생성 시작 (${selectedTopic})`,
+    );
 
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+    const response = await getAnthropicClient().messages.create({
+      model: CLAUDE_HAIKU,
       max_tokens: 512,
       system: SYSTEM_PROMPT,
       messages: [
         {
           role: 'user',
-          content: `수집된 리뷰 정보:\n${infoSummary}\n\n이 정보를 바탕으로 사용자가 놓쳤을만한 감각적/감정적 디테일을 유도하는 후속 질문 2~3개를 생성해주세요.`,
+          content: `리뷰 카테고리: ${selectedTopic}\n\n수집된 리뷰 정보:\n${infoSummary}\n\n이 정보를 바탕으로 사용자가 놓쳤을만한 감각적/감정적 디테일을 유도하는 후속 질문 2~3개를 생성해주세요.`,
         },
       ],
     });
@@ -73,42 +72,17 @@ export async function POST(req: NextRequest) {
 
     console.log(`[Smart Followup API] 응답: ${text}`);
 
-    let jsonText = text
+    const jsonText = text
       .replace(/^```(?:json)?\s*\n?/, '')
       .replace(/\n?```\s*$/, '')
       .trim();
 
-    let questions: string[] = [];
-    try {
-      const parsed = JSON.parse(jsonText);
-      questions = parsed.questions || [];
-    } catch {
-      const jsonMatch = jsonText.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[1]);
-        questions = parsed.questions || [];
-      }
-    }
+    const questions = parseQuestions(jsonText);
 
     return Response.json({ questions });
   } catch (error) {
     console.error('[Smart Followup API] 에러:', error);
-    return Response.json(
-      { questions: [], error: 'Failed to generate follow-up questions' },
-      { status: 200 }
-    );
+    return ApiResponse.serverError();
   }
 }
 
-function formatCollectedInfo(info: Partial<ReviewPayload>): string {
-  const lines: string[] = [];
-  if (info.name) lines.push(`매장: ${info.name}`);
-  if (info.location) lines.push(`위치: ${info.location}`);
-  if (info.date) lines.push(`방문일: ${info.date}`);
-  if (info.companion) lines.push(`동행: ${info.companion}`);
-  if (info.menu) lines.push(`메뉴: ${info.menu}`);
-  if (info.pros) lines.push(`맛/느낌: ${info.pros}`);
-  if (info.cons) lines.push(`아쉬운 점: ${info.cons}`);
-  if (info.extra) lines.push(`기타: ${info.extra}`);
-  return lines.join('\n');
-}

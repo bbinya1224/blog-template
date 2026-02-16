@@ -22,7 +22,9 @@ export {
   type RestaurantInfoStep,
   initialConversationState,
   stepTransitions,
+  resetConversationAtom,
   type UseChatMessagesReturn,
+  useChatOrchestration,
 } from './model';
 
 // Lib - Conversation Engine

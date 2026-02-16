@@ -6,18 +6,19 @@ import { supabaseAdmin } from '@/shared/lib/supabase';
 import type { ReviewPayload } from '@/shared/types/review';
 import type { StyleProfile } from '@/entities/style-profile';
 import { getReviewGenerationPrompts } from '@/shared/api/prompt-service';
-import { formatKoreanDate } from '@/shared/lib/utils';
 import { searchStoreInfo } from '@/shared/lib/search';
 import { formatKakaoPlaceInfo } from '@/shared/lib/kakao-local';
 import { readBlogSamples } from '@/shared/api/data-files';
+import { ApiResponse } from '@/shared/api/response';
+import { getAnthropicClient, CLAUDE_SONNET } from '@/shared/api/claude-client';
+import {
+  buildReviewSystemPrompt,
+  buildReviewUserPrompt,
+} from '@/features/chat-review/lib/prompt-builder';
 import {
   shouldUseMock,
   generateMockReview,
 } from '@/shared/lib/mock/chat-mock';
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
 
 interface GenerateReviewInput {
   payload: ReviewPayload;
@@ -26,7 +27,7 @@ interface GenerateReviewInput {
 
 const getRandomWritingSamples = async (
   email: string,
-  count: number = 3
+  count: number = 3,
 ): Promise<string> => {
   try {
     const samples = await readBlogSamples(email);
@@ -47,10 +48,7 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return new Response(
-        JSON.stringify({ error: '인증이 필요합니다.' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
+      return ApiResponse.unauthorized();
     }
 
     const authenticatedEmail = session.user.email;
@@ -108,8 +106,8 @@ export async function POST(req: NextRequest) {
       async start(controller) {
         try {
           console.log('\n[Review Gen API] Claude API 스트리밍 시작...');
-          const response = await client.messages.stream({
-            model: 'claude-sonnet-4-5-20250929',
+          const response = await getAnthropicClient().messages.stream({
+            model: CLAUDE_SONNET,
             max_tokens: 4096,
             system: [
               {
@@ -186,10 +184,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Review generation error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to generate review' }),
-      { status: 500 }
-    );
+    return ApiResponse.serverError();
   }
 }
 
@@ -246,49 +241,3 @@ function createMockReviewResponse(
   });
 }
 
-function buildReviewSystemPrompt(
-  basePrompt: string,
-  styleProfile: StyleProfile | null
-): string {
-  if (!styleProfile) {
-    return basePrompt;
-  }
-
-  // Inject style profile into system prompt
-  const styleProfileJson = JSON.stringify(styleProfile, null, 2);
-  return basePrompt.replace('{스타일 프로필 JSON}', styleProfileJson);
-}
-
-function buildReviewUserPrompt(
-  basePrompt: string,
-  payload: ReviewPayload,
-  styleProfile: StyleProfile | null,
-  kakaoPlaceInfo: string,
-  tavilyContext: string,
-  writingSamples: string
-): string {
-  const styleProfileJson = styleProfile
-    ? JSON.stringify(styleProfile, null, 2)
-    : '{}';
-
-  return basePrompt
-    .replace('{스타일 프로필 JSON}', styleProfileJson)
-    .replace('{name}', payload.name)
-    .replace('{location}', payload.location)
-    .replace('{date}', formatKoreanDate(payload.date))
-    .replace('{menu}', payload.menu)
-    .replace('{companion}', payload.companion)
-    .replace('{pros}', payload.pros || '')
-    .replace('{cons}', payload.cons || '')
-    .replace('{extra}', payload.extra || '')
-    .replace('{kakao_place_info}', kakaoPlaceInfo)
-    .replace(
-      '{tavily_search_result_context}',
-      tavilyContext || '검색된 정보가 없습니다. 일반적인 맛집 리뷰처럼 작성해주세요.'
-    )
-    .replace(
-      '{writing_samples}',
-      writingSamples || '샘플 데이터가 없습니다. 스타일 프로필을 참고해주세요.'
-    )
-    .replace('{user_draft}', payload.user_draft || '');
-}
