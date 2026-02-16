@@ -123,11 +123,7 @@ export function useChatHandlers({
       );
 
       result.messages.forEach((msg) => {
-        addMessage({
-          ...msg,
-          id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
-          timestamp: new Date(),
-        } as ChatMessage);
+        addMessage(msg);
       });
 
       dispatchActions(result.actions);

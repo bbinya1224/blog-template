@@ -158,12 +158,13 @@ export function useChatOrchestration({
     [setSelectedTopic, setStep, setSubStep, addAssistantMessage],
   );
 
-  // queueMicrotask 제거 — Zustand getState()로 동기적 최신 상태 보장
+  // handleCategorySelect가 store를 동기 업데이트하지만, useChatHandlers의 셀렉터는
+  // 리렌더 후에야 최신 값을 반영하므로 queueMicrotask로 다음 마이크로태스크에서 호출
   const handleSendMessage = useCallback(
     (message: string) => {
       if (messages.length === 0 && !isInitializedRef.current) {
         handleCategorySelect('restaurant');
-        originalHandleSendMessage(message);
+        queueMicrotask(() => originalHandleSendMessage(message));
         return;
       }
       originalHandleSendMessage(message);
