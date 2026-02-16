@@ -6,11 +6,9 @@ export function buildReviewSystemPrompt(
   basePrompt: string,
   styleProfile: StyleProfile | null,
 ): string {
-  if (!styleProfile) {
-    return basePrompt;
-  }
-
-  const styleProfileJson = JSON.stringify(styleProfile, null, 2);
+  const styleProfileJson = styleProfile
+    ? JSON.stringify(styleProfile, null, 2)
+    : '{}';
   return basePrompt.replace('{스타일 프로필 JSON}', styleProfileJson);
 }
 

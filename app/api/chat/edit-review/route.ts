@@ -5,7 +5,7 @@ import { authOptions } from '@/auth';
 import type { StyleProfile } from '@/entities/style-profile';
 import { getReviewEditPrompt } from '@/shared/api/prompt-service';
 import { ApiResponse } from '@/shared/api/response';
-import { getAnthropicClient, CLAUDE_SONNET } from '@/shared/api/claude-client';
+import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claude-client';
 import {
   shouldUseMock,
   generateMockEditReview,
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         try {
           console.log('\n[Review Edit API] Claude API 스트리밍 시작...');
           const response = await getAnthropicClient().messages.stream({
-            model: CLAUDE_SONNET,
+            model: CLAUDE_HAIKU,
             max_tokens: 4096,
             system: [
               {

@@ -82,10 +82,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ questions });
   } catch (error) {
     console.error('[Smart Followup API] 에러:', error);
-    return Response.json(
-      { questions: [], error: 'Failed to generate follow-up questions' },
-      { status: 200 },
-    );
+    return ApiResponse.serverError();
   }
 }
 

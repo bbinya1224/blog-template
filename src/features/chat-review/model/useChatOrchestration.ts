@@ -126,7 +126,10 @@ export function useChatOrchestration({
       }
     };
 
-    handleStepChange();
+    handleStepChange().catch((error) => {
+      console.error('[useChatOrchestration] handleStepChange 에러:', error);
+      addAssistantMessage(MESSAGES.error.unknown, 'text');
+    });
   }, [
     state.step,
     addMessage,
@@ -170,6 +173,8 @@ export function useChatOrchestration({
     (message: string) => {
       if (messages.length === 0 && !isInitializedRef.current) {
         handleCategorySelect('restaurant');
+        queueMicrotask(() => originalHandleSendMessage(message));
+        return;
       }
       originalHandleSendMessage(message);
     },
