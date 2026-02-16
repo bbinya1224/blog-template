@@ -1,15 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
-import {
-  conversationStateAtom,
-  hasExistingStyleAtom,
-  styleProfileAtom,
-  selectedTopicAtom,
-  stepAtom,
-  subStepAtom,
-} from './atoms';
+import { useChatStore } from './store';
 import { useRecentReviews } from './useRecentReviews';
 import { useChatMessages } from './useChatMessages';
 import { useReviewGeneration } from './useReviewGeneration';
@@ -30,23 +22,17 @@ export function useChatOrchestration({
   userEmail,
   existingStyleProfile,
 }: UseChatOrchestrationParams) {
-  const state = useAtomValue(conversationStateAtom);
-  const setStyleProfile = useSetAtom(styleProfileAtom);
-  const setHasExistingStyle = useSetAtom(hasExistingStyleAtom);
-  const setSelectedTopic = useSetAtom(selectedTopicAtom);
-  const setStep = useSetAtom(stepAtom);
-  const setSubStep = useSetAtom(subStepAtom);
+  const step = useChatStore((s) => s.step);
+  const setStyleProfile = useChatStore((s) => s.setStyleProfile);
+  const setHasExistingStyle = useChatStore((s) => s.setHasExistingStyle);
+  const setSelectedTopic = useChatStore((s) => s.setSelectedTopic);
+  const setStep = useChatStore((s) => s.setStep);
+  const setSubStep = useChatStore((s) => s.setSubStep);
   const [styleSetupContext, setStyleSetupContext] = useState<StyleSetupContext>(
     {},
   );
   const isInitializedRef = useRef(false);
   const prevStepRef = useRef<ConversationStep | null>(null);
-  const stateRef = useRef(state);
-
-  // step change 이펙트보다 먼저 선언되어야 stateRef.current가 최신 상태를 보장함
-  useEffect(() => {
-    stateRef.current = state;
-  }, [state]);
 
   const { reviews: recentReviews } = useRecentReviews(5);
   const { messages, addMessage, addAssistantMessage } = useChatMessages();
@@ -69,14 +55,15 @@ export function useChatOrchestration({
     }
   }, [existingStyleProfile, setStyleProfile, setHasExistingStyle]);
 
-  // Handle step changes
+  // Handle step changes — getState()로 항상 최신 상태 접근 (stateRef 제거)
   useEffect(() => {
     if (!isInitializedRef.current) return;
-    if (state.step === prevStepRef.current) return;
-    prevStepRef.current = state.step;
-    const s = stateRef.current;
+    if (step === prevStepRef.current) return;
+    prevStepRef.current = step;
 
     const handleStepChange = async () => {
+      const s = useChatStore.getState();
+
       switch (s.step) {
         case 'style-check':
           if (s.hasExistingStyle && s.styleProfile) {
@@ -132,7 +119,7 @@ export function useChatOrchestration({
       addAssistantMessage(MESSAGES.error.unknown, 'text');
     });
   }, [
-    state.step,
+    step,
     addMessage,
     addAssistantMessage,
     fetchSmartQuestions,
@@ -170,11 +157,12 @@ export function useChatOrchestration({
     [setSelectedTopic, setStep, setSubStep, addAssistantMessage],
   );
 
+  // queueMicrotask 제거 — Zustand getState()로 동기적 최신 상태 보장
   const handleSendMessage = useCallback(
     (message: string) => {
       if (messages.length === 0 && !isInitializedRef.current) {
         handleCategorySelect('restaurant');
-        queueMicrotask(() => originalHandleSendMessage(message));
+        originalHandleSendMessage(message);
         return;
       }
       originalHandleSendMessage(message);
@@ -182,10 +170,8 @@ export function useChatOrchestration({
     [messages.length, handleCategorySelect, originalHandleSendMessage],
   );
 
-  const inputPlaceholder = getInputPlaceholder(
-    state.step,
-    messages.length === 0,
-  );
+  const state = useChatStore.getState();
+  const inputPlaceholder = getInputPlaceholder(step, messages.length === 0);
 
   return {
     messages,

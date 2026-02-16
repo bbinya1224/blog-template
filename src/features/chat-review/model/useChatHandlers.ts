@@ -1,8 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useAtom, useAtomValue } from 'jotai';
-import { conversationStateAtom, isProcessingAtom } from './atoms';
+import { useChatStore } from './store';
 import { useConversationActions } from './useConversationActions';
 import { useChatMessages } from './useChatMessages';
 import { useMessageProcessor } from './useMessageProcessor';
@@ -27,8 +26,19 @@ export function useChatHandlers({
   styleSetupContext,
   setStyleSetupContext,
 }: UseChatHandlersProps) {
-  const state = useAtomValue(conversationStateAtom);
-  const [isProcessing, setIsProcessing] = useAtom(isProcessingAtom);
+  const state = useChatStore((s) => ({
+    step: s.step,
+    subStep: s.subStep,
+    userName: s.userName,
+    hasExistingStyle: s.hasExistingStyle,
+    styleProfile: s.styleProfile,
+    selectedTopic: s.selectedTopic,
+    collectedInfo: s.collectedInfo,
+    generatedReview: s.generatedReview,
+    sessionId: s.sessionId,
+  }));
+  const isProcessing = useChatStore((s) => s.isProcessing);
+  const setIsProcessing = useChatStore((s) => s.setIsProcessing);
   const { dispatchActions } = useConversationActions();
   const { messages, addMessage, addUserMessage, addAssistantMessage } =
     useChatMessages();
@@ -55,7 +65,6 @@ export function useChatHandlers({
     onConsumeSmartFollowup: consumeNextQuestion,
   });
 
-  // Main message handler - simplified and declarative
   const handleSendMessage = useCallback(
     async (content: string) => {
       if (isProcessing) return;
@@ -85,7 +94,6 @@ export function useChatHandlers({
     ],
   );
 
-  // Choice selection handler
   const handleChoiceSelect = useCallback(
     (messageId: string, optionId: string) => {
       const message = messages.find((m) => m.id === messageId);
@@ -97,7 +105,6 @@ export function useChatHandlers({
     [messages, handleSendMessage],
   );
 
-  // Place confirmation handler
   const handlePlaceConfirmation = useCallback(
     (messageId: string, confirmed: boolean) => {
       const message = messages.find((m) => m.id === messageId);
@@ -125,7 +132,6 @@ export function useChatHandlers({
     [messages, state, addMessage, dispatchActions],
   );
 
-  // Review action handler
   const handleReviewAction = useCallback(
     (_messageId: string, action: 'complete' | 'edit') => {
       handleSendMessage(action === 'complete' ? '완벽해요!' : '수정해주세요');

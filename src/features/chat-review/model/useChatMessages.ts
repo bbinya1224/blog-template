@@ -1,17 +1,11 @@
 'use client';
 
-import { useCallback } from 'react';
-import { useAtom } from 'jotai';
-import { messagesAtom } from './atoms';
+import { useChatStore } from './store';
 import type {
   ChatMessage,
   MessageType,
   ChoiceOption,
 } from '@/entities/chat-message';
-
-function generateId(): string {
-  return `msg_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-}
 
 export interface UseChatMessagesReturn {
   messages: ChatMessage[];
@@ -29,70 +23,13 @@ export interface UseChatMessagesReturn {
 }
 
 export function useChatMessages(): UseChatMessagesReturn {
-  const [messages, setMessages] = useAtom(messagesAtom);
-
-  const addMessage = useCallback(
-    (message: Omit<ChatMessage, 'id' | 'timestamp'>): string => {
-      const id = generateId();
-      const newMessage: ChatMessage = {
-        ...message,
-        id,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, newMessage]);
-      return id;
-    },
-    [setMessages],
-  );
-
-  const addAssistantMessage = useCallback(
-    (
-      content: string,
-      type: MessageType = 'text',
-      options?: ChoiceOption[],
-      metadata?: Record<string, unknown>,
-    ): string => {
-      return addMessage({
-        role: 'assistant',
-        type,
-        content,
-        options,
-        metadata,
-      });
-    },
-    [addMessage],
-  );
-
-  const addUserMessage = useCallback(
-    (content: string): string => {
-      return addMessage({
-        role: 'user',
-        type: 'text',
-        content,
-      });
-    },
-    [addMessage],
-  );
-
-  const updateMessage = useCallback(
-    (id: string, updates: Partial<ChatMessage>): void => {
-      setMessages((prev) =>
-        prev.map((msg) => (msg.id === id ? { ...msg, ...updates } : msg)),
-      );
-    },
-    [setMessages],
-  );
-
-  const removeMessage = useCallback(
-    (id: string): void => {
-      setMessages((prev) => prev.filter((msg) => msg.id !== id));
-    },
-    [setMessages],
-  );
-
-  const clearMessages = useCallback((): void => {
-    setMessages([]);
-  }, [setMessages]);
+  const messages = useChatStore((s) => s.messages);
+  const addMessage = useChatStore((s) => s.addMessage);
+  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
+  const addUserMessage = useChatStore((s) => s.addUserMessage);
+  const updateMessage = useChatStore((s) => s.updateMessage);
+  const removeMessage = useChatStore((s) => s.removeMessage);
+  const clearMessages = useChatStore((s) => s.clearMessages);
 
   return {
     messages,
