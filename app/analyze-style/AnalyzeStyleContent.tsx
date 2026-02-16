@@ -2,14 +2,8 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Provider as JotaiProvider } from 'jotai';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useChatStore } from '@/features/chat-review/model/store';
 import {
-  conversationStateAtom,
-  hasExistingStyleAtom,
-  styleProfileAtom,
-  stepAtom,
-  messagesAtom,
   useChatHandlers,
   useChatMessages,
 } from '@/features/chat-review/model';
@@ -40,25 +34,18 @@ function formatStyleForDisplay(profile: StyleProfile): Record<string, unknown> {
   };
 }
 
-export function AnalyzeStyleContent(props: AnalyzeStyleContentProps) {
-  return (
-    <JotaiProvider>
-      <AnalyzeStyleContentInner {...props} />
-    </JotaiProvider>
-  );
-}
-
-function AnalyzeStyleContentInner({
+export function AnalyzeStyleContent({
   userEmail,
   userName,
   existingStyleProfile,
 }: AnalyzeStyleContentProps) {
   const router = useRouter();
-  const state = useAtomValue(conversationStateAtom);
-  const setStep = useSetAtom(stepAtom);
-  const setMessages = useSetAtom(messagesAtom);
-  const setStyleProfile = useSetAtom(styleProfileAtom);
-  const setHasExistingStyle = useSetAtom(hasExistingStyleAtom);
+  const step = useChatStore((s) => s.step);
+  const storeUserName = useChatStore((s) => s.userName);
+  const setStep = useChatStore((s) => s.setStep);
+  const setMessages = useChatStore((s) => s.setMessages);
+  const setStyleProfile = useChatStore((s) => s.setStyleProfile);
+  const setHasExistingStyle = useChatStore((s) => s.setHasExistingStyle);
   const [styleSetupContext, setStyleSetupContext] = useState<StyleSetupContext>(
     {},
   );
@@ -89,7 +76,7 @@ function AnalyzeStyleContentInner({
       setStep('style-check');
 
       addAssistantMessage(
-        MESSAGES.styleCheck.hasStyle(userName || state.userName || ''),
+        MESSAGES.styleCheck.hasStyle(userName || storeUserName || ''),
         'style-summary',
         CHOICE_OPTIONS.styleAnalyzeAction,
         formatStyleForDisplay(existingStyleProfile),
@@ -102,22 +89,22 @@ function AnalyzeStyleContentInner({
         CHOICE_OPTIONS.styleSetupMethod,
       );
     }
-  }, [existingStyleProfile, userName, state.userName, setMessages, setStyleProfile, setHasExistingStyle, setStep, addAssistantMessage]);
+  }, [existingStyleProfile, userName, storeUserName, setMessages, setStyleProfile, setHasExistingStyle, setStep, addAssistantMessage]);
 
   // Handle step changes (for style-setup → style-check → topic-select flow)
   useEffect(() => {
     if (!isInitializedRef.current) return;
 
-    switch (state.step) {
+    switch (step) {
       case 'topic-select':
         addAssistantMessage(
-          MESSAGES.styleAnalyze.complete(userName || state.userName || ''),
+          MESSAGES.styleAnalyze.complete(userName || storeUserName || ''),
           'text',
         );
         redirectTimerRef.current = setTimeout(() => router.push('/'), 2000);
         break;
     }
-  }, [state.step, addAssistantMessage, userName, state.userName, router]);
+  }, [step, addAssistantMessage, userName, storeUserName, router]);
 
   // Custom choice handler - intercepts page-specific actions
   const handleChoiceSelect = useCallback(
@@ -140,7 +127,7 @@ function AnalyzeStyleContentInner({
   );
 
   const inputPlaceholder =
-    state.step === 'style-setup'
+    step === 'style-setup'
       ? '블로그 URL 또는 내용을 입력해주세요'
       : '수정하고 싶은 내용을 입력해주세요';
 

@@ -22,7 +22,7 @@ export {
   type RestaurantInfoStep,
   initialConversationState,
   stepTransitions,
-  resetConversationAtom,
+  useChatStore,
   type UseChatMessagesReturn,
   useChatOrchestration,
 } from './model';

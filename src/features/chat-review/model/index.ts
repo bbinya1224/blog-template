@@ -1,5 +1,5 @@
 export * from './types';
-export * from './atoms';
+export { useChatStore } from './store';
 export * from './useConversationActions';
 export { useChatMessages, type UseChatMessagesReturn } from './useChatMessages';
 export { useMessageProcessor } from './useMessageProcessor';

@@ -1,12 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useAtomValue } from 'jotai';
-import {
-  collectedInfoAtom,
-  styleProfileAtom,
-  generatedReviewAtom,
-} from './atoms';
+import { useChatStore } from './store';
 import { useConversationActions } from './useConversationActions';
 import { useChatMessages } from './useChatMessages';
 import { handleReviewEdited } from '../lib/step-handlers';
@@ -17,9 +12,9 @@ interface UseReviewGenerationProps {
 }
 
 export function useReviewGeneration({ userEmail }: UseReviewGenerationProps) {
-  const collectedInfo = useAtomValue(collectedInfoAtom);
-  const styleProfile = useAtomValue(styleProfileAtom);
-  const generatedReview = useAtomValue(generatedReviewAtom);
+  const collectedInfo = useChatStore((s) => s.collectedInfo);
+  const styleProfile = useChatStore((s) => s.styleProfile);
+  const generatedReview = useChatStore((s) => s.generatedReview);
   const { setGeneratedReview, goToStep, dispatchActions } =
     useConversationActions();
   const { addAssistantMessage, updateMessage } = useChatMessages();
@@ -124,7 +119,6 @@ export function useReviewGeneration({ userEmail }: UseReviewGenerationProps) {
   return { generateReview, editReview };
 }
 
-// Pure function for stream processing
 async function processStream(
   response: Response,
   onChunk: (text: string) => void,

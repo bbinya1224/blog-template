@@ -1,10 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useSetAtom } from 'jotai';
 import { cn } from '@/shared/lib/utils';
 import { OrotiLogo } from '@/shared/ui/Icons';
-import { resetConversationAtom } from '@/features/chat-review';
+import { useChatStore } from '@/features/chat-review/model/store';
 import { useSidebar } from '../model/sidebar-context';
 import { SidebarReviewList } from './SidebarReviewList';
 import { SidebarUserProfile } from './SidebarUserProfile';
@@ -12,11 +11,11 @@ import { SidebarUserProfile } from './SidebarUserProfile';
 export function Sidebar() {
   const { isExpanded, isDesktop, showLabels, toggle, collapse } = useSidebar();
   const router = useRouter();
-  const resetConversation = useSetAtom(resetConversationAtom);
+  const reset = useChatStore((s) => s.reset);
 
   const handleNewRecord = () => {
     router.push('/');
-    resetConversation();
+    reset();
     if (!isDesktop) collapse();
   };
 

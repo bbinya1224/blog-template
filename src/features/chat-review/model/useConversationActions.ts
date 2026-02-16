@@ -1,87 +1,23 @@
 'use client';
 
-import { useCallback } from 'react';
-import { useSetAtom, useAtomValue } from 'jotai';
-import {
-  stepAtom,
-  subStepAtom,
-  userNameAtom,
-  hasExistingStyleAtom,
-  styleProfileAtom,
-  selectedTopicAtom,
-  collectedInfoAtom,
-  generatedReviewAtom,
-  messagesAtom,
-  isProcessingAtom,
-  conversationStateAtom,
-  sessionIdAtom,
-} from './atoms';
-import type { ConversationAction } from './types';
-import type { ChatMessage } from '@/entities/chat-message';
-import type { ReviewPayload } from '@/shared/types/review';
+import { useShallow } from 'zustand/shallow';
+import { useChatStore } from './store';
+import type { ConversationState } from './types';
 
 export function useConversationActions() {
-  const setStep = useSetAtom(stepAtom);
-  const setSubStep = useSetAtom(subStepAtom);
-  const setUserName = useSetAtom(userNameAtom);
-  const setHasExistingStyle = useSetAtom(hasExistingStyleAtom);
-  const setStyleProfile = useSetAtom(styleProfileAtom);
-  const setSelectedTopic = useSetAtom(selectedTopicAtom);
-  const setCollectedInfo = useSetAtom(collectedInfoAtom);
-  const setGeneratedReview = useSetAtom(generatedReviewAtom);
-  const setMessages = useSetAtom(messagesAtom);
-  const setIsProcessing = useSetAtom(isProcessingAtom);
-  const setSessionId = useSetAtom(sessionIdAtom);
-
-  // Unified dispatcher for all conversation actions
-  const dispatchAction = useCallback(
-    (action: ConversationAction) => {
-      switch (action.type) {
-        case 'SET_STYLE_PROFILE':
-          setStyleProfile(action.payload);
-          break;
-        case 'SET_HAS_EXISTING_STYLE':
-          setHasExistingStyle(action.payload);
-          break;
-        case 'SET_TOPIC':
-          setSelectedTopic(action.payload);
-          break;
-        case 'UPDATE_COLLECTED_INFO':
-          setCollectedInfo((prev) => ({ ...prev, ...action.payload }));
-          break;
-        case 'SET_GENERATED_REVIEW':
-          setGeneratedReview(action.payload);
-          break;
-        case 'GO_TO_STEP':
-          setStep(action.payload);
-          break;
-        case 'SET_SUB_STEP':
-          setSubStep(action.payload);
-          break;
-        case 'RESET':
-          // Reset action can be added if needed
-          break;
-      }
-    },
-    [
-      setUserName,
-      setStyleProfile,
-      setHasExistingStyle,
-      setSelectedTopic,
-      setCollectedInfo,
-      setGeneratedReview,
-      setStep,
-      setSubStep,
-    ],
-  );
-
-  // Batch dispatcher for multiple actions
-  const dispatchActions = useCallback(
-    (actions: ConversationAction[]) => {
-      actions.forEach(dispatchAction);
-    },
-    [dispatchAction],
-  );
+  const setStep = useChatStore((s) => s.setStep);
+  const setSubStep = useChatStore((s) => s.setSubStep);
+  const setUserName = useChatStore((s) => s.setUserName);
+  const setHasExistingStyle = useChatStore((s) => s.setHasExistingStyle);
+  const setStyleProfile = useChatStore((s) => s.setStyleProfile);
+  const setSelectedTopic = useChatStore((s) => s.setSelectedTopic);
+  const updateCollectedInfo = useChatStore((s) => s.updateCollectedInfo);
+  const setGeneratedReview = useChatStore((s) => s.setGeneratedReview);
+  const setIsProcessing = useChatStore((s) => s.setIsProcessing);
+  const setSessionId = useChatStore((s) => s.setSessionId);
+  const addMessage = useChatStore((s) => s.addMessage);
+  const dispatchAction = useChatStore((s) => s.dispatchAction);
+  const dispatchActions = useChatStore((s) => s.dispatchActions);
 
   return {
     setStep,
@@ -90,12 +26,10 @@ export function useConversationActions() {
     setHasExistingStyle,
     setStyleProfile,
     setTopic: setSelectedTopic,
-    updateCollectedInfo: (info: Partial<ReviewPayload>) =>
-      setCollectedInfo((prev) => ({ ...prev, ...info })),
+    updateCollectedInfo,
     setGeneratedReview,
     goToStep: setStep,
-    addMessage: (message: ChatMessage) =>
-      setMessages((prev) => [...prev, message]),
+    addMessage,
     setIsProcessing,
     setSessionId,
     dispatchAction,
@@ -103,14 +37,26 @@ export function useConversationActions() {
   };
 }
 
-export function useConversationState() {
-  return useAtomValue(conversationStateAtom);
+export function useConversationState(): ConversationState {
+  return useChatStore(
+    useShallow((s) => ({
+      step: s.step,
+      subStep: s.subStep,
+      userName: s.userName,
+      hasExistingStyle: s.hasExistingStyle,
+      styleProfile: s.styleProfile,
+      selectedTopic: s.selectedTopic,
+      collectedInfo: s.collectedInfo,
+      generatedReview: s.generatedReview,
+      sessionId: s.sessionId,
+    })),
+  );
 }
 
 export function useMessages() {
-  return useAtomValue(messagesAtom);
+  return useChatStore((s) => s.messages);
 }
 
 export function useIsProcessing() {
-  return useAtomValue(isProcessingAtom);
+  return useChatStore((s) => s.isProcessing);
 }
