@@ -7,3 +7,9 @@ export type {
   StyleSummaryMetadata,
   ReviewPreviewMetadata,
 } from './model/types';
+
+export {
+  isPlaceCardMessage,
+  isStyleSummaryMessage,
+  isReviewPreviewMessage,
+} from './model/types';

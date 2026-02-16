@@ -1,23 +1,11 @@
 import type { CategoryConfig } from './types';
 import type { RestaurantPayload } from '@/shared/types/review';
 import type { RestaurantInfoStep } from '../../model/types';
-
-export const RESTAURANT_CHOICE_OPTIONS = {
-  date: [
-    { id: 'today', label: '오늘' },
-    { id: 'yesterday', label: '어제' },
-    { id: 'this-week', label: '이번 주' },
-    { id: 'custom', label: '📅 날짜 직접 선택' },
-  ],
-  companion: [
-    { id: 'alone', label: '혼자' },
-    { id: 'friend', label: '친구' },
-    { id: 'family', label: '가족' },
-    { id: 'lover', label: '연인' },
-    { id: 'colleague', label: '직장 동료' },
-    { id: 'custom', label: '✏️ 직접 입력' },
-  ],
-};
+import { CHOICE_OPTIONS } from '../../constants/messages';
+import {
+  extractDateInfo,
+  extractCompanionInfo,
+} from '../conversationEngine';
 
 export const restaurantConfig: CategoryConfig<
   RestaurantPayload,
@@ -57,72 +45,13 @@ export const restaurantConfig: CategoryConfig<
   },
 
   choiceOptions: {
-    date: RESTAURANT_CHOICE_OPTIONS.date,
-    companion: RESTAURANT_CHOICE_OPTIONS.companion,
+    date: CHOICE_OPTIONS.visitDate,
+    companion: CHOICE_OPTIONS.companion,
   },
 
   extractors: {
-    date: (input: string): string => {
-      const formatLocalDate = (d: Date): string => {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-      };
-
-      const today = new Date();
-      const lowered = input.toLowerCase();
-
-      if (lowered.includes('오늘')) {
-        return formatLocalDate(today);
-      }
-      if (lowered.includes('어제')) {
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        return formatLocalDate(yesterday);
-      }
-      if (lowered.includes('이번 주') || lowered.includes('이번주')) {
-        return '이번 주';
-      }
-
-      const datePattern = /(\d{1,2})[월\/\-](\d{1,2})/;
-      const match = input.match(datePattern);
-      if (match) {
-        const month = parseInt(match[1], 10);
-        const day = parseInt(match[2], 10);
-        return `${today.getFullYear()}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      }
-
-      return input;
-    },
-    companion: (input: string): string => {
-      const lowered = input.toLowerCase();
-
-      if (lowered.includes('혼자') || lowered.includes('혼밥')) return '혼자';
-      if (lowered.includes('친구')) return '친구';
-      if (
-        lowered.includes('가족') ||
-        lowered.includes('부모') ||
-        lowered.includes('엄마') ||
-        lowered.includes('아빠')
-      )
-        return '가족';
-      if (
-        lowered.includes('연인') ||
-        lowered.includes('애인') ||
-        lowered.includes('남친') ||
-        lowered.includes('여친')
-      )
-        return '연인';
-      if (
-        lowered.includes('동료') ||
-        lowered.includes('회사') ||
-        lowered.includes('직장')
-      )
-        return '직장 동료';
-
-      return input;
-    },
+    date: extractDateInfo,
+    companion: extractCompanionInfo,
   },
 
   experienceKeywords: {

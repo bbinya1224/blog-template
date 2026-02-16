@@ -13,7 +13,8 @@ import { useSmartFollowup } from './useSmartFollowup';
 import { handlePlaceConfirmed } from '../lib/step-handlers';
 import { MESSAGES } from '../constants/messages';
 import type { StyleSetupContext } from '../lib/step-handlers';
-import type { PlaceCardMetadata, ChatMessage } from '@/entities/chat-message';
+import type { ChatMessage } from '@/entities/chat-message';
+import { isPlaceCardMessage } from '@/entities/chat-message';
 
 interface UseChatHandlersProps {
   userEmail: string;
@@ -100,9 +101,9 @@ export function useChatHandlers({
   const handlePlaceConfirmation = useCallback(
     (messageId: string, confirmed: boolean) => {
       const message = messages.find((m) => m.id === messageId);
-      if (!message?.metadata) return;
+      if (!message || !isPlaceCardMessage(message)) return;
 
-      const metadata = message.metadata as unknown as PlaceCardMetadata;
+      const { metadata } = message;
       const result = handlePlaceConfirmed(
         confirmed,
         metadata.name,

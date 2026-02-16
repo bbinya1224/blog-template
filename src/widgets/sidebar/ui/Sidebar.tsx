@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useSetAtom } from 'jotai';
 import { cn } from '@/shared/lib/utils';
 import { OrotiLogo } from '@/shared/ui/Icons';
-import { resetConversationAtom } from '@/features/chat-review/model/atoms';
+import { resetConversationAtom } from '@/features/chat-review';
 import { useSidebar } from '../model/sidebar-context';
 import { SidebarReviewList } from './SidebarReviewList';
 import { SidebarUserProfile } from './SidebarUserProfile';

@@ -60,3 +60,21 @@ export interface ReviewPreviewMetadata {
   characterCount: number;
   review: string;
 }
+
+export function isPlaceCardMessage(
+  msg: ChatMessage,
+): msg is ChatMessage & { type: 'place-card'; metadata: PlaceCardMetadata } {
+  return msg.type === 'place-card' && msg.metadata != null;
+}
+
+export function isStyleSummaryMessage(
+  msg: ChatMessage,
+): msg is ChatMessage & { type: 'style-summary'; metadata: StyleSummaryMetadata } {
+  return msg.type === 'style-summary' && msg.metadata != null;
+}
+
+export function isReviewPreviewMessage(
+  msg: ChatMessage,
+): msg is ChatMessage & { type: 'review-preview'; metadata: ReviewPreviewMetadata } {
+  return msg.type === 'review-preview' && msg.metadata != null;
+}

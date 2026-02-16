@@ -9,3 +9,4 @@ export * from './usePlaceSearch';
 export * from './useReviewGeneration';
 export * from './useChatHandlers';
 export { useSmartFollowup } from './useSmartFollowup';
+export { useChatOrchestration } from './useChatOrchestration';

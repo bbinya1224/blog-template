@@ -7,6 +7,11 @@ import type {
   StyleSummaryMetadata,
   ReviewPreviewMetadata,
 } from '@/entities/chat-message';
+import {
+  isPlaceCardMessage,
+  isStyleSummaryMessage,
+  isReviewPreviewMessage,
+} from '@/entities/chat-message';
 import { ChoiceButtons } from './ChoiceButtons';
 import { PlaceCard } from './PlaceCard';
 import { StyleSummaryCard } from './StyleSummaryCard';
@@ -157,34 +162,39 @@ export function MessageContent({
         <ChoiceRenderer options={message.options} onSelect={onChoiceSelect} />
       </>
     ),
-    'place-card': () => (
-      <PlaceCardRenderer
-        metadata={message.metadata as unknown as PlaceCardMetadata}
-        onConfirm={onPlaceConfirm}
-      />
-    ),
-    'style-summary': () => (
-      <>
-        <TextRenderer content={message.content || ''} />
-        <StyleSummaryRenderer
-          metadata={message.metadata as unknown as StyleSummaryMetadata}
+    'place-card': () => {
+      if (!isPlaceCardMessage(message)) return null;
+      return (
+        <PlaceCardRenderer
+          metadata={message.metadata}
+          onConfirm={onPlaceConfirm}
         />
-        <ChoiceRenderer options={message.options} onSelect={onChoiceSelect} />
-      </>
-    ),
-    'review-preview': () => (
-      <ReviewPreviewRenderer
-        metadata={message.metadata as unknown as ReviewPreviewMetadata}
-        onAction={onReviewAction}
-      />
-    ),
+      );
+    },
+    'style-summary': () => {
+      if (!isStyleSummaryMessage(message)) return null;
+      return (
+        <>
+          <TextRenderer content={message.content || ''} />
+          <StyleSummaryRenderer metadata={message.metadata} />
+          <ChoiceRenderer options={message.options} onSelect={onChoiceSelect} />
+        </>
+      );
+    },
+    'review-preview': () => {
+      if (!isReviewPreviewMessage(message)) return null;
+      return (
+        <ReviewPreviewRenderer
+          metadata={message.metadata}
+          onAction={onReviewAction}
+        />
+      );
+    },
     loading: () => <LoadingRenderer />,
     summary: () => (
       <>
         <TextRenderer content={message.content || ''} />
-        <SummaryRenderer
-          metadata={message.metadata as Record<string, unknown>}
-        />
+        {message.metadata && <SummaryRenderer metadata={message.metadata} />}
       </>
     ),
   };

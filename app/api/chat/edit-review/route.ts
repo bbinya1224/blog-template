@@ -4,14 +4,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import type { StyleProfile } from '@/entities/style-profile';
 import { getReviewEditPrompt } from '@/shared/api/prompt-service';
+import { ApiResponse } from '@/shared/api/response';
+import { getAnthropicClient, CLAUDE_SONNET } from '@/shared/api/claude-client';
 import {
   shouldUseMock,
   generateMockEditReview,
 } from '@/shared/lib/mock/chat-mock';
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
 
 interface EditReviewInput {
   originalReview: string;
@@ -23,20 +21,14 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return new Response(
-        JSON.stringify({ error: '인증이 필요합니다.' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
+      return ApiResponse.unauthorized();
     }
 
     const { originalReview, editRequest, styleProfile }: EditReviewInput =
       await req.json();
 
     if (!originalReview?.trim() || !editRequest?.trim()) {
-      return new Response(
-        JSON.stringify({ error: '원본 리뷰와 수정 요청은 필수입니다.' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return ApiResponse.validationError('원본 리뷰와 수정 요청은 필수입니다.');
     }
 
     // 개발 환경에서 Mock 사용
@@ -66,8 +58,8 @@ export async function POST(req: NextRequest) {
       async start(controller) {
         try {
           console.log('\n[Review Edit API] Claude API 스트리밍 시작...');
-          const response = await client.messages.stream({
-            model: 'claude-sonnet-4-5-20250929',
+          const response = await getAnthropicClient().messages.stream({
+            model: CLAUDE_SONNET,
             max_tokens: 4096,
             system: [
               {
@@ -135,10 +127,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Review edit error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to edit review' }),
-      { status: 500 }
-    );
+    return ApiResponse.serverError();
   }
 }
 
