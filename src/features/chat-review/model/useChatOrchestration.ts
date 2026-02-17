@@ -37,7 +37,7 @@ export function useChatOrchestration({
 
   const { reviews: recentReviews } = useRecentReviews(5);
   const { messages, addMessage, addAssistantMessage } = useChatMessages();
-  const { generateReview } = useReviewGeneration({ userEmail });
+  const { generateReview } = useReviewGeneration();
   const {
     handleSendMessage: originalHandleSendMessage,
     handleChoiceSelect,

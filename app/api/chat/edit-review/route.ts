@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { z } from 'zod';
 import { authOptions } from '@/auth';
 import type { StyleProfile } from '@/entities/style-profile';
 import { getReviewEditPrompt } from '@/shared/api/prompt-service';
@@ -11,11 +12,11 @@ import {
   generateMockEditReview,
 } from '@/shared/lib/mock/chat-mock';
 
-interface EditReviewInput {
-  originalReview: string;
-  editRequest: string;
-  styleProfile: StyleProfile | null;
-}
+const editReviewInputSchema = z.object({
+  originalReview: z.string().min(1, '원본 리뷰가 필요합니다'),
+  editRequest: z.string().min(1, '수정 요청을 입력해주세요'),
+  styleProfile: z.any().optional().nullable(),
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,12 +25,17 @@ export async function POST(req: NextRequest) {
       return ApiResponse.unauthorized();
     }
 
-    const { originalReview, editRequest, styleProfile }: EditReviewInput =
-      await req.json();
+    const body = await req.json();
+    const validation = editReviewInputSchema.safeParse(body);
 
-    if (!originalReview?.trim() || !editRequest?.trim()) {
-      return ApiResponse.validationError('원본 리뷰와 수정 요청은 필수입니다.');
+    if (!validation.success) {
+      const firstError = validation.error.issues[0];
+      return ApiResponse.validationError(
+        firstError?.message || '입력 값이 올바르지 않습니다.'
+      );
     }
+
+    const { originalReview, editRequest, styleProfile } = validation.data;
 
     // 개발 환경에서 Mock 사용
     if (shouldUseMock()) {

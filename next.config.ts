@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
+  compiler: {
+    removeConsole: { exclude: ['error', 'warn'] },
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',

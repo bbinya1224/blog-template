@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { cn } from '@/shared/lib/utils';
 import { OrotiLogo } from '@/shared/ui/Icons';
-import { useChatStore } from '@/features/chat-review/model/store';
+import { useChatStore } from '@/features/chat-review';
 import { useSidebar } from '../model/sidebar-context';
 import { SidebarReviewList } from './SidebarReviewList';
 import { SidebarUserProfile } from './SidebarUserProfile';

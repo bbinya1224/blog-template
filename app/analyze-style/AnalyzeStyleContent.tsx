@@ -2,18 +2,17 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useChatStore } from '@/features/chat-review/model/store';
 import {
+  useChatStore,
   useChatHandlers,
   useChatMessages,
-} from '@/features/chat-review/model';
-import {
   MESSAGES,
   CHOICE_OPTIONS,
-} from '@/features/chat-review/constants/messages';
-import { MessageList, InputArea } from '@/features/chat-review/ui';
+  MessageList,
+  InputArea,
+  type StyleSetupContext,
+} from '@/features/chat-review';
 import type { StyleProfile } from '@/entities/style-profile';
-import type { StyleSetupContext } from '@/features/chat-review/lib/step-handlers';
 import { cn } from '@/shared/lib/utils';
 import { ArrowLeft } from 'lucide-react';
 

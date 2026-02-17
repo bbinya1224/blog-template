@@ -11,6 +11,7 @@ export {
   StyleSummaryCard,
   ReviewPreview,
   WelcomeScreen,
+  ChatErrorBoundary,
 } from './ui';
 
 // Model (Hooks & Types)
@@ -25,6 +26,9 @@ export {
   useChatStore,
   type UseChatMessagesReturn,
   useChatOrchestration,
+  useRecentReviews,
+  useChatHandlers,
+  useChatMessages,
 } from './model';
 
 // Lib - Conversation Engine
