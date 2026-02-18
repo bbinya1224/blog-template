@@ -1,18 +1,18 @@
 import type { ReviewPayload } from '@/shared/types/review';
-import type { StyleProfile } from '@/shared/types/style-profile';
+import type { StyleProfile } from '@/shared/types/styleProfile';
 import { formatKoreanDate } from '@/shared/lib/utils';
 import {
   generateReviewWithClaude,
   editReviewWithClaude,
-} from '@/shared/api/claude-client';
+} from '@/shared/api/claudeClient';
 import {
   getReviewGenerationPrompts,
   getReviewEditPrompt,
-} from '@/shared/api/prompt-service';
+} from '@/shared/api/promptService';
 import { AppError } from '@/shared/lib/errors';
-import { readBlogSamples } from '@/shared/api/data-files';
+import { readBlogSamples } from '@/shared/api/dataFiles';
 import { searchStoreInfo } from '@/shared/lib/search';
-import { formatKakaoPlaceInfo } from '@/shared/lib/kakao-local';
+import { formatKakaoPlaceInfo } from '@/shared/lib/kakaoLocal';
 
 const getRandomWritingSamples = async (email: string, count: number = 3): Promise<string> => {
   try {

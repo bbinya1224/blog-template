@@ -4,12 +4,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import type { ReviewPayload } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
-import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claude-client';
+import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import {
   formatCollectedInfo,
   parseQuestions,
 } from '@/features/chat-review';
-import { shouldUseMock } from '@/shared/lib/mock/chat-mock';
+import { shouldUseMock } from '@/shared/lib/mock/chatMock';
 
 interface SmartFollowupInput {
   collectedInfo: Partial<ReviewPayload>;

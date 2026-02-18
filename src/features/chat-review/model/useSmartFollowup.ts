@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import type { ReviewPayload } from '@/shared/types/review';
+import { apiPost } from '@/shared/api/httpClient';
 
 interface UseSmartFollowupReturn {
   questions: string[];
@@ -31,26 +32,10 @@ export function useSmartFollowup(): UseSmartFollowupReturn {
     ): Promise<string[]> => {
       setIsLoading(true);
       try {
-        const response = await fetch('/api/chat/smart-followup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ collectedInfo, selectedTopic }),
-        });
-
-        if (!response.ok) {
-          const errorBody = await response.json().catch(() => ({}));
-          console.error(
-            `Smart followup API error: ${response.status}`,
-            errorBody
-          );
-          questionsRef.current = [];
-          indexRef.current = 0;
-          setQuestions([]);
-          setCurrentQuestionIndex(0);
-          return [];
-        }
-
-        const data = await response.json();
+        const data = await apiPost<{ questions?: string[] }>(
+          '/api/chat/smart-followup',
+          { collectedInfo, selectedTopic },
+        );
         const fetchedQuestions: string[] = data.questions || [];
         questionsRef.current = fetchedQuestions;
         indexRef.current = 0;
@@ -62,6 +47,7 @@ export function useSmartFollowup(): UseSmartFollowupReturn {
         questionsRef.current = [];
         indexRef.current = 0;
         setQuestions([]);
+        setCurrentQuestionIndex(0);
         return [];
       } finally {
         setIsLoading(false);

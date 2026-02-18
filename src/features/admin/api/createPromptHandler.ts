@@ -5,7 +5,7 @@ import type {
   PromptWithCategory,
   CreatePromptData,
   UpdatePromptData,
-} from './prompt-repository';
+} from './promptRepository';
 
 // ============================================
 // Types

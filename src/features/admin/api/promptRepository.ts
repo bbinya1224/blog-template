@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@/shared/lib/supabase';
-import { invalidatePromptCache } from '@/shared/api/prompt-service';
+import { invalidatePromptCache } from '@/shared/api/promptService';
 
 // ============================================
 // Types

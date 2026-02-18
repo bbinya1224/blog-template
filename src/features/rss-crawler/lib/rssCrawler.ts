@@ -14,18 +14,18 @@ import {
   RSS_TIMEOUT_MS,
   RSS_RETRY_OPTIONS,
 } from './constants';
-import { buildViewerAndMobileUrls } from './url-utils';
+import { buildViewerAndMobileUrls } from './urlUtils';
 import {
   extractArticleText,
   extractPostLinksFromRss,
   type ExtractResult,
-} from './html-extractor';
+} from './htmlExtractor';
 import {
   fetchHtml,
   getRandomUserAgent,
   sleep,
   withProtocolFallback,
-} from './http-client';
+} from './httpClient';
 
 export type CrawlResult = {
   mergedText: string;

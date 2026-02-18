@@ -1,5 +1,5 @@
-import { requireAuth } from '@/shared/lib/auth-utils';
-import { getUserStatus } from '@/shared/api/data-files';
+import { requireAuth } from '@/shared/lib/authUtils';
+import { getUserStatus } from '@/shared/api/dataFiles';
 import { USAGE_LIMITS } from '@/shared/config';
 import { AppShell } from '@/widgets/app-shell';
 

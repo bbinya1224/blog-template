@@ -6,12 +6,12 @@ import { authOptions } from '@/auth';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import type { ReviewPayload } from '@/shared/types/review';
 import type { StyleProfile } from '@/entities/style-profile';
-import { getReviewGenerationPrompts } from '@/shared/api/prompt-service';
+import { getReviewGenerationPrompts } from '@/shared/api/promptService';
 import { searchStoreInfo } from '@/shared/lib/search';
-import { formatKakaoPlaceInfo } from '@/shared/lib/kakao-local';
-import { readBlogSamples } from '@/shared/api/data-files';
+import { formatKakaoPlaceInfo } from '@/shared/lib/kakaoLocal';
+import { readBlogSamples } from '@/shared/api/dataFiles';
 import { ApiResponse } from '@/shared/api/response';
-import { getAnthropicClient, CLAUDE_SONNET } from '@/shared/api/claude-client';
+import { getAnthropicClient, CLAUDE_SONNET } from '@/shared/api/claudeClient';
 import {
   buildReviewSystemPrompt,
   buildReviewUserPrompt,
@@ -19,7 +19,7 @@ import {
 import {
   shouldUseMock,
   generateMockReview,
-} from '@/shared/lib/mock/chat-mock';
+} from '@/shared/lib/mock/chatMock';
 
 import { reviewPayloadSchema } from '@/shared/types/review';
 

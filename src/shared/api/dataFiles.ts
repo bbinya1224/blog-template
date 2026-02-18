@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import type { ReviewPayload } from '@/shared/types/review';
-import type { StyleProfile } from '@/shared/types/style-profile';
+import type { StyleProfile } from '@/shared/types/styleProfile';
 
 export const readBlogPosts = async (email: string): Promise<string> => {
   if (!email) return '';

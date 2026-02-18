@@ -5,7 +5,7 @@ import {
   enforceHttps,
   downgradeToHttp,
   isProtocolError,
-} from './url-utils';
+} from './urlUtils';
 
 export const getRandomUserAgent = (): string =>
   USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];

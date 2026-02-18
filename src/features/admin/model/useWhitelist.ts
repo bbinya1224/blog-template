@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
+import { createAdminClient } from '@/shared/api/adminClient';
 
 export type ApprovedUser = {
   id: string;
@@ -18,34 +19,24 @@ export function useWhitelist(password: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const client = useMemo(() => createAdminClient(password), [password]);
+
   const fetchUsers = useCallback(async () => {
     if (!password) return;
-    
+
     setLoading(true);
     setError('');
 
     try {
-      const response = await fetch('/api/admin/whitelist', {
-        headers: {
-          'X-Admin-Password': password,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('조회 실패');
-      }
-
-      const data = await response.json();
- 
-      const usersArray = data.data?.users || [];
-      setUsers(usersArray);
+      const data = await client.get<{ users: ApprovedUser[] }>('/api/admin/whitelist');
+      setUsers(data.users || []);
     } catch (error) {
       console.error('[useWhitelist] 에러 발생:', error);
       setError('화이트리스트를 불러올 수 없습니다');
     } finally {
       setLoading(false);
     }
-  }, [password]);
+  }, [password, client]);
 
   const addUser = async (email: string, notes: string) => {
     if (!email.trim()) return;
@@ -54,23 +45,10 @@ export function useWhitelist(password: string) {
     setError('');
 
     try {
-      const response = await fetch('/api/admin/whitelist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Password': password,
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          notes: notes.trim() || undefined,
-        }),
+      await client.post('/api/admin/whitelist', {
+        email: email.trim(),
+        notes: notes.trim() || undefined,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || '추가 실패');
-      }
 
       await fetchUsers();
       return true;
@@ -90,21 +68,7 @@ export function useWhitelist(password: string) {
     setError('');
 
     try {
-      const response = await fetch('/api/admin/whitelist', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Password': password,
-        },
-        body: JSON.stringify({
-          email,
-          ...updates,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('업데이트 실패');
-      }
+      await client.put('/api/admin/whitelist', { email, ...updates });
 
       await fetchUsers();
       return true;
@@ -125,18 +89,7 @@ export function useWhitelist(password: string) {
     setError('');
 
     try {
-      const response = await fetch('/api/admin/whitelist', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Password': password,
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!response.ok) {
-        throw new Error('삭제 실패');
-      }
+      await client.delete('/api/admin/whitelist', { email });
 
       await fetchUsers();
       return true;

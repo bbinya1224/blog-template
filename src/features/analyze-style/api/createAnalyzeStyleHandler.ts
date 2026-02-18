@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
-import type { StyleProfile } from '@/shared/types/style-profile';
+import type { StyleProfile } from '@/shared/types/styleProfile';
 import { AppError, NotFoundError } from '@/shared/lib/errors';
 
 type AnalyzeStyleDeps = {

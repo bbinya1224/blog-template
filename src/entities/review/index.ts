@@ -4,6 +4,6 @@ export {
   getReviews,
   getReviewById,
   updateReview,
-} from './api/review-repository';
+} from './api/reviewRepository';
 
 export { ReviewCard } from './ui/ReviewCard';

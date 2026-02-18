@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRecentReviews } from '@/features/chat-review';
 import { formatReviewDate } from '@/shared/lib/utils';
-import { useSidebar } from '../model/sidebar-context';
+import { useSidebar } from '../model/sidebarContext';
 
 export function SidebarReviewList() {
   const { reviews, isLoading } = useRecentReviews(20);

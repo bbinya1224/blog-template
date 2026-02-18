@@ -2,12 +2,13 @@
 
 import type { ChangeEvent, FormEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { SectionCard } from '@/shared/ui/SectionCard';
 import { StatusMessage } from '@/shared/ui/StatusMessage';
 import { DynamicMessage } from '@/shared/ui/DynamicMessage';
 import { ReviewResultSkeleton } from '@/features/review/ui/ReviewResultSkeleton';
 import type { ReviewPayload } from '@/shared/types/review';
-import type { StyleProfile } from '@/shared/types/style-profile';
+import type { StyleProfile } from '@/shared/types/styleProfile';
 import {
   loadStyleProfile,
   copyToClipboard,
@@ -16,7 +17,7 @@ import {
   ReviewWizard,
   ReviewResult,
 } from '@/features/review';
-import { trpc } from '@/shared/api/trpc';
+import { apiPost } from '@/shared/api/httpClient';
 
 const emptyForm: ReviewPayload = {
   name: '',
@@ -37,7 +38,9 @@ export default function GenerateClient() {
   const [editRequest, setEditRequest] = useState('');
   const [isCopying, setIsCopying] = useState(false);
 
-  const generateMutation = trpc.review.generate.useMutation({
+  const generateMutation = useMutation({
+    mutationFn: (payload: ReviewPayload) =>
+      apiPost<{ review: string; message: string }>('/api/generate-review', payload),
     onMutate: async () => {
       setStatusMessage('리뷰를 생성하는 중입니다…');
     },
@@ -58,13 +61,14 @@ export default function GenerateClient() {
         });
     },
     onError: (error) => {
-      setStatusMessage(error.message);
+      setStatusMessage(error instanceof Error ? error.message : '리뷰 생성에 실패했습니다.');
     },
   });
 
-  const editMutation = trpc.review.edit.useMutation({
+  const editMutation = useMutation({
+    mutationFn: (input: { review: string; request: string }) =>
+      apiPost<{ review: string }>('/api/edit-review', input),
     onMutate: async (variables) => {
-      // 이전 상태를 context에 저장
       const previousReview = review;
 
       setReview(
@@ -81,11 +85,10 @@ export default function GenerateClient() {
       setStatusMessage('수정 반영이 완료되었습니다.');
     },
     onError: (error, _variables, context) => {
-      // 에러 시 원래대로 복구
       if (context?.previousReview) {
         setReview(context.previousReview);
       }
-      setStatusMessage(error.message);
+      setStatusMessage(error instanceof Error ? error.message : '수정에 실패했습니다.');
     },
   });
 
