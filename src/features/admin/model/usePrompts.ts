@@ -1,10 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-
-// ============================================
-// Types
-// ============================================
+import { createAdminClient } from '@/shared/api/admin-client';
 
 export type PromptCategory = {
   id: string;
@@ -30,36 +27,23 @@ export type Prompt = {
   };
 };
 
-// ============================================
-// Hook
-// ============================================
-
 export const usePrompts = (adminPassword: string) => {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [categories, setCategories] = useState<PromptCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const headers = useMemo(() => ({
-    'Content-Type': 'application/json',
-    'X-Admin-Password': adminPassword,
-  }), [adminPassword]);
+  const client = useMemo(() => createAdminClient(adminPassword), [adminPassword]);
 
   const fetchCategories = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/prompts/categories', { headers });
-      const data = await res.json();
-
-      if (!data.success) {
-        throw new Error(data.error?.message || '카테고리 조회 실패');
-      }
-
-      setCategories(data.data.categories);
+      const data = await client.get<{ categories: PromptCategory[] }>('/api/admin/prompts/categories');
+      setCategories(data.categories);
     } catch (err) {
       console.error('카테고리 조회 오류:', err);
       setError(err instanceof Error ? err.message : '카테고리 조회 실패');
     }
-  }, [headers]);
+  }, [client]);
 
   const fetchPrompts = useCallback(
     async (categorySlug?: string) => {
@@ -67,18 +51,9 @@ export const usePrompts = (adminPassword: string) => {
       setError(null);
 
       try {
-        const url = categorySlug
-          ? `/api/admin/prompts?category=${categorySlug}`
-          : '/api/admin/prompts';
-
-        const res = await fetch(url, { headers });
-        const data = await res.json();
-
-        if (!data.success) {
-          throw new Error(data.error?.message || '프롬프트 조회 실패');
-        }
-
-        setPrompts(data.data.prompts);
+        const params = categorySlug ? { category: categorySlug } : undefined;
+        const data = await client.get<{ prompts: Prompt[] }>('/api/admin/prompts', params);
+        setPrompts(data.prompts);
       } catch (err) {
         console.error('프롬프트 조회 오류:', err);
         setError(err instanceof Error ? err.message : '프롬프트 조회 실패');
@@ -86,7 +61,7 @@ export const usePrompts = (adminPassword: string) => {
         setLoading(false);
       }
     },
-    [headers]
+    [client]
   );
 
   const updatePrompt = useCallback(
@@ -95,19 +70,8 @@ export const usePrompts = (adminPassword: string) => {
       setError(null);
 
       try {
-        const res = await fetch(`/api/admin/prompts/${id}`, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify(updates),
-        });
+        await client.put(`/api/admin/prompts/${id}`, updates);
 
-        const data = await res.json();
-
-        if (!data.success) {
-          throw new Error(data.error?.message || '프롬프트 수정 실패');
-        }
-
-        // 로컬 상태 업데이트
         setPrompts((prev) =>
           prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
         );
@@ -121,7 +85,7 @@ export const usePrompts = (adminPassword: string) => {
         setLoading(false);
       }
     },
-    [headers]
+    [client]
   );
 
   const deletePrompt = useCallback(
@@ -132,18 +96,8 @@ export const usePrompts = (adminPassword: string) => {
       setError(null);
 
       try {
-        const res = await fetch(`/api/admin/prompts/${id}`, {
-          method: 'DELETE',
-          headers,
-        });
+        await client.delete(`/api/admin/prompts/${id}`);
 
-        const data = await res.json();
-
-        if (!data.success) {
-          throw new Error(data.error?.message || '프롬프트 삭제 실패');
-        }
-
-        // 로컬 상태 업데이트
         setPrompts((prev) => prev.filter((p) => p.id !== id));
 
         return true;
@@ -155,7 +109,7 @@ export const usePrompts = (adminPassword: string) => {
         setLoading(false);
       }
     },
-    [headers]
+    [client]
   );
 
   return {

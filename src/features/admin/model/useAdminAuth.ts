@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { createAdminClient } from '@/shared/api/admin-client';
 
 export function useAdminAuth() {
   const [password, setPassword] = useState('');
@@ -20,19 +21,8 @@ export function useAdminAuth() {
     setError('');
 
     try {
-      const response = await fetch('/api/admin/whitelist', {
-        headers: {
-          'X-Admin-Password': password,
-        },
-      });
-
-      if (response.status === 401) {
-        throw new Error('비밀번호가 틀립니다');
-      }
-
-      if (!response.ok) {
-        throw new Error('인증 실패');
-      }
+      const client = createAdminClient(password);
+      await client.get('/api/admin/whitelist');
 
       setIsAuthenticated(true);
       return true;
