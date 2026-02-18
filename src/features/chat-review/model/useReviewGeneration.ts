@@ -6,7 +6,7 @@ import { useConversationActions } from './useConversationActions';
 import { useChatMessages } from './useChatMessages';
 import { handleReviewEdited } from '../lib/step-handlers';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
-import { apiSSE, SSEError } from '@/shared/api/sse-client';
+import { apiSSE, SSEError } from '@/shared/api/sseClient';
 
 export function useReviewGeneration() {
   const collectedInfo = useChatStore((s) => s.collectedInfo);

@@ -1,6 +1,6 @@
-import { createFetchRssHandler } from '@/features/rss-crawler/api/create-fetch-rss-handler';
+import { createFetchRssHandler } from '@/features/rss-crawler/api/createFetchRssHandler';
 import { crawlBlogRss } from '@/features/rss-crawler';
-import { saveBlogPosts, saveBlogSamples } from '@/shared/api/data-files';
+import { saveBlogPosts, saveBlogSamples } from '@/shared/api/dataFiles';
 
 export const POST = createFetchRssHandler({
   crawlBlogRss,

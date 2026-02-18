@@ -1,4 +1,4 @@
-import type { StyleProfile } from '@/shared/types/style-profile';
+import type { StyleProfile } from '@/shared/types/styleProfile';
 
 interface StyleProfileSummaryProps {
   styleProfile: StyleProfile;

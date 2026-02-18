@@ -67,7 +67,7 @@ export {
   buildReviewUserPrompt,
   formatCollectedInfo,
   parseQuestions,
-} from './lib/prompt-builder';
+} from './lib/promptBuilder';
 
 // Constants
 export {

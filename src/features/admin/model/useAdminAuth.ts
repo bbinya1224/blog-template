@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createAdminClient } from '@/shared/api/admin-client';
+import { createAdminClient } from '@/shared/api/adminClient';
 
 export function useAdminAuth() {
   const [password, setPassword] = useState('');

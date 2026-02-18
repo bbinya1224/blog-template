@@ -1,8 +1,8 @@
-import type { StyleProfile } from '@/shared/types/style-profile';
+import type { StyleProfile } from '@/shared/types/styleProfile';
 import { StyleAnalysisError } from '@/shared/lib/errors';
 import { unique } from '@/shared/lib/utils';
-import { analyzeStyleWithClaude } from '@/shared/api/claude-client';
-import { getStyleAnalysisPrompts } from '@/shared/api/prompt-service';
+import { analyzeStyleWithClaude } from '@/shared/api/claudeClient';
+import { getStyleAnalysisPrompts } from '@/shared/api/promptService';
 
 const COMMON_SECTIONS = ['방문 이유', '분위기', '메뉴/맛', '서비스', '총평'];
 

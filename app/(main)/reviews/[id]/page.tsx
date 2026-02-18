@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getReviewById } from '@/entities/review/api/review-repository';
+import { getReviewById } from '@/entities/review/api/reviewRepository';
 import { ReviewDetailViewer } from '@/widgets/review-detail/ui/ReviewDetailViewer';
 
 interface ReviewDetailPageProps {

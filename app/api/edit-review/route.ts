@@ -1,6 +1,6 @@
-import { createEditReviewHandler } from '@/features/review/api/create-edit-review-handler';
-import { editReviewWithClaudeAPI } from '@/features/review/lib/review-generator';
-import { readStyleProfile, incrementUsageCount } from '@/shared/api/data-files';
+import { createEditReviewHandler } from '@/features/review/api/createEditReviewHandler';
+import { editReviewWithClaudeAPI } from '@/features/review/lib/reviewGenerator';
+import { readStyleProfile, incrementUsageCount } from '@/shared/api/dataFiles';
 import { ValidationError } from '@/shared/lib/errors';
 import type { ReviewEditPayload } from '@/shared/types/review';
 

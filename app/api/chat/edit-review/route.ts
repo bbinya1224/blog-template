@@ -4,13 +4,13 @@ import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 import { authOptions } from '@/auth';
 import type { StyleProfile } from '@/entities/style-profile';
-import { getReviewEditPrompt } from '@/shared/api/prompt-service';
+import { getReviewEditPrompt } from '@/shared/api/promptService';
 import { ApiResponse } from '@/shared/api/response';
-import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claude-client';
+import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import {
   shouldUseMock,
   generateMockEditReview,
-} from '@/shared/lib/mock/chat-mock';
+} from '@/shared/lib/mock/chatMock';
 
 const editReviewInputSchema = z.object({
   originalReview: z.string().min(1, '원본 리뷰가 필요합니다'),

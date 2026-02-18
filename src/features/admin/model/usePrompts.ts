@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import { createAdminClient } from '@/shared/api/admin-client';
+import { createAdminClient } from '@/shared/api/adminClient';
 
 export type PromptCategory = {
   id: string;

@@ -7,7 +7,7 @@ import { Review } from '@/entities/review';
 import { SectionCard } from '@/shared/ui/SectionCard';
 import { copyToClipboard } from '@/features/review';
 import { InlineDiffView } from '@/features/review-edit';
-import { apiPost, apiPut } from '@/shared/api/http-client';
+import { apiPost, apiPut } from '@/shared/api/httpClient';
 
 interface ReviewDetailViewerProps {
   initialReview: Review;

@@ -1,9 +1,9 @@
-import { createAnalyzeStyleHandler } from '@/features/analyze-style/api/create-analyze-style-handler';
-import { generateStyleProfileWithClaude } from '@/features/analyze-style/lib/style-analysis';
+import { createAnalyzeStyleHandler } from '@/features/analyze-style/api/createAnalyzeStyleHandler';
+import { generateStyleProfileWithClaude } from '@/features/analyze-style/lib/styleAnalysis';
 import {
   readBlogPosts,
   saveStyleProfile,
-} from '@/shared/api/data-files';
+} from '@/shared/api/dataFiles';
 
 export const POST = createAnalyzeStyleHandler({
   readBlogPosts,

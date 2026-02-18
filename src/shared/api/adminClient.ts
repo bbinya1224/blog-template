@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiDelete } from './http-client';
+import { apiGet, apiPost, apiPut, apiDelete } from './httpClient';
 
 export type AdminClient = ReturnType<typeof createAdminClient>;
 

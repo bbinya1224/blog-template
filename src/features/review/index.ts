@@ -1,5 +1,5 @@
 // Client-side functions
-export { loadStyleProfile, copyToClipboard } from './api/review-api';
+export { loadStyleProfile, copyToClipboard } from './api/reviewApi';
 
 // UI Components
 export { GeneratePageHeader } from './ui/GeneratePageHeader';

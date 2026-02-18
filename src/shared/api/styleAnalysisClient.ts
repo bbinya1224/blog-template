@@ -1,6 +1,6 @@
-import type { StyleProfile } from '@/shared/types/style-profile';
+import type { StyleProfile } from '@/shared/types/styleProfile';
 import { API_ENDPOINTS } from '@/shared/config/constants';
-import { apiPost } from './http-client';
+import { apiPost } from './httpClient';
 
 export const analyzeStyle = async (
   rssUrl: string,

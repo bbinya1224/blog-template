@@ -1,1 +1,1 @@
-export { useIsDesktop } from './use-media-query';
+export { useIsDesktop } from './useMediaQuery';

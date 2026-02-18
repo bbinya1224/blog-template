@@ -1,7 +1,7 @@
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
-import { useSidebar } from '../model/sidebar-context';
+import { useSidebar } from '../model/sidebarContext';
 
 export function SidebarUserProfile() {
   const { data: session, status } = useSession();

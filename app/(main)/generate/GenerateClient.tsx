@@ -8,7 +8,7 @@ import { StatusMessage } from '@/shared/ui/StatusMessage';
 import { DynamicMessage } from '@/shared/ui/DynamicMessage';
 import { ReviewResultSkeleton } from '@/features/review/ui/ReviewResultSkeleton';
 import type { ReviewPayload } from '@/shared/types/review';
-import type { StyleProfile } from '@/shared/types/style-profile';
+import type { StyleProfile } from '@/shared/types/styleProfile';
 import {
   loadStyleProfile,
   copyToClipboard,
@@ -17,7 +17,7 @@ import {
   ReviewWizard,
   ReviewResult,
 } from '@/features/review';
-import { apiPost } from '@/shared/api/http-client';
+import { apiPost } from '@/shared/api/httpClient';
 
 const emptyForm: ReviewPayload = {
   name: '',

@@ -5,7 +5,7 @@ import { useChatMessages } from './useChatMessages';
 import { MESSAGES } from '../constants/messages';
 import type { PlaceCardMetadata } from '@/entities/chat-message';
 import type { SearchResult } from '@/shared/lib/search';
-import { apiPost } from '@/shared/api/http-client';
+import { apiPost } from '@/shared/api/httpClient';
 
 export function usePlaceSearch() {
   const { addAssistantMessage } = useChatMessages();

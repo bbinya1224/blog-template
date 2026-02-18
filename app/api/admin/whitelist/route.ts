@@ -3,14 +3,14 @@ import {
   createWhitelistPostHandler,
   createWhitelistPutHandler,
   createWhitelistDeleteHandler,
-} from '@/features/admin/api/create-whitelist-handler';
+} from '@/features/admin/api/createWhitelistHandler';
 import {
   getAllUsers,
   getUserByEmail,
   addUser,
   updateUser,
   deleteUser,
-} from '@/features/admin/api/whitelist-repository';
+} from '@/features/admin/api/whitelistRepository';
 
 const deps = {
   getAllUsers,

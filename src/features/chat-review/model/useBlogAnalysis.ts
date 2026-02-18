@@ -3,9 +3,9 @@
 import { useCallback } from 'react';
 import { useConversationActions } from './useConversationActions';
 import { useChatMessages } from './useChatMessages';
-import { analyzeStyle } from '@/shared/api/style-analysis-client';
+import { analyzeStyle } from '@/shared/api/styleAnalysisClient';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
-import type { StyleProfile } from '@/shared/types/style-profile';
+import type { StyleProfile } from '@/shared/types/styleProfile';
 
 function convertBlogUrlToRss(blogUrl: string): string {
   const match = blogUrl.match(/blog\.naver\.com\/([a-zA-Z0-9_-]+)/);

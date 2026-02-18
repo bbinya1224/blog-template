@@ -1,6 +1,6 @@
-import { getUserStatus } from '@/shared/api/data-files';
+import { getUserStatus } from '@/shared/api/dataFiles';
 import { ApiResponse } from '../response';
-import type { AuthenticatedRequest } from './with-auth';
+import type { AuthenticatedRequest } from './withAuth';
 
 type QuotaHandler<TContext = unknown> = (
   request: AuthenticatedRequest,

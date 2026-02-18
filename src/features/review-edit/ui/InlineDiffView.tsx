@@ -1,6 +1,6 @@
 'use client';
 
-import { calculateDiffStats } from '../lib/diff-calculator';
+import { calculateDiffStats } from '../lib/diffCalculator';
 import { DiffHighlight } from './DiffHighlight';
 
 interface InlineDiffViewProps {

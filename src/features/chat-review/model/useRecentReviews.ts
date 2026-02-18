@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { Review } from '@/entities/review';
-import { apiGet } from '@/shared/api/http-client';
+import { apiGet } from '@/shared/api/httpClient';
 
 export function useRecentReviews(limit: number = 5) {
   const { data: reviews = [], isLoading, error } = useQuery({

@@ -2,7 +2,7 @@
 
 import { type ReactNode } from 'react';
 import { Sidebar } from '@/widgets/sidebar';
-import { useSidebar } from '@/widgets/sidebar/model/sidebar-context';
+import { useSidebar } from '@/widgets/sidebar/model/sidebarContext';
 
 interface AppShellProps {
   children: ReactNode;

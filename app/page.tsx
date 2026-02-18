@@ -1,5 +1,5 @@
-import { getSession } from '@/shared/lib/auth-utils';
-import { readStyleProfile } from '@/shared/api/data-files';
+import { getSession } from '@/shared/lib/authUtils';
+import { readStyleProfile } from '@/shared/api/dataFiles';
 import { ChatPageContent } from './ChatPageContent';
 import { PublicChatView } from './PublicChatView';
 import { AppShell } from '@/widgets/app-shell';

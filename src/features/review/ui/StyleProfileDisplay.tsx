@@ -1,5 +1,5 @@
 import { SectionCard } from '@/shared/ui/SectionCard';
-import type { StyleProfile } from '@/shared/types/style-profile';
+import type { StyleProfile } from '@/shared/types/styleProfile';
 
 interface StyleProfileDisplayProps {
   styleProfile: StyleProfile | null;

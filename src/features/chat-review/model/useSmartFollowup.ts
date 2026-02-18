@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import type { ReviewPayload } from '@/shared/types/review';
-import { apiPost } from '@/shared/api/http-client';
+import { apiPost } from '@/shared/api/httpClient';
 
 interface UseSmartFollowupReturn {
   questions: string[];

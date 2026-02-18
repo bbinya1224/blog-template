@@ -22,9 +22,9 @@ import {
 } from '@/features/analyze-style';
 import { loadStyleProfile } from '@/features/review';
 import { PAGE_TEXTS } from '@/features/analyze-style/constants/texts';
-import type { StyleProfile } from '@/shared/types/style-profile';
+import type { StyleProfile } from '@/shared/types/styleProfile';
 import type { Session } from 'next-auth';
-import { apiPost } from '@/shared/api/http-client';
+import { apiPost } from '@/shared/api/httpClient';
 
 interface AnalyzeClientPageProps {
   user: Session['user'];

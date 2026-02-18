@@ -1,11 +1,11 @@
-import { createGenerateReviewHandler } from '@/features/review/api/create-generate-review-handler';
-import { generateReviewWithClaudeAPI } from '@/features/review/lib/review-generator';
+import { createGenerateReviewHandler } from '@/features/review/api/createGenerateReviewHandler';
+import { generateReviewWithClaudeAPI } from '@/features/review/lib/reviewGenerator';
 import {
   readStyleProfile,
   saveReviewToDB,
   getUserStatus,
   incrementUsageCount,
-} from '@/shared/api/data-files';
+} from '@/shared/api/dataFiles';
 import { reviewPayloadSchema } from '@/shared/types/review';
 import type { ReviewPayload } from '@/shared/types/review';
 import { ValidationError } from '@/shared/lib/errors';
