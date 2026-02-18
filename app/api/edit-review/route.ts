@@ -1,6 +1,6 @@
 import { createEditReviewHandler } from '@/features/review/api/create-edit-review-handler';
 import { editReviewWithClaudeAPI } from '@/features/review/lib/review-generator';
-import { readStyleProfile } from '@/shared/api/data-files';
+import { readStyleProfile, incrementUsageCount } from '@/shared/api/data-files';
 import { ValidationError } from '@/shared/lib/errors';
 import type { ReviewEditPayload } from '@/shared/types/review';
 
@@ -29,4 +29,5 @@ export const POST = createEditReviewHandler({
   validateEditRequest,
   readStyleProfile,
   editReview: editReviewWithClaudeAPI,
+  incrementUsageCount,
 });

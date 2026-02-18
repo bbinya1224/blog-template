@@ -79,9 +79,9 @@ export class HttpError extends AppError {
   }
 }
 
-export class SSEError extends Error {
+export class SSEError extends AppError {
   constructor(message: string) {
-    super(message);
+    super(message, 'SSE_ERROR', 502);
     this.name = 'SSEError';
   }
 }

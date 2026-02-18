@@ -13,12 +13,14 @@ type EditReviewDeps = {
     editRequest: string,
     styleProfile: StyleProfile,
   ) => Promise<string>;
+  incrementUsageCount?: (email: string) => Promise<void>;
 };
 
 export const createEditReviewHandler = ({
   validateEditRequest,
   readStyleProfile,
   editReview,
+  incrementUsageCount,
 }: EditReviewDeps) => {
   return async (request: Request) => {
     try {
@@ -33,10 +35,7 @@ export const createEditReviewHandler = ({
 
       const body: unknown = await request.json();
 
-      // validateEditRequest는 유효하지 않으면 ValidationError를 던짐
-      // 성공하면 body는 ReviewEditPayload로 타입이 좁혀짐
       if (!validateEditRequest(body)) {
-        // 이 코드는 실행되지 않지만 타입 가드를 위해 필요
         throw new Error('Unreachable: validateEditRequest throws on failure');
       }
 
@@ -50,6 +49,8 @@ export const createEditReviewHandler = ({
       }
 
       const review = await editReview(originalReview, editRequest, styleProfile);
+
+      await incrementUsageCount?.(session.user.email);
 
       return NextResponse.json({
         review,

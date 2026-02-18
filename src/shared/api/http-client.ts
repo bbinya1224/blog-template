@@ -1,10 +1,5 @@
 import { HttpError } from '@/shared/lib/errors';
-
-type ApiSuccessResponse<T> = { success: true; data: T };
-type ApiErrorResponse = {
-  success: false;
-  error: { code: string; message: string };
-};
+import type { ApiSuccessResponse, ApiErrorResponse } from '@/shared/types/api';
 
 async function parseResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {

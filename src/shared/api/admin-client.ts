@@ -1,5 +1,7 @@
 import { apiGet, apiPost, apiPut, apiDelete } from './http-client';
 
+export type AdminClient = ReturnType<typeof createAdminClient>;
+
 export function createAdminClient(password: string) {
   const headers = { 'X-Admin-Password': password };
 

@@ -105,7 +105,7 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
         console.error('Analysis failed:', error);
       }
     },
-    [rssUrl, maxPosts, fetchRssMutation, analyzeStyleMutation],
+    [rssUrl, maxPosts, fetchRssMutation.mutateAsync, analyzeStyleMutation.mutateAsync],
   );
 
   const handleNextStep = useCallback(() => {

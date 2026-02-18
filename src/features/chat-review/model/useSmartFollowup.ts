@@ -47,6 +47,7 @@ export function useSmartFollowup(): UseSmartFollowupReturn {
         questionsRef.current = [];
         indexRef.current = 0;
         setQuestions([]);
+        setCurrentQuestionIndex(0);
         return [];
       } finally {
         setIsLoading(false);
