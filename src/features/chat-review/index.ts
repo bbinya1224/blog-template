@@ -61,10 +61,19 @@ export {
   type ReviewEditResult,
 } from './lib/step-handlers';
 
+// Lib - Prompt Builder
+export {
+  buildReviewSystemPrompt,
+  buildReviewUserPrompt,
+  formatCollectedInfo,
+  parseQuestions,
+} from './lib/prompt-builder';
+
 // Constants
 export {
   MESSAGES,
   CHOICE_OPTIONS,
+  CATEGORY_LABELS,
   getCompanionLabel,
   getDateLabel,
 } from './constants/messages';

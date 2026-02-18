@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { StyleProfile } from '@/entities/style-profile';
 import { Utensils, ShoppingCart, Sparkles, Paintbrush, BookOpen } from 'lucide-react';
 import { OrotiLogo } from '@/shared/ui/Icons';
+import { MESSAGES, CATEGORY_LABELS } from '../constants/messages';
 
 interface CategoryOption {
   id: string;
@@ -17,29 +18,29 @@ interface CategoryOption {
 const REVIEW_CATEGORIES: CategoryOption[] = [
   {
     id: 'restaurant',
-    label: '맛집',
+    label: CATEGORY_LABELS.restaurant,
     icon: <Utensils />,
   },
   {
     id: 'product',
-    label: '제품',
+    label: CATEGORY_LABELS.product,
     icon: <ShoppingCart />,
     disabled: true,
-    disabledLabel: '준비중',
+    disabledLabel: CATEGORY_LABELS.comingSoon,
   },
   {
     id: 'beauty',
-    label: '뷰티',
+    label: CATEGORY_LABELS.beauty,
     icon: <Paintbrush />,
     disabled: true,
-    disabledLabel: '준비중',
+    disabledLabel: CATEGORY_LABELS.comingSoon,
   },
   {
     id: 'book',
-    label: '독서',
+    label: CATEGORY_LABELS.book,
     icon: <BookOpen />,
     disabled: true,
-    disabledLabel: '준비중',
+    disabledLabel: CATEGORY_LABELS.comingSoon,
   },
 ];
 
@@ -68,10 +69,10 @@ export function WelcomeScreen({
       </div>
 
       <h1 className='mb-2 text-2xl font-semibold text-stone-800 sm:text-3xl'>
-        {userName ? `${userName}님, 안녕하세요` : '안녕하세요'}
+        {MESSAGES.welcome.greeting(userName)}
       </h1>
       <p className='mb-10 text-lg text-stone-400'>
-        오늘은 어떤 경험을 남겨볼까요?
+        {MESSAGES.welcome.subtitle}
       </p>
 
       <div className='flex flex-wrap justify-center gap-3'>
@@ -115,7 +116,7 @@ export function WelcomeScreen({
               <div className='mb-2 flex items-center gap-2'>
                 <Sparkles className='size-4 text-primary' />
                 <span className='text-sm font-medium text-stone-700'>
-                  내 글 스타일
+                  {MESSAGES.welcome.styleLabel}
                 </span>
               </div>
               <p className='text-sm leading-relaxed text-stone-500'>
@@ -128,13 +129,13 @@ export function WelcomeScreen({
                 href='/analyze-style'
                 className='mt-2 inline-block text-xs text-primary transition-colors hover:text-primary-hover'
               >
-                자세히 보기
+                {MESSAGES.welcome.detailLink}
               </Link>
             </div>
           ) : (
             <div className='text-center'>
               <p className='mb-3 text-sm text-stone-400'>
-                아직 글 스타일을 분석하지 않으셨네요!
+                {MESSAGES.welcome.noStyleMessage}
               </p>
               <Link
                 href='/analyze-style'
@@ -144,7 +145,7 @@ export function WelcomeScreen({
                   'transition-all duration-200 hover:border-primary/40 hover:text-primary',
                 )}
               >
-                <Sparkles className='size-4' />내 글 스타일 분석하기
+                <Sparkles className='size-4' />{MESSAGES.welcome.analyzeStyleLink}
               </Link>
             </div>
           )}

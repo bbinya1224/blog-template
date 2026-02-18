@@ -15,7 +15,7 @@ import { getAnthropicClient, CLAUDE_SONNET } from '@/shared/api/claude-client';
 import {
   buildReviewSystemPrompt,
   buildReviewUserPrompt,
-} from '@/features/chat-review/lib/prompt-builder';
+} from '@/features/chat-review';
 import {
   shouldUseMock,
   generateMockReview,

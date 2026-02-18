@@ -136,9 +136,10 @@ describe('withRetry', () => {
       .mockRejectedValue(new AppError('Bad request', 'ERROR', 400));
 
     const promise = withRetry(fn, { maxAttempts: 3, initialDelayMs: 1000 });
+    const expectation = expect(promise).rejects.toThrow('Bad request');
     await vi.runAllTimersAsync();
 
-    await expect(promise).rejects.toThrow('Bad request');
+    await expectation;
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
@@ -147,9 +148,10 @@ describe('withRetry', () => {
     const fn = vi.fn().mockRejectedValue(error);
 
     const promise = withRetry(fn, { maxAttempts: 3, initialDelayMs: 100 });
+    const expectation = expect(promise).rejects.toThrow('Persistent error');
     await vi.runAllTimersAsync();
 
-    await expect(promise).rejects.toThrow('Persistent error');
+    await expectation;
     expect(fn).toHaveBeenCalledTimes(3);
   });
 
@@ -166,9 +168,10 @@ describe('withRetry', () => {
       initialDelayMs: 100,
       retryableErrors,
     });
+    const expectation = expect(promise).rejects.toThrow('Custom error');
     await vi.runAllTimersAsync();
 
-    await expect(promise).rejects.toThrow('Custom error');
+    await expectation;
     expect(fn).toHaveBeenCalledTimes(2);
   });
 });

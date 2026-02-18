@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 import { useConversationActions } from './useConversationActions';
 import { useChatMessages } from './useChatMessages';
-import { analyzeStyle } from '@/features/analyze-style';
+import { analyzeStyle } from '@/shared/api/style-analysis-client';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
 import type { StyleProfile } from '@/shared/types/style-profile';
 
