@@ -9,3 +9,4 @@ export { PlaceCard } from './PlaceCard';
 export { StyleSummaryCard } from './StyleSummaryCard';
 export { ReviewPreview } from './ReviewPreview';
 export { WelcomeScreen } from './WelcomeScreen';
+export { ChatErrorBoundary } from './ChatErrorBoundary';

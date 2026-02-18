@@ -11,6 +11,7 @@ export {
   StyleSummaryCard,
   ReviewPreview,
   WelcomeScreen,
+  ChatErrorBoundary,
 } from './ui';
 
 // Model (Hooks & Types)
@@ -25,6 +26,9 @@ export {
   useChatStore,
   type UseChatMessagesReturn,
   useChatOrchestration,
+  useRecentReviews,
+  useChatHandlers,
+  useChatMessages,
 } from './model';
 
 // Lib - Conversation Engine
@@ -57,10 +61,19 @@ export {
   type ReviewEditResult,
 } from './lib/step-handlers';
 
+// Lib - Prompt Builder
+export {
+  buildReviewSystemPrompt,
+  buildReviewUserPrompt,
+  formatCollectedInfo,
+  parseQuestions,
+} from './lib/prompt-builder';
+
 // Constants
 export {
   MESSAGES,
   CHOICE_OPTIONS,
+  CATEGORY_LABELS,
   getCompanionLabel,
   getDateLabel,
 } from './constants/messages';

@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { z } from 'zod';
 import { authOptions } from '@/auth';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import type { ReviewPayload } from '@/shared/types/review';
@@ -14,16 +15,18 @@ import { getAnthropicClient, CLAUDE_SONNET } from '@/shared/api/claude-client';
 import {
   buildReviewSystemPrompt,
   buildReviewUserPrompt,
-} from '@/features/chat-review/lib/prompt-builder';
+} from '@/features/chat-review';
 import {
   shouldUseMock,
   generateMockReview,
 } from '@/shared/lib/mock/chat-mock';
 
-interface GenerateReviewInput {
-  payload: ReviewPayload;
-  styleProfile: StyleProfile | null;
-}
+import { reviewPayloadSchema } from '@/shared/types/review';
+
+const generateReviewInputSchema = z.object({
+  payload: reviewPayloadSchema,
+  styleProfile: z.unknown().nullable(),
+});
 
 const getRandomWritingSamples = async (
   email: string,
@@ -53,8 +56,18 @@ export async function POST(req: NextRequest) {
 
     const authenticatedEmail = session.user.email;
 
-    const { payload, styleProfile }: GenerateReviewInput =
-      await req.json();
+    const body = await req.json();
+    const parsed = generateReviewInputSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return ApiResponse.validationError(
+        '잘못된 요청 형식입니다.',
+        parsed.error.flatten(),
+      );
+    }
+
+    const { payload, styleProfile: rawStyleProfile } = parsed.data;
+    const styleProfile = rawStyleProfile as StyleProfile | null;
 
     // 개발 환경에서 Mock 사용
     if (shouldUseMock()) {

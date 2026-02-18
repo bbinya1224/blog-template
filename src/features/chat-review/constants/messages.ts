@@ -1,6 +1,31 @@
 import type { ChoiceOption } from '@/entities/chat-message';
 
+export const CATEGORY_LABELS = {
+  restaurant: '맛집',
+  product: '제품',
+  beauty: '뷰티',
+  book: '독서',
+  comingSoon: '준비중',
+} as const;
+
 export const MESSAGES = {
+  // 웰컴 화면
+  welcome: {
+    greeting: (name?: string) => (name ? `${name}님, 안녕하세요` : '안녕하세요'),
+    subtitle: '오늘은 어떤 경험을 남겨볼까요?',
+    styleLabel: '내 글 스타일',
+    noStyleMessage: '아직 글 스타일을 분석하지 않으셨네요!',
+    analyzeStyleLink: '내 글 스타일 분석하기',
+    detailLink: '자세히 보기',
+  },
+
+  // 입력 영역
+  input: {
+    placeholder: '메시지를 입력해주세요...',
+    sendLabel: '메시지 전송',
+    tagline: '경험은 당신이, 표현은 오롯이가',
+  },
+
   // 카테고리 선택 시작 메시지
   categoryStart: {
     restaurant: `좋아요! 어떤 맛집을 기록해볼까요? 🍽️

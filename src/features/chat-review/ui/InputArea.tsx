@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/shared/lib/utils';
+import { MESSAGES } from '../constants/messages';
 
 interface InputAreaProps {
   onSend: (message: string) => void;
@@ -12,7 +13,7 @@ interface InputAreaProps {
 
 export function InputArea({
   onSend,
-  placeholder = '메시지를 입력해주세요...',
+  placeholder = MESSAGES.input.placeholder,
   disabled,
   className,
 }: InputAreaProps) {
@@ -101,7 +102,7 @@ export function InputArea({
                 ? 'bg-primary text-white hover:bg-primary-hover active:scale-95'
                 : 'bg-stone-100 text-stone-300',
             )}
-            aria-label='메시지 전송'
+            aria-label={MESSAGES.input.sendLabel}
           >
             {/* Arrow up icon (Claude style) */}
             <svg
@@ -120,7 +121,7 @@ export function InputArea({
           </button>
         </div>
         <p className='mt-1.5 text-center text-[11px] text-stone-300'>
-          경험은 당신이, 표현은 오롯이가
+          {MESSAGES.input.tagline}
         </p>
       </div>
     </div>

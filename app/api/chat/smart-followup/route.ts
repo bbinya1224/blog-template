@@ -8,7 +8,7 @@ import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claude-client';
 import {
   formatCollectedInfo,
   parseQuestions,
-} from '@/features/chat-review/lib/prompt-builder';
+} from '@/features/chat-review';
 import { shouldUseMock } from '@/shared/lib/mock/chat-mock';
 
 interface SmartFollowupInput {

@@ -1,14 +1,18 @@
-export type ReviewPayload = {
-  name: string;
-  location: string;
-  date: string;
-  menu: string;
-  companion: string;
-  pros?: string;
-  cons?: string;
-  extra?: string;
-  user_draft?: string;
-};
+import { z } from 'zod';
+
+export const reviewPayloadSchema = z.object({
+  name: z.string().min(1),
+  location: z.string().min(1),
+  date: z.string().min(1),
+  menu: z.string().min(1),
+  companion: z.string().min(1),
+  pros: z.string().optional(),
+  cons: z.string().optional(),
+  extra: z.string().optional(),
+  user_draft: z.string().optional(),
+});
+
+export type ReviewPayload = z.infer<typeof reviewPayloadSchema>;
 
 export type RestaurantPayload = ReviewPayload;
 

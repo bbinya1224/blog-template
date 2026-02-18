@@ -5,13 +5,16 @@ import { useChatStore } from './store';
 import { useConversationActions } from './useConversationActions';
 import { useChatMessages } from './useChatMessages';
 import { handleReviewEdited } from '../lib/step-handlers';
-import { MESSAGES } from '../constants/messages';
+import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
 
-interface UseReviewGenerationProps {
-  userEmail: string;
+class SSEError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'SSEError';
+  }
 }
 
-export function useReviewGeneration({ userEmail }: UseReviewGenerationProps) {
+export function useReviewGeneration() {
   const collectedInfo = useChatStore((s) => s.collectedInfo);
   const styleProfile = useChatStore((s) => s.styleProfile);
   const generatedReview = useChatStore((s) => s.generatedReview);
@@ -31,7 +34,6 @@ export function useReviewGeneration({ userEmail }: UseReviewGenerationProps) {
         body: JSON.stringify({
           payload: collectedInfo,
           styleProfile,
-          userEmail,
         }),
       });
 
@@ -55,12 +57,19 @@ export function useReviewGeneration({ userEmail }: UseReviewGenerationProps) {
       });
     } catch (error) {
       console.error('[generateReview] Failed:', error);
-      addAssistantMessage(MESSAGES.error.unknown, 'text');
+      if (error instanceof SSEError) {
+        addAssistantMessage(
+          MESSAGES.error.network,
+          'choice',
+          CHOICE_OPTIONS.errorRecovery,
+        );
+      } else {
+        addAssistantMessage(MESSAGES.error.unknown, 'text');
+      }
     }
   }, [
     collectedInfo,
     styleProfile,
-    userEmail,
     setGeneratedReview,
     goToStep,
     addAssistantMessage,
@@ -104,7 +113,15 @@ export function useReviewGeneration({ userEmail }: UseReviewGenerationProps) {
         dispatchActions(result.actions);
       } catch (error) {
         console.error('[editReview] Failed:', error);
-        addAssistantMessage(MESSAGES.error.unknown, 'text');
+        if (error instanceof SSEError) {
+          addAssistantMessage(
+            MESSAGES.error.network,
+            'choice',
+            CHOICE_OPTIONS.errorRecovery,
+          );
+        } else {
+          addAssistantMessage(MESSAGES.error.unknown, 'text');
+        }
       }
     },
     [
@@ -119,6 +136,8 @@ export function useReviewGeneration({ userEmail }: UseReviewGenerationProps) {
   return { generateReview, editReview };
 }
 
+const MAX_PARSE_ERRORS = 5;
+
 async function processStream(
   response: Response,
   onChunk: (text: string) => void,
@@ -129,6 +148,8 @@ async function processStream(
   const decoder = new TextDecoder();
   let buffer = '';
   let fullText = '';
+  let currentEvent: string | null = null;
+  let parseErrorCount = 0;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -139,17 +160,36 @@ async function processStream(
     buffer = lines.pop() || '';
 
     for (const line of lines) {
-      if (line.startsWith('data: ')) {
+      if (line.startsWith('event: ')) {
+        currentEvent = line.slice(7).trim();
+      } else if (line.startsWith('data: ')) {
         try {
           const data = JSON.parse(line.slice(6));
-          if (data.token) {
-            fullText += data.token;
-            onChunk(fullText);
-          } else if (data.fullText) {
-            fullText = data.fullText;
+          if (currentEvent === 'error') {
+            throw new SSEError(data.message || 'Stream error');
+          } else if (currentEvent === 'done') {
+            if (data.fullText) {
+              fullText = data.fullText;
+            }
+          } else {
+            if (data.token) {
+              fullText += data.token;
+              onChunk(fullText);
+            } else if (data.fullText) {
+              fullText = data.fullText;
+            }
           }
-        } catch {
-          // Ignore parse errors
+          parseErrorCount = 0;
+          currentEvent = null;
+        } catch (e) {
+          if (e instanceof SSEError) {
+            throw e;
+          }
+          parseErrorCount++;
+          if (parseErrorCount > MAX_PARSE_ERRORS) {
+            throw new SSEError('Too many parse errors in stream');
+          }
+          console.warn('[processStream] parse error:', e);
         }
       }
     }

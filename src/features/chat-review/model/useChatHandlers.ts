@@ -48,7 +48,7 @@ export function useChatHandlers({
 
   const { analyzeBlogUrl } = useBlogAnalysis(state.userName);
   const { searchPlace } = usePlaceSearch();
-  const { editReview } = useReviewGeneration({ userEmail });
+  const { editReview } = useReviewGeneration();
   const {
     fetchSmartQuestions,
     consumeNextQuestion,
