@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
 import { Review } from '@/entities/review';
 import { SectionCard } from '@/shared/ui/SectionCard';
 import { copyToClipboard } from '@/features/review';
 import { InlineDiffView } from '@/features/review-edit';
-import { trpc } from '@/shared/api/trpc';
+import { apiPost, apiPut } from '@/shared/api/http-client';
 
 interface ReviewDetailViewerProps {
   initialReview: Review;
@@ -21,24 +22,28 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
   const [editedContent, setEditedContent] = useState('');
   const [showDiff, setShowDiff] = useState(false);
 
-  const editMutation = trpc.review.edit.useMutation({
+  const editMutation = useMutation({
+    mutationFn: (input: { review: string; request: string }) =>
+      apiPost<{ review: string }>('/api/edit-review', input),
     onSuccess: (data) => {
       setEditedContent(data.review);
       setShowDiff(true);
     },
     onError: (error) => {
-      alert(`수정 요청 중 오류: ${error.message}`);
+      alert(`수정 요청 중 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     },
   });
 
-  const updateMutation = trpc.review.update.useMutation({
+  const updateMutation = useMutation({
+    mutationFn: (input: { id: string; content: string }) =>
+      apiPut<{ id: string }>(`/api/reviews/${encodeURIComponent(input.id)}`, { content: input.content }),
     onSuccess: () => {
       setOriginalContent(content);
       alert('저장되었습니다.');
       router.refresh();
     },
     onError: (error) => {
-      alert(`저장 중 오류: ${error.message}`);
+      alert(`저장 중 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     },
   });
 
