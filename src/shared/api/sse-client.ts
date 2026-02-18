@@ -28,10 +28,18 @@ export async function apiSSE(
     signal: options?.signal,
   });
 
-  if (!response.ok) throw new SSEError(`SSE request failed: ${response.status}`);
+  if (!response.ok) {
+    const err = new SSEError(`SSE request failed: ${response.status}`);
+    callbacks.onError?.(err);
+    throw err;
+  }
 
   const reader = response.body?.getReader();
-  if (!reader) throw new SSEError('No response body');
+  if (!reader) {
+    const err = new SSEError('No response body');
+    callbacks.onError?.(err);
+    throw err;
+  }
 
   const decoder = new TextDecoder();
   const maxParseErrors = options?.maxParseErrors ?? DEFAULT_MAX_PARSE_ERRORS;
@@ -72,10 +80,10 @@ export async function apiSSE(
                 callbacks.onToken(fullText);
               } else if (data.fullText) {
                 fullText = data.fullText;
+                callbacks.onToken(fullText);
               }
             }
 
-            parseErrorCount = 0;
             currentEvent = null;
           } catch (e) {
             if (e instanceof SSEError) throw e;

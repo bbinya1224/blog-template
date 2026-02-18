@@ -12,7 +12,10 @@ async function parseResponse<T>(response: Response): Promise<T> {
     );
   }
 
-  const json: unknown = await response.json();
+  const text = await response.text();
+  if (!text) return undefined as T;
+
+  const json: unknown = JSON.parse(text);
 
   if (
     typeof json === 'object' &&
@@ -51,7 +54,10 @@ export async function apiPost<T>(
 ): Promise<T> {
   const response = await fetch(path, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: {
+      ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+      ...options?.headers,
+    },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   return parseResponse<T>(response);
@@ -64,7 +70,10 @@ export async function apiPut<T>(
 ): Promise<T> {
   const response = await fetch(path, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: {
+      ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+      ...options?.headers,
+    },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   return parseResponse<T>(response);
@@ -77,7 +86,10 @@ export async function apiDelete<T>(
 ): Promise<T> {
   const response = await fetch(path, {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: {
+      ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+      ...options?.headers,
+    },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   return parseResponse<T>(response);
