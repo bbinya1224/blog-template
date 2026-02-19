@@ -2,7 +2,6 @@ export * from './types';
 export { useChatStore } from './store';
 export * from './useConversationActions';
 export { useChatMessages, type UseChatMessagesReturn } from './useChatMessages';
-export { useMessageProcessor } from './useMessageProcessor';
 export * from './useBlogAnalysis';
 export * from './usePlaceSearch';
 export * from './useReviewGeneration';
