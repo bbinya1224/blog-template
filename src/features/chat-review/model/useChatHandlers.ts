@@ -13,7 +13,6 @@ import { useSmartFollowup } from './useSmartFollowup';
 import { handlePlaceConfirmed } from '../lib/step-handlers';
 import { MESSAGES } from '../constants/messages';
 import type { StyleSetupContext } from '../lib/step-handlers';
-import type { ChatMessage } from '@/entities/chat-message';
 import { isPlaceCardMessage } from '@/entities/chat-message';
 
 interface UseChatHandlersProps {
@@ -23,7 +22,7 @@ interface UseChatHandlersProps {
 }
 
 export function useChatHandlers({
-  userEmail,
+  userEmail: _userEmail,
   styleSetupContext,
   setStyleSetupContext,
 }: UseChatHandlersProps) {
@@ -48,7 +47,7 @@ export function useChatHandlers({
 
   const { analyzeBlogUrl } = useBlogAnalysis(state.userName);
   const { searchPlace } = usePlaceSearch();
-  const { editReview } = useReviewGeneration();
+  const { editReview, generateReview } = useReviewGeneration();
   const {
     fetchSmartQuestions,
     consumeNextQuestion,
@@ -146,6 +145,7 @@ export function useChatHandlers({
     fetchSmartQuestions,
     consumeNextQuestion,
     resetSmartFollowup,
+    generateReview,
     isProcessing,
   };
 }

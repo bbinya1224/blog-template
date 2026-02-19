@@ -9,7 +9,7 @@ import type { Review } from '@/entities/review';
 import { MessageList } from './MessageList';
 import { InputArea } from './InputArea';
 import { WelcomeScreen } from './WelcomeScreen';
-import { useScrollToBottom } from '../model/useScrollToBottom';
+import { useScrollToBottom } from '@/shared/lib/hooks';
 import { Utensils } from 'lucide-react';
 
 const REVIEW_HEADER_TITLES: Record<string, string> = {

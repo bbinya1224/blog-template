@@ -1,66 +1,16 @@
 // UI Components
-export {
-  ChatContainer,
-  MessageList,
-  MessageBubble,
-  InputArea,
-  ChoiceButtons,
-  TypingIndicator,
-  ProgressBar,
-  PlaceCard,
-  StyleSummaryCard,
-  ReviewPreview,
-  WelcomeScreen,
-  ChatErrorBoundary,
-} from './ui';
+export { ChatContainer, MessageList, InputArea, ChatErrorBoundary } from './ui';
 
-// Model (Hooks & Types)
-export {
-  type ConversationState,
-  type ConversationStep,
-  type ConversationAction,
-  type ReviewTopic,
-  type RestaurantInfoStep,
-  initialConversationState,
-  stepTransitions,
-  useChatStore,
-  type UseChatMessagesReturn,
-  useChatOrchestration,
-  useChatHandlers,
-  useChatMessages,
-} from './model';
+// Model (Hooks & Store)
+export { useChatStore } from './model';
+export { useChatOrchestration } from './model';
+export { useChatHandlers } from './model';
+export { useChatMessages, type UseChatMessagesReturn } from './model';
 
-// Lib - Conversation Engine
-export {
-  canTransition,
-  determineNextStep,
-  isInfoGatheringComplete,
-  determineInfoSubStep,
-  classifyIntent,
-  createInitialMessage,
-  extractDateInfo,
-  extractCompanionInfo,
-  type UserIntent,
-} from './lib/conversationEngine';
+// Types
+export type { StyleSetupContext } from './lib/step-handlers';
 
-// Lib - Step Handlers
-export {
-  handleStyleSetup,
-  handleStyleCheck,
-  handleTopicSelect,
-  handleInfoGathering,
-  handlePlaceConfirmed,
-  handleConfirmation,
-  handleReviewEdit,
-  handleReviewEdited,
-  createSummaryMessage,
-  type StepHandlerResult,
-  type StyleSetupContext,
-  type InfoGatheringResult,
-  type ReviewEditResult,
-} from './lib/step-handlers';
-
-// Lib - Prompt Builder
+// Lib - Prompt Builder (used by API routes)
 export {
   buildReviewSystemPrompt,
   buildReviewUserPrompt,
@@ -69,10 +19,4 @@ export {
 } from './lib/promptBuilder';
 
 // Constants
-export {
-  MESSAGES,
-  CHOICE_OPTIONS,
-  CATEGORY_LABELS,
-  getCompanionLabel,
-  getDateLabel,
-} from './constants/messages';
+export { MESSAGES, CHOICE_OPTIONS } from './constants/messages';

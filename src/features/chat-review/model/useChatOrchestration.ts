@@ -5,7 +5,6 @@ import { useShallow } from 'zustand/shallow';
 import { useChatStore } from './store';
 import { useRecentReviews } from '@/entities/review';
 import { useChatMessages } from './useChatMessages';
-import { useReviewGeneration } from './useReviewGeneration';
 import { useChatHandlers } from './useChatHandlers';
 import { createInitialMessage } from '../lib/conversationEngine';
 import { createSummaryMessage } from '../lib/step-handlers';
@@ -37,7 +36,6 @@ export function useChatOrchestration({
 
   const { reviews: recentReviews } = useRecentReviews(5);
   const { messages, addMessage, addAssistantMessage } = useChatMessages();
-  const { generateReview } = useReviewGeneration();
   const {
     handleSendMessage: originalHandleSendMessage,
     handleChoiceSelect,
@@ -45,6 +43,7 @@ export function useChatOrchestration({
     handleReviewAction,
     fetchSmartQuestions,
     consumeNextQuestion,
+    generateReview,
     isProcessing,
   } = useChatHandlers({ userEmail, styleSetupContext, setStyleSetupContext });
 

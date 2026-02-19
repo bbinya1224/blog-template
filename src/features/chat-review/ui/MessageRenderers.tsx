@@ -16,7 +16,7 @@ import { ChoiceButtons } from './ChoiceButtons';
 import { PlaceCard } from './PlaceCard';
 import { StyleSummaryCard } from './StyleSummaryCard';
 import { ReviewPreview } from './ReviewPreview';
-import { useTypingEffect, useStreamingText } from '../model/useTextAnimation';
+import { useTypingEffect, useStreamingText } from '@/shared/lib/hooks';
 
 interface TextRendererProps {
   content: string;
@@ -48,7 +48,7 @@ export function TextRenderer({
   if (!content) return null;
 
   return (
-    <p className='text-[15px] leading-7 break-keep whitespace-pre-wrap text-stone-700'>
+    <p className='text-[15px]/7 break-keep whitespace-pre-wrap text-stone-700'>
       {displayedText}
       <span
         aria-hidden
