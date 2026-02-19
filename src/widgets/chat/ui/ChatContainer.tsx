@@ -5,7 +5,7 @@ import Link from 'next/link';
 import type { ChatMessage } from '@/entities/chat-message';
 import type { StyleProfile } from '@/entities/style-profile';
 import type { Review } from '@/entities/review';
-import { MessageList } from '@/entities/chat-message';
+import { MessageList } from './MessageList';
 import { InputArea } from '@/shared/ui/InputArea';
 import { MESSAGES, WelcomeScreen } from '@/features/chat-review';
 import { useScrollToBottom } from '@/shared/lib/hooks';

@@ -1,10 +1,16 @@
 'use client';
 
 import { cn } from '@/shared/lib/utils';
-import type { ChoiceOption } from '../model/types';
+
+interface ChoiceButtonOption {
+  id: string;
+  label: string;
+  icon?: string;
+  disabled?: boolean;
+}
 
 interface ChoiceButtonsProps {
-  options: ChoiceOption[];
+  options: ChoiceButtonOption[];
   onSelect?: (optionId: string) => void;
   className?: string;
 }

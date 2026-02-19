@@ -9,7 +9,7 @@ import {
   CHOICE_OPTIONS,
   type StyleSetupContext,
 } from '@/features/chat-review';
-import { MessageList } from '@/entities/chat-message';
+import { MessageList } from '@/widgets/chat';
 import { InputArea } from '@/shared/ui/InputArea';
 import type { StyleProfile } from '@/entities/style-profile';
 import { cn } from '@/shared/lib/utils';

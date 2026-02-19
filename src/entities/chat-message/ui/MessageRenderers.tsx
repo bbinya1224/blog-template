@@ -15,7 +15,7 @@ import {
 import { PlaceCard } from './PlaceCard';
 import { ReviewPreview } from './ReviewPreview';
 import { StyleSummaryCard } from './StyleSummaryCard';
-import { ChoiceButtons } from './ChoiceButtons';
+import { ChoiceButtons } from '@/shared/ui/ChoiceButtons';
 import { useTypingEffect, useStreamingText } from '@/shared/lib/hooks';
 
 interface TextRendererProps {
