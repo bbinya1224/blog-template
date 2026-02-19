@@ -101,7 +101,7 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
     <div className='space-y-8'>
       <SectionCard title='리뷰 내용'>
         <div className='space-y-4'>
-          <div className='relative rounded-xl border border-gray-200 bg-slate-50 p-4 text-sm leading-relaxed text-gray-800 md:p-6 overflow-scroll'>
+          <div className='relative rounded-xl border border-gray-200 bg-slate-50 p-4 text-sm/relaxed text-gray-800 md:p-6 overflow-scroll'>
             <button
               onClick={handleCopy}
               className='absolute right-4 top-4 rounded-lg bg-white/80 p-2 text-gray-500 backdrop-blur-sm transition hover:bg-white hover:text-blue-600 shadow-sm border border-gray-100'

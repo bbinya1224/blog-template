@@ -3,7 +3,6 @@
 import { useCallback } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { useChatStore } from './store';
-import { useConversationActions } from './useConversationActions';
 import { useChatMessages } from './useChatMessages';
 import { useBlogAnalysis } from './useBlogAnalysis';
 import { usePlaceSearch } from './usePlaceSearch';
@@ -55,7 +54,7 @@ export function useChatHandlers({
   );
   const isProcessing = useChatStore((s) => s.isProcessing);
   const setIsProcessing = useChatStore((s) => s.setIsProcessing);
-  const { dispatchActions } = useConversationActions();
+  const dispatchActions = useChatStore((s) => s.dispatchActions);
   const { messages, addMessage, addUserMessage, addAssistantMessage } =
     useChatMessages();
 

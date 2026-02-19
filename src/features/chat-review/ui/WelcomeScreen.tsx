@@ -119,7 +119,7 @@ export function WelcomeScreen({
                   {MESSAGES.welcome.styleLabel}
                 </span>
               </div>
-              <p className='text-sm leading-relaxed text-stone-500'>
+              <p className='text-sm/relaxed text-stone-500'>
                 {styleProfile.writing_style?.tone || '친근한 톤'}
                 {' · '}
                 이모지{' '}

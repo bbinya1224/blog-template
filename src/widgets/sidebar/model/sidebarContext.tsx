@@ -31,6 +31,11 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const isDesktop = useIsDesktop();
   const hydratedRef = useRef(false);
 
+  const [showLabels, setShowLabels] = useState(false);
+  const initializedRef = useRef(false);
+
+  /* eslint-disable react-hooks/set-state-in-effect -- localStorage hydration + responsive layout sync */
+
   // Hydrate from localStorage / screen size (mount-only via ref guard)
   useEffect(() => {
     if (hydratedRef.current) return;
@@ -60,9 +65,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     }
   }, [isDesktop]);
 
-  const [showLabels, setShowLabels] = useState(false);
-  const initializedRef = useRef(false);
-
+  // Label animation sync with expand state
   useEffect(() => {
     if (!hydrated) return;
     if (!initializedRef.current) {
@@ -77,6 +80,8 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       setShowLabels(false);
     }
   }, [isExpanded, hydrated]);
+
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const toggle = useCallback(() => setIsExpanded((v) => !v), []);
   const expand = useCallback(() => setIsExpanded(true), []);

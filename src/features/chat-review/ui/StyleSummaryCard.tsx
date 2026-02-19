@@ -54,7 +54,7 @@ export function StyleSummaryCard({
             <span className='w-16 shrink-0 pt-0.5 text-xs text-stone-400'>
               {item.label}
             </span>
-            <span className='text-sm leading-relaxed text-stone-600'>
+            <span className='text-sm/relaxed text-stone-600'>
               {item.value}
             </span>
           </div>

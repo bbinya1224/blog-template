@@ -2,7 +2,6 @@
 
 import { useCallback } from 'react';
 import { useChatStore } from './store';
-import { useConversationActions } from './useConversationActions';
 import { useChatMessages } from './useChatMessages';
 import { handleReviewEdited } from '../lib/step-handlers';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
@@ -12,8 +11,9 @@ export function useReviewGeneration() {
   const collectedInfo = useChatStore((s) => s.collectedInfo);
   const styleProfile = useChatStore((s) => s.styleProfile);
   const generatedReview = useChatStore((s) => s.generatedReview);
-  const { setGeneratedReview, goToStep, dispatchActions } =
-    useConversationActions();
+  const setGeneratedReview = useChatStore((s) => s.setGeneratedReview);
+  const setStep = useChatStore((s) => s.setStep);
+  const dispatchActions = useChatStore((s) => s.dispatchActions);
   const { addAssistantMessage, updateMessage } = useChatMessages();
 
   const generateReview = useCallback(async () => {
@@ -37,7 +37,7 @@ export function useReviewGeneration() {
       );
 
       setGeneratedReview(fullText);
-      goToStep('review-edit');
+      setStep('review-edit');
 
       updateMessage(msgId, {
         type: 'review-preview',
@@ -60,7 +60,7 @@ export function useReviewGeneration() {
     collectedInfo,
     styleProfile,
     setGeneratedReview,
-    goToStep,
+    setStep,
     addAssistantMessage,
     updateMessage,
   ]);

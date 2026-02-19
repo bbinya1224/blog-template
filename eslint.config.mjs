@@ -38,6 +38,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Claude Code hook scripts (CJS, require() 필수)
+    ".claude/scripts/**",
   ]),
 ]);
 
