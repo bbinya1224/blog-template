@@ -26,7 +26,6 @@ export {
   useChatStore,
   type UseChatMessagesReturn,
   useChatOrchestration,
-  useRecentReviews,
   useChatHandlers,
   useChatMessages,
 } from './model';

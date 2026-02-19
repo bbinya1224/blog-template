@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { useChatStore } from './store';
-import { useRecentReviews } from './useRecentReviews';
+import { useRecentReviews } from '@/entities/review';
 import { useChatMessages } from './useChatMessages';
 import { useReviewGeneration } from './useReviewGeneration';
 import { useChatHandlers } from './useChatHandlers';

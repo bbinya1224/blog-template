@@ -1,4 +1,4 @@
-import { getReviews } from '@/entities/review/api/reviewRepository';
+import { getReviews } from '@/entities/review/api';
 import { ReviewList } from '@/widgets/review-list/ui/ReviewList';
 
 export const dynamic = 'force-dynamic';
