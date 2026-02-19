@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/shared/lib/utils';
-import type { ChoiceOption } from '@/entities/chat-message';
+import type { ChoiceOption } from '../model/types';
 
 interface ChoiceButtonsProps {
   options: ChoiceOption[];

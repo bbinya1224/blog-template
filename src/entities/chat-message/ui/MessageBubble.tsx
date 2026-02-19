@@ -1,5 +1,5 @@
 import { cn } from '@/shared/lib/utils';
-import type { ChatMessage } from '@/entities/chat-message';
+import type { ChatMessage } from '../model/types';
 import type { CSSProperties } from 'react';
 import { OrotiLogo } from '@/shared/ui/Icons';
 import { MessageContent } from './MessageRenderers';

@@ -7,10 +7,10 @@ import {
   useChatHandlers,
   MESSAGES,
   CHOICE_OPTIONS,
-  MessageList,
-  InputArea,
   type StyleSetupContext,
 } from '@/features/chat-review';
+import { MessageList } from '@/entities/chat-message';
+import { InputArea } from '@/shared/ui/InputArea';
 import type { StyleProfile } from '@/entities/style-profile';
 import { cn } from '@/shared/lib/utils';
 import { ArrowLeft } from 'lucide-react';

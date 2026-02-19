@@ -1,4 +1,2 @@
 export { ChatContainer } from './ChatContainer';
-export { MessageList } from './MessageList';
-export { InputArea } from './InputArea';
 export { ChatErrorBoundary } from './ChatErrorBoundary';

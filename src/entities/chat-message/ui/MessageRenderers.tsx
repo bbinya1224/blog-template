@@ -6,15 +6,15 @@ import type {
   PlaceCardMetadata,
   StyleSummaryMetadata,
   ReviewPreviewMetadata,
-} from '@/entities/chat-message';
+} from '../model/types';
 import {
   isPlaceCardMessage,
   isStyleSummaryMessage,
   isReviewPreviewMessage,
-  PlaceCard,
-  ReviewPreview,
-  StyleSummaryCard,
-} from '@/entities/chat-message';
+} from '../model/types';
+import { PlaceCard } from './PlaceCard';
+import { ReviewPreview } from './ReviewPreview';
+import { StyleSummaryCard } from './StyleSummaryCard';
 import { ChoiceButtons } from './ChoiceButtons';
 import { useTypingEffect, useStreamingText } from '@/shared/lib/hooks';
 
