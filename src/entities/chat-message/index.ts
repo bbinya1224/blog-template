@@ -21,4 +21,3 @@ export { ChoiceButtons } from './ui/ChoiceButtons';
 export { MessageContent } from './ui/MessageRenderers';
 export { MessageBubble } from './ui/MessageBubble';
 export { MessageList } from './ui/MessageList';
-export { TypingIndicator } from './ui/TypingIndicator';

@@ -3,13 +3,11 @@
 import { cn, formatReviewDate } from '@/shared/lib/utils';
 import Link from 'next/link';
 import type { ChatMessage } from '@/entities/chat-message';
-import type { ConversationStep } from '../model/types';
 import type { StyleProfile } from '@/entities/style-profile';
 import type { Review } from '@/entities/review';
 import { MessageList } from '@/entities/chat-message';
 import { InputArea } from '@/shared/ui/InputArea';
-import { MESSAGES } from '../constants/messages';
-import { WelcomeScreen } from './WelcomeScreen';
+import { MESSAGES, WelcomeScreen } from '@/features/chat-review';
 import { useScrollToBottom } from '@/shared/lib/hooks';
 import { Utensils } from 'lucide-react';
 
@@ -28,7 +26,7 @@ const REVIEW_ICONS: Record<string, React.ReactNode> = {
 
 interface ChatContainerProps {
   messages: ChatMessage[];
-  currentStep: ConversationStep;
+  currentStep?: string;
   isTyping?: boolean;
   isInputDisabled?: boolean;
   inputPlaceholder?: string;

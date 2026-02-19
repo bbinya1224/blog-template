@@ -1,5 +1,5 @@
 // UI Components
-export { ChatContainer, ChatErrorBoundary } from './ui';
+export { ChatErrorBoundary, WelcomeScreen } from './ui';
 
 // Model (Hooks & Store)
 export { useChatStore } from './model';

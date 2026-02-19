@@ -3,7 +3,7 @@
 import { cn } from '@/shared/lib/utils';
 import type { ChatMessage } from '../model/types';
 import { MessageBubble } from './MessageBubble';
-import { TypingIndicator } from './TypingIndicator';
+import { TypingIndicator } from '@/shared/ui/TypingIndicator';
 
 const MAX_STAGGER_INDEX = 3;
 const STAGGER_DELAY_MS = 50;
