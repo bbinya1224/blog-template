@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import {
   useChatStore,
   useChatHandlers,
-  useChatMessages,
   MESSAGES,
   CHOICE_OPTIONS,
   MessageList,
@@ -52,7 +51,8 @@ export function AnalyzeStyleContent({
   const isInitializedRef = useRef(false);
   const redirectTimerRef = useRef<NodeJS.Timeout>(undefined);
 
-  const { messages, addAssistantMessage } = useChatMessages();
+  const messages = useChatStore((s) => s.messages);
+  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
   const {
     handleSendMessage,
     handleChoiceSelect: originalHandleChoiceSelect,

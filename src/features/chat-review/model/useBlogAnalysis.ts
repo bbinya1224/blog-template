@@ -2,7 +2,6 @@
 
 import { useCallback } from 'react';
 import { useChatStore } from './store';
-import { useChatMessages } from './useChatMessages';
 import { analyzeStyle } from '@/shared/api/styleAnalysisClient';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
 import type { StyleProfile } from '@/shared/types/styleProfile';
@@ -28,7 +27,7 @@ export function useBlogAnalysis(userName: string | null) {
   const setStyleProfile = useChatStore((s) => s.setStyleProfile);
   const setHasExistingStyle = useChatStore((s) => s.setHasExistingStyle);
   const setStep = useChatStore((s) => s.setStep);
-  const { addAssistantMessage } = useChatMessages();
+  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
 
   const analyzeBlogUrl = useCallback(
     async (url: string) => {

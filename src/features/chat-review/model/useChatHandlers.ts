@@ -3,7 +3,6 @@
 import { useCallback } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { useChatStore } from './store';
-import { useChatMessages } from './useChatMessages';
 import { useBlogAnalysis } from './useBlogAnalysis';
 import { usePlaceSearch } from './usePlaceSearch';
 import { useReviewGeneration } from './useReviewGeneration';
@@ -55,8 +54,10 @@ export function useChatHandlers({
   const isProcessing = useChatStore((s) => s.isProcessing);
   const setIsProcessing = useChatStore((s) => s.setIsProcessing);
   const dispatchActions = useChatStore((s) => s.dispatchActions);
-  const { messages, addMessage, addUserMessage, addAssistantMessage } =
-    useChatMessages();
+  const messages = useChatStore((s) => s.messages);
+  const addMessage = useChatStore((s) => s.addMessage);
+  const addUserMessage = useChatStore((s) => s.addUserMessage);
+  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
 
   const { analyzeBlogUrl } = useBlogAnalysis(state.userName);
   const { searchPlace } = usePlaceSearch();

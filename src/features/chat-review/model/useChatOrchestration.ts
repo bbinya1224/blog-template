@@ -4,7 +4,6 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { useChatStore } from './store';
 import { useRecentReviews } from '@/entities/review';
-import { useChatMessages } from './useChatMessages';
 import { useChatHandlers } from './useChatHandlers';
 import { createInitialMessage } from '../lib/conversation/conversationEngine';
 import { createSummaryMessage } from '../lib/step-handlers';
@@ -35,7 +34,9 @@ export function useChatOrchestration({
   const prevStepRef = useRef<ConversationStep | null>(null);
 
   const { reviews: recentReviews } = useRecentReviews(5);
-  const { messages, addMessage, addAssistantMessage } = useChatMessages();
+  const messages = useChatStore((s) => s.messages);
+  const addMessage = useChatStore((s) => s.addMessage);
+  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
   const {
     handleSendMessage: originalHandleSendMessage,
     handleChoiceSelect,

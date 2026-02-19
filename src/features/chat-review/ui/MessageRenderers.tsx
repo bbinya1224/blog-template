@@ -11,11 +11,11 @@ import {
   isPlaceCardMessage,
   isStyleSummaryMessage,
   isReviewPreviewMessage,
+  PlaceCard,
+  ReviewPreview,
+  StyleSummaryCard,
 } from '@/entities/chat-message';
 import { ChoiceButtons } from './ChoiceButtons';
-import { PlaceCard } from './PlaceCard';
-import { StyleSummaryCard } from './StyleSummaryCard';
-import { ReviewPreview } from './ReviewPreview';
 import { useTypingEffect, useStreamingText } from '@/shared/lib/hooks';
 
 interface TextRendererProps {

@@ -5,8 +5,6 @@ export { ChatContainer, MessageList, InputArea, ChatErrorBoundary } from './ui';
 export { useChatStore } from './model';
 export { useChatOrchestration } from './model';
 export { useChatHandlers } from './model';
-export { useChatMessages, type UseChatMessagesReturn } from './model';
-
 // Types
 export type { StyleSetupContext } from './lib/step-handlers';
 

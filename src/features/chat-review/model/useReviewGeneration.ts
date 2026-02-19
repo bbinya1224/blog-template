@@ -2,7 +2,6 @@
 
 import { useCallback } from 'react';
 import { useChatStore } from './store';
-import { useChatMessages } from './useChatMessages';
 import { handleReviewEdited } from '../lib/step-handlers';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
 import { apiSSE, SSEError } from '@/shared/api/sseClient';
@@ -14,7 +13,8 @@ export function useReviewGeneration() {
   const setGeneratedReview = useChatStore((s) => s.setGeneratedReview);
   const setStep = useChatStore((s) => s.setStep);
   const dispatchActions = useChatStore((s) => s.dispatchActions);
-  const { addAssistantMessage, updateMessage } = useChatMessages();
+  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
+  const updateMessage = useChatStore((s) => s.updateMessage);
 
   const generateReview = useCallback(async () => {
     const msgId = addAssistantMessage('', 'text', undefined, {
