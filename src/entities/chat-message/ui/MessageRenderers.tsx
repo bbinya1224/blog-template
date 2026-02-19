@@ -1,12 +1,7 @@
 'use client';
 
 import { cn } from '@/shared/lib/utils';
-import type {
-  ChatMessage,
-  PlaceCardMetadata,
-  StyleSummaryMetadata,
-  ReviewPreviewMetadata,
-} from '../model/types';
+import type { ChatMessage } from '../model/types';
 import {
   isPlaceCardMessage,
   isStyleSummaryMessage,
@@ -18,17 +13,15 @@ import { StyleSummaryCard } from './StyleSummaryCard';
 import { ChoiceButtons } from '@/shared/ui/ChoiceButtons';
 import { useTypingEffect, useStreamingText } from '@/shared/lib/hooks';
 
-interface TextRendererProps {
-  content: string;
-  enableTyping?: boolean;
-  isStreaming?: boolean;
-}
-
-export function TextRenderer({
+function TextRenderer({
   content,
   enableTyping = false,
   isStreaming = false,
-}: TextRendererProps) {
+}: {
+  content: string;
+  enableTyping?: boolean;
+  isStreaming?: boolean;
+}) {
   const { displayedText: typedText, isTyping } = useTypingEffect(
     content,
     enableTyping,
@@ -61,78 +54,6 @@ export function TextRenderer({
   );
 }
 
-export function ChoiceRenderer({
-  options,
-  onSelect,
-}: {
-  options: ChatMessage['options'];
-  onSelect?: (id: string) => void;
-}) {
-  if (!options) return null;
-  return <ChoiceButtons options={options} onSelect={onSelect} />;
-}
-
-export function PlaceCardRenderer({
-  metadata,
-  onConfirm,
-}: {
-  metadata: PlaceCardMetadata;
-  onConfirm?: (confirmed: boolean) => void;
-}) {
-  return <PlaceCard metadata={metadata} onConfirm={onConfirm} />;
-}
-
-export function StyleSummaryRenderer({
-  metadata,
-}: {
-  metadata: StyleSummaryMetadata;
-}) {
-  return <StyleSummaryCard metadata={metadata} />;
-}
-
-export function ReviewPreviewRenderer({
-  metadata,
-  onAction,
-}: {
-  metadata: ReviewPreviewMetadata;
-  onAction?: (action: 'complete' | 'edit') => void;
-}) {
-  return <ReviewPreview metadata={metadata} onAction={onAction} />;
-}
-
-export function LoadingRenderer() {
-  return (
-    <div className='flex items-center gap-1.5'>
-      {[0, 150, 300].map((delay) => (
-        <span
-          key={delay}
-          className='size-1.5 animate-bounce rounded-full bg-stone-400'
-          style={{ animationDelay: `${delay}ms` }}
-        />
-      ))}
-    </div>
-  );
-}
-
-export function SummaryRenderer({
-  metadata,
-}: {
-  metadata: Record<string, unknown>;
-}) {
-  if (!metadata) return null;
-
-  return (
-    <div className='space-y-2 rounded-xl bg-stone-50 p-4'>
-      {Object.entries(metadata).map(([key, value]) => (
-        <div key={key} className='flex gap-2 text-sm'>
-          <span className='text-stone-400'>{key}:</span>
-          <span className='text-stone-600'>{String(value)}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 interface MessageContentProps {
   message: ChatMessage;
   enableTyping?: boolean;
@@ -159,16 +80,15 @@ export function MessageContent({
     choice: () => (
       <>
         <TextRenderer content={message.content || ''} />
-        <ChoiceRenderer options={message.options} onSelect={onChoiceSelect} />
+        {message.options && (
+          <ChoiceButtons options={message.options} onSelect={onChoiceSelect} />
+        )}
       </>
     ),
     'place-card': () => {
       if (!isPlaceCardMessage(message)) return null;
       return (
-        <PlaceCardRenderer
-          metadata={message.metadata}
-          onConfirm={onPlaceConfirm}
-        />
+        <PlaceCard metadata={message.metadata} onConfirm={onPlaceConfirm} />
       );
     },
     'style-summary': () => {
@@ -176,25 +96,46 @@ export function MessageContent({
       return (
         <>
           <TextRenderer content={message.content || ''} />
-          <StyleSummaryRenderer metadata={message.metadata} />
-          <ChoiceRenderer options={message.options} onSelect={onChoiceSelect} />
+          <StyleSummaryCard metadata={message.metadata} />
+          {message.options && (
+            <ChoiceButtons
+              options={message.options}
+              onSelect={onChoiceSelect}
+            />
+          )}
         </>
       );
     },
     'review-preview': () => {
       if (!isReviewPreviewMessage(message)) return null;
       return (
-        <ReviewPreviewRenderer
-          metadata={message.metadata}
-          onAction={onReviewAction}
-        />
+        <ReviewPreview metadata={message.metadata} onAction={onReviewAction} />
       );
     },
-    loading: () => <LoadingRenderer />,
+    loading: () => (
+      <div className='flex items-center gap-1.5'>
+        {[0, 150, 300].map((delay) => (
+          <span
+            key={delay}
+            className='size-1.5 animate-bounce rounded-full bg-stone-400'
+            style={{ animationDelay: `${delay}ms` }}
+          />
+        ))}
+      </div>
+    ),
     summary: () => (
       <>
         <TextRenderer content={message.content || ''} />
-        {message.metadata && <SummaryRenderer metadata={message.metadata} />}
+        {message.metadata && (
+          <div className='space-y-2 rounded-xl bg-stone-50 p-4'>
+            {Object.entries(message.metadata).map(([key, value]) => (
+              <div key={key} className='flex gap-2 text-sm'>
+                <span className='text-stone-400'>{key}:</span>
+                <span className='text-stone-600'>{String(value)}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </>
     ),
   };
