@@ -6,7 +6,7 @@ import { useChatStore } from './store';
 import { useRecentReviews } from '@/entities/review';
 import { useChatMessages } from './useChatMessages';
 import { useChatHandlers } from './useChatHandlers';
-import { createInitialMessage } from '../lib/conversationEngine';
+import { createInitialMessage } from '../lib/conversation/conversationEngine';
 import { createSummaryMessage } from '../lib/step-handlers';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
 import type { StyleProfile } from '@/entities/style-profile';

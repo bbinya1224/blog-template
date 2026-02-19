@@ -10,7 +10,7 @@ import {
   extractDateInfo,
   extractCompanionInfo,
   determineInfoSubStep,
-} from '../conversationEngine';
+} from '../conversation/conversationEngine';
 import { restaurantConfig } from '../categories/restaurant.config';
 
 export function handleInfoGathering(

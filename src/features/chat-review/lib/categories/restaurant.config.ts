@@ -5,7 +5,7 @@ import { CHOICE_OPTIONS } from '../../constants/messages';
 import {
   extractDateInfo,
   extractCompanionInfo,
-} from '../conversationEngine';
+} from '../conversation/conversationEngine';
 
 export const restaurantConfig: CategoryConfig<
   RestaurantPayload,

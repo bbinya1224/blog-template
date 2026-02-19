@@ -124,34 +124,33 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   clearMessages: () => set({ messages: [] }),
 
-  // Dispatch actions
+  // Dispatch actions — setter를 위임하여 단일 변경 경로 보장
   dispatchAction: (action) => {
+    const store = get();
     switch (action.type) {
       case 'SET_STYLE_PROFILE':
-        set({ styleProfile: action.payload });
+        store.setStyleProfile(action.payload);
         break;
       case 'SET_HAS_EXISTING_STYLE':
-        set({ hasExistingStyle: action.payload });
+        store.setHasExistingStyle(action.payload);
         break;
       case 'SET_TOPIC':
-        set({ selectedTopic: action.payload });
+        store.setSelectedTopic(action.payload);
         break;
       case 'UPDATE_COLLECTED_INFO':
-        set((state) => ({
-          collectedInfo: { ...state.collectedInfo, ...action.payload },
-        }));
+        store.updateCollectedInfo(action.payload);
         break;
       case 'SET_GENERATED_REVIEW':
-        set({ generatedReview: action.payload });
+        store.setGeneratedReview(action.payload);
         break;
       case 'GO_TO_STEP':
-        set({ step: action.payload });
+        store.setStep(action.payload);
         break;
       case 'SET_SUB_STEP':
-        set({ subStep: action.payload });
+        store.setSubStep(action.payload);
         break;
       case 'RESET':
-        get().reset();
+        store.reset();
         break;
     }
   },

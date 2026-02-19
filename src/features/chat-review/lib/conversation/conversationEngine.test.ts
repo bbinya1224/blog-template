@@ -1,18 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import {
   canTransition,
-  determineNextStep,
   isInfoGatheringComplete,
   determineInfoSubStep,
   classifyIntent,
   extractDateInfo,
   extractCompanionInfo,
 } from './conversationEngine';
-import type {
-  ConversationState,
-  ConversationStep,
-} from '../model/types';
-import { stepTransitions, initialConversationState } from '../model/types';
+import type { ConversationState } from '../../model/types';
+import { stepTransitions, initialConversationState } from '../../model/types';
 
 function createState(overrides: Partial<ConversationState> = {}): ConversationState {
   return { ...initialConversationState, ...overrides };
