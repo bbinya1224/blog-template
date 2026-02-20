@@ -38,7 +38,7 @@ export function useChatOrchestration({
   const addMessage = useChatStore((s) => s.addMessage);
   const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
   const {
-    handleSendMessage: originalHandleSendMessage,
+    handleSendMessage,
     handleChoiceSelect,
     handlePlaceConfirmation,
     handleReviewAction,
@@ -158,21 +158,13 @@ export function useChatOrchestration({
     [setSelectedTopic, setStep, setSubStep, addAssistantMessage],
   );
 
-  // 초기 화면에서 InputArea가 렌더되지 않으므로 (ChatContainer의 hasMessages 조건)
-  // messages.length === 0 분기는 도달 불가 — originalHandleSendMessage를 직접 사용
-  const handleSendMessage = originalHandleSendMessage;
-
   const state = useChatStore(
     useShallow((s) => ({
       step: s.step,
-      subStep: s.subStep,
       userName: s.userName,
       hasExistingStyle: s.hasExistingStyle,
       styleProfile: s.styleProfile,
       selectedTopic: s.selectedTopic,
-      collectedInfo: s.collectedInfo,
-      generatedReview: s.generatedReview,
-      sessionId: s.sessionId,
     })),
   );
   const inputPlaceholder = getInputPlaceholder(step, messages.length === 0);

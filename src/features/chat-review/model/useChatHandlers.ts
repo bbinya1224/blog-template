@@ -23,8 +23,6 @@ import {
   type ReviewEditResult,
 } from '../lib/step-handlers';
 import { MESSAGES } from '../constants/messages';
-import type { ConversationAction } from './types';
-import type { ChatMessage } from '@/entities/chat-message';
 import { isPlaceCardMessage } from '@/entities/chat-message';
 
 interface UseChatHandlersProps {
@@ -66,21 +64,7 @@ export function useChatHandlers({
     fetchSmartQuestions,
     consumeNextQuestion,
     getRemainingQuestions,
-    reset: resetSmartFollowup,
   } = useSmartFollowup();
-
-  const addResultMessages = useCallback(
-    (msgs: Partial<ChatMessage>[]) => {
-      msgs.forEach((msg) => {
-        addMessage({
-          ...msg,
-          id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          timestamp: new Date(),
-        } as ChatMessage);
-      });
-    },
-    [addMessage],
-  );
 
   // Step별 메시지 처리 — 이전 useMessageProcessor의 역할을 직접 수행
   const processMessage = useCallback(
@@ -152,14 +136,14 @@ export function useChatHandlers({
           result = { messages: [], actions: [] };
       }
 
-      addResultMessages(result.messages);
-      return { actions: result.actions as ConversationAction[] };
+      result.messages.forEach((msg) => addMessage(msg));
+      return { actions: result.actions };
     },
     [
       state,
       styleSetupContext,
       setStyleSetupContext,
-      addResultMessages,
+      addMessage,
       analyzeBlogUrl,
       searchPlace,
       editReview,
@@ -245,7 +229,6 @@ export function useChatHandlers({
     handleReviewAction,
     fetchSmartQuestions,
     consumeNextQuestion,
-    resetSmartFollowup,
     generateReview,
     isProcessing,
   };
