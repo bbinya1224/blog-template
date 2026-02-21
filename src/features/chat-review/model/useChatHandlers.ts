@@ -84,11 +84,12 @@ export function useChatHandlers({
           break;
 
         case 'style-setup':
-          result = handleStyleSetup(content, state, styleSetupContext);
           if (content.includes('blog.naver.com')) {
+            updateStyleSetupMethod(content, setStyleSetupContext);
             await analyzeBlogUrl(content);
             return null;
           }
+          result = handleStyleSetup(content, state, styleSetupContext);
           updateStyleSetupMethod(content, setStyleSetupContext);
           break;
 
@@ -167,9 +168,9 @@ export function useChatHandlers({
       } catch (error) {
         console.error('Message handling error:', error);
         addAssistantMessage(MESSAGES.error.unknown, 'text');
+      } finally {
+        setIsProcessing(false);
       }
-
-      setIsProcessing(false);
     },
     [
       isProcessing,
@@ -243,7 +244,7 @@ function updateStyleSetupMethod(
     content.includes('주소') ||
     content === '1'
   ) {
-    setStyleSetupContext({ method: 'blog-url' });
+    setStyleSetupContext((prev) => ({ ...prev, method: 'blog-url' }));
   } else if (
     content.includes('첨부') ||
     content.includes('붙여') ||
