@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { signIn } from 'next-auth/react';
-import { ChatContainer } from '@/features/chat-review';
+import { ChatContainer } from '@/widgets/chat';
 import type { ChatMessage } from '@/entities/chat-message';
 
 const LOGIN_PROMPT_MESSAGES: ChatMessage[] = [

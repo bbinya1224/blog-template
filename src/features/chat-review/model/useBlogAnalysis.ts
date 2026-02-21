@@ -1,8 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useConversationActions } from './useConversationActions';
-import { useChatMessages } from './useChatMessages';
+import { useChatStore } from './store';
 import { analyzeStyle } from '@/shared/api/styleAnalysisClient';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
 import type { StyleProfile } from '@/shared/types/styleProfile';
@@ -25,9 +24,10 @@ function formatStyleForDisplay(profile: StyleProfile): Record<string, unknown> {
 }
 
 export function useBlogAnalysis(userName: string | null) {
-  const { setStyleProfile, setHasExistingStyle, goToStep } =
-    useConversationActions();
-  const { addAssistantMessage } = useChatMessages();
+  const setStyleProfile = useChatStore((s) => s.setStyleProfile);
+  const setHasExistingStyle = useChatStore((s) => s.setHasExistingStyle);
+  const setStep = useChatStore((s) => s.setStep);
+  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
 
   const analyzeBlogUrl = useCallback(
     async (url: string) => {
@@ -46,7 +46,7 @@ export function useBlogAnalysis(userName: string | null) {
             CHOICE_OPTIONS.styleConfirm,
             formatStyleForDisplay(styleProfile),
           );
-          goToStep('style-check');
+          setStep('style-check');
         } else {
           throw new Error('Analysis failed');
         }
@@ -63,7 +63,7 @@ export function useBlogAnalysis(userName: string | null) {
       userName,
       setStyleProfile,
       setHasExistingStyle,
-      goToStep,
+      setStep,
       addAssistantMessage,
     ],
   );

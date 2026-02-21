@@ -20,7 +20,7 @@ export const ReviewResult = ({
   onEdit,
 }: ReviewResultProps) => (
   <div className='space-y-4'>
-    <div className='rounded-xl border border-gray-200 bg-slate-50 p-4 text-sm leading-relaxed text-gray-800 md:p-6 overflow-scroll'>
+    <div className='rounded-xl border border-gray-200 bg-slate-50 p-4 text-sm/relaxed text-gray-800 md:p-6 overflow-scroll'>
       <pre className='max-h-96 whitespace-pre-wrap wrap-break-word'>
         {review}
       </pre>

@@ -38,7 +38,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className='space-y-3'>
-          <h1 className='text-3xl font-semibold leading-tight text-stone-800 md:text-4xl'>
+          <h1 className='text-3xl/tight font-semibold text-stone-800 md:text-4xl'>
             안녕하세요, {session?.user?.name || '기록자'}님!
           </h1>
           <p className='text-lg text-stone-500'>

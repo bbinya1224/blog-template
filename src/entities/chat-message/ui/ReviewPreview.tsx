@@ -122,7 +122,7 @@ export function ReviewPreview({
 
       {/* Review content */}
       <div className='max-h-64 overflow-y-auto p-5 sm:max-h-80'>
-        <p className='text-sm leading-relaxed whitespace-pre-wrap text-stone-600'>
+        <p className='text-sm/relaxed whitespace-pre-wrap text-stone-600'>
           {metadata.review}
         </p>
       </div>

@@ -5,13 +5,12 @@ import { useRouter } from 'next/navigation';
 import {
   useChatStore,
   useChatHandlers,
-  useChatMessages,
   MESSAGES,
   CHOICE_OPTIONS,
-  MessageList,
-  InputArea,
   type StyleSetupContext,
 } from '@/features/chat-review';
+import { MessageList } from '@/widgets/chat';
+import { InputArea } from '@/shared/ui/InputArea';
 import type { StyleProfile } from '@/entities/style-profile';
 import { cn } from '@/shared/lib/utils';
 import { ArrowLeft } from 'lucide-react';
@@ -52,7 +51,8 @@ export function AnalyzeStyleContent({
   const isInitializedRef = useRef(false);
   const redirectTimerRef = useRef<NodeJS.Timeout>(undefined);
 
-  const { messages, addAssistantMessage } = useChatMessages();
+  const messages = useChatStore((s) => s.messages);
+  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
   const {
     handleSendMessage,
     handleChoiceSelect: originalHandleChoiceSelect,

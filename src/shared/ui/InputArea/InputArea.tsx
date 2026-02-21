@@ -2,19 +2,22 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/shared/lib/utils';
-import { MESSAGES } from '../constants/messages';
 
 interface InputAreaProps {
   onSend: (message: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  sendAriaLabel?: string;
+  tagline?: string;
   className?: string;
 }
 
 export function InputArea({
   onSend,
-  placeholder = MESSAGES.input.placeholder,
+  placeholder = '메시지를 입력해주세요...',
   disabled,
+  sendAriaLabel = '메시지 전송',
+  tagline,
   className,
 }: InputAreaProps) {
   const [value, setValue] = useState('');
@@ -102,7 +105,7 @@ export function InputArea({
                 ? 'bg-primary text-white hover:bg-primary-hover active:scale-95'
                 : 'bg-stone-100 text-stone-300',
             )}
-            aria-label={MESSAGES.input.sendLabel}
+            aria-label={sendAriaLabel}
           >
             {/* Arrow up icon (Claude style) */}
             <svg
@@ -120,9 +123,11 @@ export function InputArea({
             </svg>
           </button>
         </div>
-        <p className='mt-1.5 text-center text-[11px] text-stone-300'>
-          {MESSAGES.input.tagline}
-        </p>
+        {tagline && (
+          <p className='mt-1.5 text-center text-[11px] text-stone-300'>
+            {tagline}
+          </p>
+        )}
       </div>
     </div>
   );

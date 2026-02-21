@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRecentReviews } from '@/features/chat-review';
+import { useRecentReviews } from '@/entities/review';
 import { formatReviewDate } from '@/shared/lib/utils';
 import { useSidebar } from '../model/sidebarContext';
 

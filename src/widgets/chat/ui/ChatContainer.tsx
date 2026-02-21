@@ -3,13 +3,12 @@
 import { cn, formatReviewDate } from '@/shared/lib/utils';
 import Link from 'next/link';
 import type { ChatMessage } from '@/entities/chat-message';
-import type { ConversationStep } from '../model/types';
 import type { StyleProfile } from '@/entities/style-profile';
 import type { Review } from '@/entities/review';
 import { MessageList } from './MessageList';
-import { InputArea } from './InputArea';
-import { WelcomeScreen } from './WelcomeScreen';
-import { useScrollToBottom } from '../model/useScrollToBottom';
+import { InputArea } from '@/shared/ui/InputArea';
+import { MESSAGES, WelcomeScreen } from '@/features/chat-review';
+import { useScrollToBottom } from '@/shared/lib/hooks';
 import { Utensils } from 'lucide-react';
 
 const REVIEW_HEADER_TITLES: Record<string, string> = {
@@ -27,7 +26,7 @@ const REVIEW_ICONS: Record<string, React.ReactNode> = {
 
 interface ChatContainerProps {
   messages: ChatMessage[];
-  currentStep: ConversationStep;
+  currentStep?: string;
   isTyping?: boolean;
   isInputDisabled?: boolean;
   inputPlaceholder?: string;
@@ -106,6 +105,8 @@ export function ChatContainer({
             onSend={onSendMessage}
             disabled={isInputDisabled || isTyping}
             placeholder={inputPlaceholder}
+            sendAriaLabel={MESSAGES.input.sendLabel}
+            tagline={MESSAGES.input.tagline}
           />
         </div>
       )}

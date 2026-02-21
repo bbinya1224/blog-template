@@ -3,11 +3,9 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { useChatStore } from './store';
-import { useRecentReviews } from './useRecentReviews';
-import { useChatMessages } from './useChatMessages';
-import { useReviewGeneration } from './useReviewGeneration';
+import { useRecentReviews } from '@/entities/review';
 import { useChatHandlers } from './useChatHandlers';
-import { createInitialMessage } from '../lib/conversationEngine';
+import { createInitialMessage } from '../lib/conversation/conversationEngine';
 import { createSummaryMessage } from '../lib/step-handlers';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
 import type { StyleProfile } from '@/entities/style-profile';
@@ -36,15 +34,17 @@ export function useChatOrchestration({
   const prevStepRef = useRef<ConversationStep | null>(null);
 
   const { reviews: recentReviews } = useRecentReviews(5);
-  const { messages, addMessage, addAssistantMessage } = useChatMessages();
-  const { generateReview } = useReviewGeneration();
+  const messages = useChatStore((s) => s.messages);
+  const addMessage = useChatStore((s) => s.addMessage);
+  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
   const {
-    handleSendMessage: originalHandleSendMessage,
+    handleSendMessage,
     handleChoiceSelect,
     handlePlaceConfirmation,
     handleReviewAction,
     fetchSmartQuestions,
     consumeNextQuestion,
+    generateReview,
     isProcessing,
   } = useChatHandlers({ userEmail, styleSetupContext, setStyleSetupContext });
 
@@ -158,21 +158,13 @@ export function useChatOrchestration({
     [setSelectedTopic, setStep, setSubStep, addAssistantMessage],
   );
 
-  // 초기 화면에서 InputArea가 렌더되지 않으므로 (ChatContainer의 hasMessages 조건)
-  // messages.length === 0 분기는 도달 불가 — originalHandleSendMessage를 직접 사용
-  const handleSendMessage = originalHandleSendMessage;
-
   const state = useChatStore(
     useShallow((s) => ({
       step: s.step,
-      subStep: s.subStep,
       userName: s.userName,
       hasExistingStyle: s.hasExistingStyle,
       styleProfile: s.styleProfile,
       selectedTopic: s.selectedTopic,
-      collectedInfo: s.collectedInfo,
-      generatedReview: s.generatedReview,
-      sessionId: s.sessionId,
     })),
   );
   const inputPlaceholder = getInputPlaceholder(step, messages.length === 0);

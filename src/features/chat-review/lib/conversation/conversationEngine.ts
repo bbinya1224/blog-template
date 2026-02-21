@@ -3,10 +3,10 @@ import type {
   ConversationState,
   RestaurantInfoStep,
   stepTransitions,
-} from '../model/types';
+} from '../../model/types';
 import type { ChatMessage } from '@/entities/chat-message';
 import type { StyleProfile } from '@/entities/style-profile';
-import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
+import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
 
 export function canTransition(
   currentStep: ConversationStep,

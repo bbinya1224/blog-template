@@ -3,7 +3,6 @@ import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 import { authOptions } from '@/auth';
-import type { StyleProfile } from '@/entities/style-profile';
 import { getReviewEditPrompt } from '@/shared/api/promptService';
 import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';

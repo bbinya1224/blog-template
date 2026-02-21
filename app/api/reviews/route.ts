@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getReviews } from '@/entities/review';
+import { getReviews } from '@/entities/review/api';
 
 export async function GET() {
   try {

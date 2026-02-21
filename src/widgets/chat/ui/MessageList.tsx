@@ -2,8 +2,9 @@
 
 import { cn } from '@/shared/lib/utils';
 import type { ChatMessage } from '@/entities/chat-message';
-import { MessageBubble } from './MessageBubble';
-import { TypingIndicator } from './TypingIndicator';
+import { MessageContent } from '@/entities/chat-message';
+import { MessageBubble } from '@/shared/ui/MessageBubble';
+import { TypingIndicator } from '@/shared/ui/TypingIndicator';
 
 const MAX_STAGGER_INDEX = 3;
 const STAGGER_DELAY_MS = 50;
@@ -32,18 +33,33 @@ export function MessageList({
           {messages.map((message, index) => (
             <MessageBubble
               key={message.id}
-              message={message}
-              onChoiceSelect={(optionId) =>
-                onChoiceSelect?.(message.id, optionId)
-              }
-              onPlaceConfirm={(confirmed) =>
-                onPlaceConfirm?.(message.id, confirmed)
-              }
-              onReviewAction={(action) => onReviewAction?.(message.id, action)}
+              role={message.role}
               style={{
                 animationDelay: `${Math.min(index, MAX_STAGGER_INDEX) * STAGGER_DELAY_MS}ms`,
               }}
-            />
+            >
+              {message.role === 'assistant' ? (
+                <MessageContent
+                  message={message}
+                  enableTyping={
+                    message.type === 'text' && !message.metadata?.streaming
+                  }
+                  onChoiceSelect={(optionId) =>
+                    onChoiceSelect?.(message.id, optionId)
+                  }
+                  onPlaceConfirm={(confirmed) =>
+                    onPlaceConfirm?.(message.id, confirmed)
+                  }
+                  onReviewAction={(action) =>
+                    onReviewAction?.(message.id, action)
+                  }
+                />
+              ) : (
+                <p className='text-[15px]/7 whitespace-pre-wrap text-stone-800'>
+                  {message.content}
+                </p>
+              )}
+            </MessageBubble>
           ))}
 
           {isTyping && <TypingIndicator />}

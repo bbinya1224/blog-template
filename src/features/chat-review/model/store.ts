@@ -47,12 +47,9 @@ interface ChatStore extends ConversationState {
   ) => string;
   addUserMessage: (content: string) => string;
   updateMessage: (id: string, updates: Partial<ChatMessage>) => void;
-  removeMessage: (id: string) => void;
   setMessages: (messages: ChatMessage[]) => void;
-  clearMessages: () => void;
 
   // Dispatch actions
-  dispatchAction: (action: ConversationAction) => void;
   dispatchActions: (actions: ConversationAction[]) => void;
 
   // Reset
@@ -115,50 +112,39 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       ),
     })),
 
-  removeMessage: (id) =>
-    set((state) => ({
-      messages: state.messages.filter((msg) => msg.id !== id),
-    })),
-
   setMessages: (messages) => set({ messages }),
 
-  clearMessages: () => set({ messages: [] }),
-
-  // Dispatch actions
-  dispatchAction: (action) => {
-    switch (action.type) {
-      case 'SET_STYLE_PROFILE':
-        set({ styleProfile: action.payload });
-        break;
-      case 'SET_HAS_EXISTING_STYLE':
-        set({ hasExistingStyle: action.payload });
-        break;
-      case 'SET_TOPIC':
-        set({ selectedTopic: action.payload });
-        break;
-      case 'UPDATE_COLLECTED_INFO':
-        set((state) => ({
-          collectedInfo: { ...state.collectedInfo, ...action.payload },
-        }));
-        break;
-      case 'SET_GENERATED_REVIEW':
-        set({ generatedReview: action.payload });
-        break;
-      case 'GO_TO_STEP':
-        set({ step: action.payload });
-        break;
-      case 'SET_SUB_STEP':
-        set({ subStep: action.payload });
-        break;
-      case 'RESET':
-        get().reset();
-        break;
-    }
-  },
-
+  // Dispatch actions — setter를 위임하여 단일 변경 경로 보장
   dispatchActions: (actions) => {
-    const { dispatchAction } = get();
-    actions.forEach(dispatchAction);
+    const store = get();
+    for (const action of actions) {
+      switch (action.type) {
+        case 'SET_STYLE_PROFILE':
+          store.setStyleProfile(action.payload);
+          break;
+        case 'SET_HAS_EXISTING_STYLE':
+          store.setHasExistingStyle(action.payload);
+          break;
+        case 'SET_TOPIC':
+          store.setSelectedTopic(action.payload);
+          break;
+        case 'UPDATE_COLLECTED_INFO':
+          store.updateCollectedInfo(action.payload);
+          break;
+        case 'SET_GENERATED_REVIEW':
+          store.setGeneratedReview(action.payload);
+          break;
+        case 'GO_TO_STEP':
+          store.setStep(action.payload);
+          break;
+        case 'SET_SUB_STEP':
+          store.setSubStep(action.payload);
+          break;
+        case 'RESET':
+          store.reset();
+          break;
+      }
+    }
   },
 
   // Reset

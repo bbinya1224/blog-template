@@ -22,7 +22,7 @@ export function PlaceCard({ metadata, onConfirm, className }: PlaceCardProps) {
       <div className="p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-stone-800 text-lg leading-tight">
+            <h3 className="font-semibold text-stone-800 text-lg/tight">
               {metadata.name}
             </h3>
             {metadata.category && (
@@ -105,7 +105,7 @@ export function PlaceCard({ metadata, onConfirm, className }: PlaceCardProps) {
 
         {/* Description */}
         {metadata.description && (
-          <p className="text-sm text-stone-500 pt-1 leading-relaxed">
+          <p className="text-sm/relaxed text-stone-500 pt-1">
             {metadata.description}
           </p>
         )}

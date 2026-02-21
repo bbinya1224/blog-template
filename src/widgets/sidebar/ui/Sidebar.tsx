@@ -3,19 +3,21 @@
 import { useRouter } from 'next/navigation';
 import { cn } from '@/shared/lib/utils';
 import { OrotiLogo } from '@/shared/ui/Icons';
-import { useChatStore } from '@/features/chat-review';
 import { useSidebar } from '../model/sidebarContext';
 import { SidebarReviewList } from './SidebarReviewList';
 import { SidebarUserProfile } from './SidebarUserProfile';
 
-export function Sidebar() {
+interface SidebarProps {
+  onNewRecord?: () => void;
+}
+
+export function Sidebar({ onNewRecord }: SidebarProps) {
   const { isExpanded, isDesktop, showLabels, toggle, collapse } = useSidebar();
   const router = useRouter();
-  const reset = useChatStore((s) => s.reset);
 
   const handleNewRecord = () => {
     router.push('/');
-    reset();
+    onNewRecord?.();
     if (!isDesktop) collapse();
   };
 

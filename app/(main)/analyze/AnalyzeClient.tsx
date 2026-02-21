@@ -105,6 +105,7 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
         console.error('Analysis failed:', error);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mutateAsync is stable from useMutation
     [rssUrl, maxPosts, fetchRssMutation.mutateAsync, analyzeStyleMutation.mutateAsync],
   );
 

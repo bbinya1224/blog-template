@@ -8,11 +8,8 @@ import {
   extractDateInfo,
   extractCompanionInfo,
 } from './conversationEngine';
-import type {
-  ConversationState,
-  ConversationStep,
-} from '../model/types';
-import { stepTransitions, initialConversationState } from '../model/types';
+import type { ConversationState } from '../../model/types';
+import { stepTransitions, initialConversationState } from '../../model/types';
 
 function createState(overrides: Partial<ConversationState> = {}): ConversationState {
   return { ...initialConversationState, ...overrides };
@@ -201,6 +198,99 @@ describe('conversationEngine', () => {
     it('should return input as-is if no pattern matches', () => {
       expect(extractCompanionInfo('선배랑 갔어요')).toBe('선배랑 갔어요');
       expect(extractCompanionInfo('후배들이랑')).toBe('후배들이랑');
+    });
+  });
+
+  describe('determineNextStep', () => {
+    it('style-check → topic-select when hasExistingStyle', () => {
+      const state = createState({ step: 'style-check', hasExistingStyle: true });
+      expect(determineNextStep(state)).toBe('topic-select');
+    });
+
+    it('style-check → style-setup when no existing style', () => {
+      const state = createState({ step: 'style-check', hasExistingStyle: false });
+      expect(determineNextStep(state)).toBe('style-setup');
+    });
+
+    it('style-setup → topic-select when styleProfile exists', () => {
+      const state = createState({
+        step: 'style-setup',
+        styleProfile: { writing_style: {} } as ConversationState['styleProfile'],
+      });
+      expect(determineNextStep(state)).toBe('topic-select');
+    });
+
+    it('style-setup → style-setup when no styleProfile', () => {
+      const state = createState({ step: 'style-setup', styleProfile: null });
+      expect(determineNextStep(state)).toBe('style-setup');
+    });
+
+    it('topic-select → info-gathering when topic selected', () => {
+      const state = createState({ step: 'topic-select', selectedTopic: 'restaurant' });
+      expect(determineNextStep(state)).toBe('info-gathering');
+    });
+
+    it('topic-select → topic-select when no topic', () => {
+      const state = createState({ step: 'topic-select', selectedTopic: null });
+      expect(determineNextStep(state)).toBe('topic-select');
+    });
+
+    it('info-gathering → smart-followup when info complete', () => {
+      const state = createState({
+        step: 'info-gathering',
+        collectedInfo: {
+          date: '2026-02-15',
+          companion: '친구',
+          location: '강남역',
+          name: '맛집',
+          menu: '불고기',
+          pros: '맛있어요',
+        },
+      });
+      expect(determineNextStep(state)).toBe('smart-followup');
+    });
+
+    it('info-gathering → info-gathering when info incomplete', () => {
+      const state = createState({
+        step: 'info-gathering',
+        collectedInfo: { date: '2026-02-15' },
+      });
+      expect(determineNextStep(state)).toBe('info-gathering');
+    });
+
+    it('smart-followup → confirmation', () => {
+      const state = createState({ step: 'smart-followup' });
+      expect(determineNextStep(state)).toBe('confirmation');
+    });
+
+    it('confirmation → generating', () => {
+      const state = createState({ step: 'confirmation' });
+      expect(determineNextStep(state)).toBe('generating');
+    });
+
+    it('generating → review-edit when review exists', () => {
+      const state = createState({ step: 'generating', generatedReview: '리뷰 내용' });
+      expect(determineNextStep(state)).toBe('review-edit');
+    });
+
+    it('generating → generating when no review yet', () => {
+      const state = createState({ step: 'generating', generatedReview: null });
+      expect(determineNextStep(state)).toBe('generating');
+    });
+
+    it('review-edit → complete', () => {
+      const state = createState({ step: 'review-edit' });
+      expect(determineNextStep(state)).toBe('complete');
+    });
+
+    it('complete → complete (terminal)', () => {
+      const state = createState({ step: 'complete' });
+      expect(determineNextStep(state)).toBe('complete');
+    });
+
+    it('default → returns current step for unknown step', () => {
+      const state = createState({ step: 'unknown-step' as ConversationState['step'] });
+      expect(determineNextStep(state)).toBe('unknown-step');
     });
   });
 
