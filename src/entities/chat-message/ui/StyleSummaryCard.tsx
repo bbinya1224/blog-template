@@ -1,15 +1,31 @@
 'use client';
 
+import { useEffect } from 'react';
 import { cn } from '@/shared/lib/utils';
-import type { StyleSummaryMetadata } from '@/entities/chat-message';
+import { useTypingEffect, useStaggerReveal } from '@/shared/lib/hooks';
+import type { StyleSummaryMetadata } from '../model/types';
+
+const INITIAL_DELAY_MS = 700;
+const ITEM_STAGGER_MS = 400;
+const TAG_STAGGER_MS = 150;
+const TYPING_SPEED = 18;
+
+function TypingValue({ value, active }: { value: string; active: boolean }) {
+  const { displayedText } = useTypingEffect(value, active, TYPING_SPEED);
+  return <>{displayedText}</>;
+}
 
 interface StyleSummaryCardProps {
   metadata: StyleSummaryMetadata;
+  enableTyping?: boolean;
+  onAnimationComplete?: () => void;
   className?: string;
 }
 
 export function StyleSummaryCard({
   metadata,
+  enableTyping = false,
+  onAnimationComplete,
   className,
 }: StyleSummaryCardProps) {
   const styleItems = [
@@ -19,16 +35,46 @@ export function StyleSummaryCard({
     { label: '톤', value: metadata.tone },
   ];
 
+  const hasExpressions =
+    metadata.frequentExpressions && metadata.frequentExpressions.length > 0;
+  const tagCount = metadata.frequentExpressions?.length ?? 0;
+
+  // step 1: header, steps 2..5: style items, step 6: expressions
+  const totalSteps = 1 + styleItems.length + (hasExpressions ? 1 : 0);
+  const revealStep = useStaggerReveal(totalSteps, enableTyping, {
+    delayMs: INITIAL_DELAY_MS,
+    staggerMs: ITEM_STAGGER_MS,
+  });
+
+  const headerVisible = revealStep >= 1;
+  const expressionsRevealed = revealStep >= 1 + styleItems.length + 1;
+
+  const visibleTags = useStaggerReveal(
+    tagCount,
+    enableTyping && expressionsRevealed,
+    {
+      staggerMs: TAG_STAGGER_MS,
+      showAllWhenDisabled: !enableTyping,
+    },
+  );
+
+  const allItemsRevealed = revealStep >= totalSteps;
+  const allTagsRevealed = !hasExpressions || visibleTags >= tagCount;
+  useEffect(() => {
+    if ((!enableTyping || (allItemsRevealed && allTagsRevealed)) && onAnimationComplete) {
+      onAnimationComplete();
+    }
+  }, [enableTyping, allItemsRevealed, allTagsRevealed, onAnimationComplete]);
+
   return (
-    <div
-      className={cn(
-        'rounded-2xl bg-linear-to-br from-stone-50 to-orange-50/30 p-5',
-        'border border-stone-100',
-        className,
-      )}
-    >
+    <div className={cn('rounded-2xl p-5', className)}>
       {/* Header */}
-      <div className='mb-4 flex items-center gap-2.5'>
+      <div
+        className={cn(
+          'mb-4 flex items-center gap-2.5 transition-opacity duration-300',
+          enableTyping && !headerVisible ? 'opacity-0' : 'opacity-100',
+        )}
+      >
         <div className='flex size-8 items-center justify-center rounded-lg bg-orange-100'>
           <svg
             className='size-4 text-orange-500'
@@ -44,40 +90,69 @@ export function StyleSummaryCard({
             />
           </svg>
         </div>
-        <h4 className='font-medium text-stone-700'>나의 글쓰기 스타일</h4>
+        <h4 className='font-medium text-stone-700'>
+          {enableTyping ? (
+            headerVisible ? (
+              <TypingValue value='나의 글쓰기 스타일' active />
+            ) : null
+          ) : (
+            '나의 글쓰기 스타일'
+          )}
+        </h4>
       </div>
 
       {/* Style attributes */}
       <div className='space-y-2.5'>
-        {styleItems.map((item) => (
-          <div key={item.label} className='flex items-start gap-3'>
-            <span className='w-16 shrink-0 pt-0.5 text-xs text-stone-400'>
-              {item.label}
-            </span>
-            <span className='text-sm/relaxed text-stone-600'>
-              {item.value}
-            </span>
-          </div>
-        ))}
+        {styleItems.map((item, index) => {
+          const itemVisible = revealStep >= index + 2;
+          return (
+            <div
+              key={item.label}
+              className={cn(
+                'flex items-start gap-3 transition-opacity duration-300',
+                itemVisible ? 'opacity-100' : 'opacity-0',
+              )}
+            >
+              <span className='w-16 shrink-0 pt-0.5 text-xs text-stone-400'>
+                {item.label}
+              </span>
+              <span className='text-sm/relaxed text-stone-600'>
+                {enableTyping ? (
+                  itemVisible ? <TypingValue value={item.value} active /> : null
+                ) : (
+                  item.value
+                )}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Frequent expressions */}
-      {metadata.frequentExpressions &&
-        metadata.frequentExpressions.length > 0 && (
-          <div className='mt-4 border-t border-stone-100/80 pt-4'>
-            <p className='mb-2.5 text-xs text-stone-400'>자주 쓰는 표현</p>
-            <div className='flex flex-wrap gap-2'>
-              {metadata.frequentExpressions.map((expr, index) => (
-                <span
-                  key={`${expr}-${index}`}
-                  className='rounded-full border border-stone-100 bg-white px-3 py-1.5 text-xs text-stone-500 shadow-sm'
-                >
-                  &ldquo;{expr}&rdquo;
-                </span>
-              ))}
-            </div>
+      {hasExpressions && (
+        <div
+          className={cn(
+            'mt-4 border-t border-stone-100/80 pt-4 transition-opacity duration-300',
+            expressionsRevealed ? 'opacity-100' : 'opacity-0',
+          )}
+        >
+          <p className='mb-2.5 text-xs text-stone-400'>자주 쓰는 표현</p>
+          <div className='flex flex-wrap gap-2'>
+            {metadata.frequentExpressions!.map((expr, index) => (
+              <span
+                key={`${expr}-${index}`}
+                className={cn(
+                  'rounded-full border border-stone-100 bg-white px-3 py-1.5 text-xs text-stone-500 shadow-sm',
+                  'transition-opacity duration-200',
+                  index < visibleTags ? 'opacity-100' : 'opacity-0',
+                )}
+              >
+                &ldquo;{expr}&rdquo;
+              </span>
+            ))}
           </div>
-        )}
+        </div>
+      )}
     </div>
   );
 }

@@ -17,4 +17,4 @@ export {
 export { PlaceCard } from './ui/PlaceCard';
 export { ReviewPreview } from './ui/ReviewPreview';
 export { StyleSummaryCard } from './ui/StyleSummaryCard';
-export { MessageContent } from './ui/MessageRenderers';
+export { MessageContent } from './ui/MessageContent';
