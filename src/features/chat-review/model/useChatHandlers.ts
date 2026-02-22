@@ -239,27 +239,28 @@ function updateStyleSetupMethod(
   content: string,
   setStyleSetupContext: React.Dispatch<React.SetStateAction<StyleSetupContext>>,
 ) {
-  if (
-    content.includes('블로그') ||
-    content.includes('주소') ||
-    content === '1'
-  ) {
-    setStyleSetupContext((prev) => ({ ...prev, method: 'blog-url' }));
-  } else if (
-    content.includes('첨부') ||
-    content.includes('붙여') ||
-    content === '2'
-  ) {
-    setStyleSetupContext((prev) => ({ ...prev, method: 'paste-text' }));
-  } else if (
-    content.includes('직접') ||
-    content.includes('설정') ||
-    content === '3'
-  ) {
-    setStyleSetupContext((prev) => ({
-      ...prev,
-      method: 'questionnaire',
-      questionnaireStep: 0,
-    }));
-  }
+  setStyleSetupContext((prev) => {
+    if (prev.method) return prev;
+
+    if (
+      content.includes('블로그') ||
+      content.includes('주소') ||
+      content === '1'
+    ) {
+      return { ...prev, method: 'blog-url' };
+    } else if (
+      content.includes('첨부') ||
+      content.includes('붙여') ||
+      content === '2'
+    ) {
+      return { ...prev, method: 'paste-text' };
+    } else if (
+      content.includes('직접') ||
+      content.includes('설정') ||
+      content === '3'
+    ) {
+      return { ...prev, method: 'questionnaire', questionnaireStep: 0 };
+    }
+    return prev;
+  });
 }

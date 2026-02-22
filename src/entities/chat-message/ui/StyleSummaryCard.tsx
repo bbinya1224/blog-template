@@ -81,6 +81,7 @@ export function StyleSummaryCard({
       >
         <div className='flex size-8 items-center justify-center rounded-lg bg-orange-100'>
           <svg
+            aria-hidden='true'
             className='size-4 text-orange-500'
             fill='none'
             stroke='currentColor'

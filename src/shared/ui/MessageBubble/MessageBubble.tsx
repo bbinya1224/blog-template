@@ -29,7 +29,7 @@ export function MessageBubble({
     >
       {isAssistant ? (
         <div className='flex w-fit items-start gap-3'>
-          <OrotiLogo className='size-7 shrink-0' />
+          <OrotiLogo className='size-7 shrink-0' aria-hidden='true' />
           <div className='flex-1 rounded-2xl px-3'>{children}</div>
         </div>
       ) : (
