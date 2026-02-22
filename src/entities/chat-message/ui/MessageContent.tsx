@@ -9,6 +9,21 @@ import { PlaceCard } from './PlaceCard';
 import { ReviewPreview } from './ReviewPreview';
 import { ChoiceButtons } from '@/shared/ui/ChoiceButtons';
 
+const METADATA_LABELS: Record<string, string> = {
+  name: '가게 이름',
+  location: '위치',
+  date: '방문 날짜',
+  menu: '메뉴',
+  companion: '동행',
+  pros: '좋았던 점',
+  cons: '아쉬운 점',
+  extra: '기타',
+  title: '제목',
+  author: '저자',
+  readDate: '읽은 날짜',
+  genre: '장르',
+};
+
 interface MessageContentProps {
   message: ChatMessage;
   enableTyping?: boolean;
@@ -80,12 +95,14 @@ export function MessageContent({
           <div className='space-y-2 rounded-xl bg-stone-50 p-4'>
             {Object.entries(message.metadata)
               .filter(
-                ([, value]) =>
-                  typeof value === 'string' || typeof value === 'number',
+                ([key, value]) =>
+                  key !== 'formattedSummary' &&
+                  key !== 'user_draft' &&
+                  (typeof value === 'string' || typeof value === 'number'),
               )
               .map(([key, value]) => (
                 <div key={key} className='flex gap-2 text-sm'>
-                  <span className='text-stone-400'>{key}:</span>
+                  <span className='text-stone-400'>{METADATA_LABELS[key] ?? key}:</span>
                   <span className='text-stone-600'>{String(value)}</span>
                 </div>
               ))}
