@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/shared/lib/utils';
-import type { ReviewPreviewMetadata } from '@/entities/chat-message';
+import { Button } from '@/shared/ui/Button';
+import type { ReviewPreviewMetadata } from '../model/types';
 
 interface ReviewPreviewProps {
   metadata: ReviewPreviewMetadata;
@@ -71,7 +72,8 @@ export function ReviewPreview({
           </div>
 
           {/* Copy button */}
-          <button
+          <Button
+            variant='unstyled'
             onClick={handleCopy}
             className={cn(
               'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm',
@@ -116,7 +118,7 @@ export function ReviewPreview({
                 <span>복사</span>
               </>
             )}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -130,7 +132,8 @@ export function ReviewPreview({
       {/* Action buttons */}
       {onAction && (
         <div className='flex gap-3 border-t border-stone-100 bg-stone-50/50 p-4'>
-          <button
+          <Button
+            variant='unstyled'
             onClick={() => onAction('complete')}
             className={cn(
               'flex-1 rounded-xl px-4 py-3 text-sm font-medium',
@@ -142,8 +145,9 @@ export function ReviewPreview({
             )}
           >
             완벽해요!
-          </button>
-          <button
+          </Button>
+          <Button
+            variant='unstyled'
             onClick={() => onAction('edit')}
             className={cn(
               'flex-1 rounded-xl px-4 py-3 text-sm font-medium',
@@ -154,7 +158,7 @@ export function ReviewPreview({
             )}
           >
             수정할래요
-          </button>
+          </Button>
         </div>
       )}
     </div>

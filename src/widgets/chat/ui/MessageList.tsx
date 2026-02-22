@@ -41,9 +41,7 @@ export function MessageList({
               {message.role === 'assistant' ? (
                 <MessageContent
                   message={message}
-                  enableTyping={
-                    message.type === 'text' && !message.metadata?.streaming
-                  }
+                  enableTyping={!message.metadata?.streaming}
                   onChoiceSelect={(optionId) =>
                     onChoiceSelect?.(message.id, optionId)
                   }
