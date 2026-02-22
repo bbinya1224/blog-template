@@ -27,7 +27,7 @@ export function useStaggerReveal(
     if (totalSteps <= 0) return;
 
     let current = 0;
-    let intervalId: ReturnType<typeof setInterval>;
+    let intervalId: ReturnType<typeof setInterval> | undefined;
     const delayId = setTimeout(() => {
       intervalId = setInterval(() => {
         current++;
@@ -38,7 +38,7 @@ export function useStaggerReveal(
 
     return () => {
       clearTimeout(delayId);
-      clearInterval(intervalId);
+      if (intervalId !== undefined) clearInterval(intervalId);
     };
   }, [enabled, totalSteps, delayMs, staggerMs, showAllWhenDisabled]);
 

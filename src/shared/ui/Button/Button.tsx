@@ -36,7 +36,7 @@ const VARIANT_STYLES: Record<ButtonVariant, string> = {
   unstyled: '',
 };
 
-const SIZE_STYLES: Record<string, string> = {
+const SIZE_STYLES: Record<'sm' | 'md' | 'lg', string> = {
   sm: 'px-4 py-2 text-sm',
   md: 'px-6 py-3 text-base',
   lg: 'px-8 py-4 text-lg',

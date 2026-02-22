@@ -46,7 +46,7 @@ export function ChoiceButtons({
               option.icon && 'flex items-center gap-2',
               animated
                 ? cn(
-                    'transition-[opacity,transform] duration-420 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
+                    'transition-[opacity,transform] duration-[420ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]',
                     visible
                       ? 'translate-y-0 scale-100 opacity-100'
                       : 'translate-y-3 scale-95 opacity-0',

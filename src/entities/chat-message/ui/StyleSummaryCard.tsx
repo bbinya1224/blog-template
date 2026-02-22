@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { cn } from '@/shared/lib/utils';
 import { useTypingEffect, useStaggerReveal } from '@/shared/lib/hooks';
 import type { StyleSummaryMetadata } from '../model/types';
@@ -60,9 +60,13 @@ export function StyleSummaryCard({
 
   const allItemsRevealed = revealStep >= totalSteps;
   const allTagsRevealed = !hasExpressions || visibleTags >= tagCount;
+  const completeFiredRef = useRef(false);
   useEffect(() => {
-    if ((!enableTyping || (allItemsRevealed && allTagsRevealed)) && onAnimationComplete) {
-      onAnimationComplete();
+    if (!enableTyping || (allItemsRevealed && allTagsRevealed)) {
+      if (!completeFiredRef.current && onAnimationComplete) {
+        completeFiredRef.current = true;
+        onAnimationComplete();
+      }
     }
   }, [enableTyping, allItemsRevealed, allTagsRevealed, onAnimationComplete]);
 
