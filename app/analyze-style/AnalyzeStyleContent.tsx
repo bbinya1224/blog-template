@@ -49,7 +49,6 @@ export function AnalyzeStyleContent({
   );
   const [isInputEnabled, setIsInputEnabled] = useState(!existingStyleProfile);
   const isInitializedRef = useRef(false);
-  const redirectTimerRef = useRef<NodeJS.Timeout>(undefined);
 
   const messages = useChatStore((s) => s.messages);
   const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
@@ -59,8 +58,15 @@ export function AnalyzeStyleContent({
     isProcessing,
   } = useChatHandlers({ userEmail, styleSetupContext, setStyleSetupContext });
 
-  // Cleanup redirect timer on unmount
-  useEffect(() => () => clearTimeout(redirectTimerRef.current), []);
+  const reset = useChatStore((s) => s.reset);
+
+  useEffect(
+    () => () => {
+      isInitializedRef.current = false;
+      reset();
+    },
+    [reset],
+  );
 
   // Initialize on mount (ref guard prevents re-execution)
   useEffect(() => {
@@ -88,7 +94,16 @@ export function AnalyzeStyleContent({
         CHOICE_OPTIONS.styleSetupMethod,
       );
     }
-  }, [existingStyleProfile, userName, storeUserName, setMessages, setStyleProfile, setHasExistingStyle, setStep, addAssistantMessage]);
+  }, [
+    existingStyleProfile,
+    userName,
+    storeUserName,
+    setMessages,
+    setStyleProfile,
+    setHasExistingStyle,
+    setStep,
+    addAssistantMessage,
+  ]);
 
   // Handle step changes (for style-setup → style-check → topic-select flow)
   useEffect(() => {
@@ -98,9 +113,9 @@ export function AnalyzeStyleContent({
       case 'topic-select':
         addAssistantMessage(
           MESSAGES.styleAnalyze.complete(userName || storeUserName || ''),
-          'text',
+          'choice',
+          [{ id: 'go-home', label: '경험 기록하러 가기' }],
         );
-        redirectTimerRef.current = setTimeout(() => router.push('/'), 2000);
         break;
     }
   }, [step, addAssistantMessage, userName, storeUserName, router]);

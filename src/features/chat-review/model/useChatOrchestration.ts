@@ -56,6 +56,15 @@ export function useChatOrchestration({
     }
   }, [existingStyleProfile, setStyleProfile, setHasExistingStyle]);
 
+  // Reset initialized flag when conversation is reset
+  // step change effect보다 먼저 선언하여 같은 렌더 사이클에서 ref가 먼저 초기화됨
+  useEffect(() => {
+    if (messages.length === 0) {
+      isInitializedRef.current = false;
+      prevStepRef.current = null;
+    }
+  }, [messages.length]);
+
   // Handle step changes — getState()로 항상 최신 상태 접근 (stateRef 제거)
   useEffect(() => {
     if (!isInitializedRef.current) return;
@@ -127,14 +136,6 @@ export function useChatOrchestration({
     consumeNextQuestion,
     generateReview,
   ]);
-
-  // Reset initialized flag when conversation is reset
-  useEffect(() => {
-    if (messages.length === 0) {
-      isInitializedRef.current = false;
-      prevStepRef.current = null;
-    }
-  }, [messages.length]);
 
   const handleCategorySelect = useCallback(
     (categoryId: string) => {

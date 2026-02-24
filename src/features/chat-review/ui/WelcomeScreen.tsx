@@ -3,7 +3,14 @@
 import { cn } from '@/shared/lib/utils';
 import Link from 'next/link';
 import type { StyleProfile } from '@/entities/style-profile';
-import { Utensils, ShoppingCart, Sparkles, Paintbrush, BookOpen } from 'lucide-react';
+import {
+  Utensils,
+  ShoppingCart,
+  Sparkles,
+  Paintbrush,
+  BookOpen,
+  LogIn,
+} from 'lucide-react';
 import { OrotiLogo } from '@/shared/ui/Icons';
 import { MESSAGES, CATEGORY_LABELS } from '../constants/messages';
 
@@ -46,16 +53,20 @@ const REVIEW_CATEGORIES: CategoryOption[] = [
 
 interface WelcomeScreenProps {
   userName?: string;
+  isAuthenticated?: boolean;
   hasExistingStyle?: boolean;
   styleProfile?: StyleProfile | null;
   onCategorySelect?: (categoryId: string) => void;
+  onLoginClick?: () => void;
 }
 
 export function WelcomeScreen({
   userName,
+  isAuthenticated = true,
   hasExistingStyle,
   styleProfile,
   onCategorySelect,
+  onLoginClick,
 }: WelcomeScreenProps) {
   const handleCategoryClick = (category: CategoryOption) => {
     if (category.disabled) return;
@@ -132,6 +143,23 @@ export function WelcomeScreen({
                 {MESSAGES.welcome.detailLink}
               </Link>
             </div>
+          ) : !isAuthenticated ? (
+            <div className='text-center'>
+              <p className='mb-3 text-sm text-stone-400'>
+                {MESSAGES.welcome.loginMessage}
+              </p>
+              <button
+                onClick={onLoginClick}
+                className={cn(
+                  'inline-flex items-center gap-2 px-5 py-2.5',
+                  'rounded-xl border border-stone-200 bg-white text-sm font-medium text-stone-600',
+                  'transition-all duration-200 hover:border-primary/40 hover:text-primary',
+                )}
+              >
+                <LogIn className='size-4' />
+                {MESSAGES.welcome.loginLink}
+              </button>
+            </div>
           ) : (
             <div className='text-center'>
               <p className='mb-3 text-sm text-stone-400'>
@@ -145,7 +173,8 @@ export function WelcomeScreen({
                   'transition-all duration-200 hover:border-primary/40 hover:text-primary',
                 )}
               >
-                <Sparkles className='size-4' />{MESSAGES.welcome.analyzeStyleLink}
+                <Sparkles className='size-4' />
+                {MESSAGES.welcome.analyzeStyleLink}
               </Link>
             </div>
           )}

@@ -11,11 +11,18 @@ export const CATEGORY_LABELS = {
 export const MESSAGES = {
   // 웰컴 화면
   welcome: {
-    greeting: (name?: string) => (name ? `${name}님, 안녕하세요` : '안녕하세요'),
+    greeting: (name?: string) =>
+      name ? `${name}님, 안녕하세요` : '안녕하세요',
     subtitle: '오늘은 어떤 경험을 남겨볼까요?',
     styleLabel: '내 글 스타일',
     noStyleMessage: '아직 글 스타일을 분석하지 않으셨네요!',
     analyzeStyleLink: '내 글 스타일 분석하기',
+    loginMessage: '로그인하고 나만의 글 스타일을 만들어보세요!',
+    loginLink: 'Google 로그인 먼저 하기',
+    loginModalTitle: '로그인이 필요해요',
+    loginModalMessage:
+      '앗, 이 기능을 사용하려면 로그인이 필요해요!\n간편하게 Google로 시작해보세요!',
+    loginModalButton: 'Google 로그인 하러가기',
     detailLink: '자세히 보기',
   },
 
