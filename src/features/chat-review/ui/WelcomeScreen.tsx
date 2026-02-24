@@ -62,7 +62,7 @@ interface WelcomeScreenProps {
 
 export function WelcomeScreen({
   userName,
-  isAuthenticated = true,
+  isAuthenticated = false,
   hasExistingStyle,
   styleProfile,
   onCategorySelect,
