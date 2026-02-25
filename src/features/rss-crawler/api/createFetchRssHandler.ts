@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
+import { ALLOWED_RSS_HOSTS } from '../lib/constants';
+
+const MAX_POSTS_LIMIT = 50;
+
+function isAllowedRssUrl(url: string): boolean {
+  try {
+    const { hostname, pathname } = new URL(url);
+    return ALLOWED_RSS_HOSTS.includes(hostname) && pathname.endsWith('.xml');
+  } catch {
+    return false;
+  }
+}
 
 type FetchRssPayload = {
   rssUrl: string;
@@ -71,7 +83,16 @@ export const createFetchRssHandler = ({
 
       const { rssUrl, maxPosts = 20, debug = false } = body;
 
-      const { mergedText, samples } = await crawlBlogRss(rssUrl, maxPosts, {
+      if (!isAllowedRssUrl(rssUrl)) {
+        return NextResponse.json(
+          { error: '허용되지 않는 RSS URL입니다. 지원하는 블로그 플랫폼의 RSS만 사용할 수 있습니다.' },
+          { status: 400 }
+        );
+      }
+
+      const cappedMaxPosts = Math.min(Math.max(maxPosts, 1), MAX_POSTS_LIMIT);
+
+      const { mergedText, samples } = await crawlBlogRss(rssUrl, cappedMaxPosts, {
         debug,
       });
 

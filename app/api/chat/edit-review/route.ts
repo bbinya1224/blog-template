@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { authOptions } from '@/auth';
 import { getReviewEditPrompt } from '@/shared/api/promptService';
 import { ApiResponse } from '@/shared/api/response';
+import { getUserStatus } from '@/shared/api/dataFiles';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import {
   shouldUseMock,
@@ -22,6 +23,11 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return ApiResponse.unauthorized();
+    }
+
+    const userStatus = await getUserStatus(session.user.email);
+    if (userStatus?.is_preview && (userStatus.usage_count || 0) >= 2) {
+      return ApiResponse.quotaExceeded();
     }
 
     const body = await req.json();
@@ -42,7 +48,7 @@ export async function POST(req: NextRequest) {
       return createMockEditResponse(originalReview, editRequest);
     }
 
-    console.log(`\n[Review Edit API] 리뷰 수정 요청: "${editRequest.substring(0, 50)}..."`);
+    console.log(`\n[Review Edit API] 리뷰 수정 요청 수신`);
 
     // 프롬프트 로드
     const editPromptTemplate = await getReviewEditPrompt();

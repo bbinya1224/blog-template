@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import type { ReviewPayload } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
+import { getUserStatus } from '@/shared/api/dataFiles';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import {
   formatCollectedInfo,
@@ -31,6 +32,11 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return ApiResponse.unauthorized();
+    }
+
+    const userStatus = await getUserStatus(session.user.email);
+    if (userStatus?.is_preview && (userStatus.usage_count || 0) >= 2) {
+      return ApiResponse.quotaExceeded();
     }
 
     const { collectedInfo, selectedTopic }: SmartFollowupInput =
@@ -70,7 +76,7 @@ export async function POST(req: NextRequest) {
       .map((block) => block.text)
       .join('');
 
-    console.log(`[Smart Followup API] 응답: ${text}`);
+    console.log(`[Smart Followup API] 응답 생성 완료 (${text.length}자)`);
 
     const jsonText = text
       .replace(/^```(?:json)?\s*\n?/, '')

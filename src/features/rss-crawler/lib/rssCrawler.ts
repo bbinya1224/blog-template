@@ -4,6 +4,19 @@ import * as path from 'path';
 import { RssCrawlingError } from '@/shared/lib/errors';
 import { stripHtmlTags, normalizeText } from '@/shared/lib/utils';
 import { withRetry } from '@/shared/lib/retry';
+
+import { ALLOWED_POST_HOSTS } from './constants';
+
+function isAllowedPostLink(url: string): boolean {
+  try {
+    const { hostname } = new URL(url);
+    return ALLOWED_POST_HOSTS.some(
+      (host) => hostname === host || hostname.endsWith(`.${host}`),
+    );
+  } catch {
+    return false;
+  }
+}
 import {
   MIN_TEXT_LENGTH,
   MIN_POST_LENGTH,
@@ -74,9 +87,23 @@ export const crawlBlogRss = async (
       await fs.mkdir(debugDir, { recursive: true });
     }
 
-    for (let i = 0; i < postLinks.length; i++) {
-      const link = postLinks[i];
-      console.log(`\n[${i + 1}/${postLinks.length}] 포스트 처리: ${link}`);
+    const safeLinks = postLinks.filter((link) => {
+      if (!isAllowedPostLink(link)) {
+        console.warn(`⚠️ 허용되지 않는 도메인, 건너뜀: ${link}`);
+        return false;
+      }
+      return true;
+    });
+
+    if (safeLinks.length === 0) {
+      throw new RssCrawlingError(
+        'RSS 피드에서 유효한 네이버 블로그 포스트를 찾을 수 없습니다.',
+      );
+    }
+
+    for (let i = 0; i < safeLinks.length; i++) {
+      const link = safeLinks[i];
+      console.log(`\n[${i + 1}/${safeLinks.length}] 포스트 처리: ${link}`);
 
       const candidateUrls = buildViewerAndMobileUrls(link);
 
@@ -131,7 +158,7 @@ export const crawlBlogRss = async (
       if (!extracted) {
         console.warn(
           `[${i + 1}/${
-            postLinks.length
+            safeLinks.length
           }] ✗ 모든 URL에서 본문 추출 실패 → 건너뜀`,
         );
         continue;
@@ -143,7 +170,7 @@ export const crawlBlogRss = async (
       if (cleanedText.length > MIN_POST_LENGTH) {
         cleanedPosts.push(cleanedText);
         console.log(
-          `[${i + 1}/${postLinks.length}] ✓ 정제된 길이: ${
+          `[${i + 1}/${safeLinks.length}] ✓ 정제된 길이: ${
             cleanedText.length
           }자`,
         );
