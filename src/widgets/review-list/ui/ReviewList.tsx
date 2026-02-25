@@ -67,7 +67,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
               {group.label}
             </h2>
             <div className="divide-y divide-stone-100">
-              {group.reviews.map((review, index) => (
+              {group.reviews.map((review) => (
                 <div
                   key={review.id}
                   className="group flex items-center gap-2 rounded-lg transition-all duration-200 ease-out hover:bg-surface"
@@ -112,7 +112,10 @@ export function ReviewList({ reviews }: ReviewListProps) {
 
       <Modal
         isOpen={deleteTarget !== null}
-        onClose={() => setDeleteTarget(null)}
+        onClose={() => {
+          deleteMutation.reset();
+          setDeleteTarget(null);
+        }}
         title="리뷰를 삭제할까요?"
         size="sm"
       >

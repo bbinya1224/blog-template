@@ -22,7 +22,7 @@ export const MESSAGES = {
     loginModalTitle: '로그인이 필요해요',
     loginModalMessage:
       '앗, 이 기능을 사용하려면 로그인이 필요해요!\n간편하게 Google로 시작해보세요!',
-    loginModalButton: 'Google 로그인 하러가기',
+    loginModalButton: 'Google 로그인 하러 가기',
     detailLink: '자세히 보기',
   },
 

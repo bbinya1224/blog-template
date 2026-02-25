@@ -25,14 +25,17 @@ export async function getReviews(): Promise<Review[]> {
       return [];
     }
 
-    return (data || []).map((review) => ({
-      id: review.id,
-      storeName: review.restaurant_name,
-      date: review.visit_date || review.created_at.split('T')[0],
-      createdAt: review.created_at,
-      content: review.review_content,
-      characterCount: review.review_content.length,
-    }));
+    return (data || []).map((review) => {
+      const content = review.review_content ?? '';
+      return {
+        id: review.id,
+        storeName: review.restaurant_name,
+        date: review.visit_date || review.created_at.split('T')[0],
+        createdAt: review.created_at,
+        content,
+        characterCount: content.length,
+      };
+    });
   } catch (error) {
     console.error('리뷰 조회 중 오류:', error);
     return [];
@@ -62,13 +65,14 @@ export async function getReviewById(id: string): Promise<Review | null> {
       return null;
     }
 
+    const content = data.review_content ?? '';
     return {
       id: data.id,
       storeName: data.restaurant_name,
       date: data.visit_date || data.created_at.split('T')[0],
       createdAt: data.created_at,
-      content: data.review_content,
-      characterCount: data.review_content.length,
+      content,
+      characterCount: content.length,
     };
   } catch (error) {
     console.error('리뷰 조회 중 오류:', error);
@@ -76,21 +80,20 @@ export async function getReviewById(id: string): Promise<Review | null> {
   }
 }
 
-export async function deleteReview(id: string): Promise<void> {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.email) {
-    throw new Error('인증 필요');
-  }
-
-  const { error } = await supabaseAdmin
+export async function deleteReview(id: string, userEmail: string): Promise<void> {
+  const { data, error } = await supabaseAdmin
     .from('user_reviews')
     .delete()
     .eq('id', id)
-    .eq('user_email', session.user.email);
+    .eq('user_email', userEmail)
+    .select('id');
 
   if (error) {
     throw new Error('리뷰 삭제 실패: ' + error.message);
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error('삭제할 리뷰를 찾을 수 없습니다.');
   }
 }
 
