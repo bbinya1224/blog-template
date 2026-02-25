@@ -1,7 +1,8 @@
 export interface Review {
-  id: string; // filename without extension
+  id: string;
   storeName: string;
   date: string;
+  createdAt: string;
   content: string;
-  preview: string; // First few lines or summary
+  characterCount: number;
 }

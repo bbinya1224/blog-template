@@ -29,8 +29,9 @@ export async function getReviews(): Promise<Review[]> {
       id: review.id,
       storeName: review.restaurant_name,
       date: review.visit_date || review.created_at.split('T')[0],
+      createdAt: review.created_at,
       content: review.review_content,
-      preview: review.review_content.slice(0, 150) + '...',
+      characterCount: review.review_content.length,
     }));
   } catch (error) {
     console.error('리뷰 조회 중 오류:', error);
@@ -65,8 +66,9 @@ export async function getReviewById(id: string): Promise<Review | null> {
       id: data.id,
       storeName: data.restaurant_name,
       date: data.visit_date || data.created_at.split('T')[0],
+      createdAt: data.created_at,
       content: data.review_content,
-      preview: data.review_content.slice(0, 150) + '...',
+      characterCount: data.review_content.length,
     };
   } catch (error) {
     console.error('리뷰 조회 중 오류:', error);
@@ -74,9 +76,24 @@ export async function getReviewById(id: string): Promise<Review | null> {
   }
 }
 
-/**
- * 리뷰 내용 수정
- */
+export async function deleteReview(id: string): Promise<void> {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.email) {
+    throw new Error('인증 필요');
+  }
+
+  const { error } = await supabaseAdmin
+    .from('user_reviews')
+    .delete()
+    .eq('id', id)
+    .eq('user_email', session.user.email);
+
+  if (error) {
+    throw new Error('리뷰 삭제 실패: ' + error.message);
+  }
+}
+
 export async function updateReview(id: string, content: string): Promise<void> {
   try {
     const session = await getServerSession(authOptions);
