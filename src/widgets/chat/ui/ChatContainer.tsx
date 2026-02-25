@@ -35,11 +35,13 @@ interface ChatContainerProps {
   onPlaceConfirm?: (messageId: string, confirmed: boolean) => void;
   onReviewAction?: (messageId: string, action: 'complete' | 'edit') => void;
   onCategorySelect?: (categoryId: string) => void;
+  isAuthenticated?: boolean;
   hasExistingStyle?: boolean;
   styleProfile?: StyleProfile | null;
   selectedTopic?: string | null;
   recentReviews?: Review[];
   userName?: string;
+  onLoginClick?: () => void;
   className?: string;
 }
 
@@ -54,11 +56,13 @@ export function ChatContainer({
   onPlaceConfirm,
   onReviewAction,
   onCategorySelect,
+  isAuthenticated,
   hasExistingStyle,
   styleProfile,
   selectedTopic,
   recentReviews = [],
   userName,
+  onLoginClick,
   className,
 }: ChatContainerProps) {
   const hasMessages = messages.length > 0;
@@ -66,7 +70,6 @@ export function ChatContainer({
 
   return (
     <div className={cn('flex h-full flex-col', className)}>
-      {/* Review type header */}
       {hasMessages && selectedTopic && (
         <div className='flex shrink-0 items-center gap-2 px-6 py-3'>
           <span className='text-orange-400'>{REVIEW_ICONS[selectedTopic]}</span>
@@ -76,15 +79,16 @@ export function ChatContainer({
         </div>
       )}
 
-      {/* Main scrollable content */}
       <div ref={containerRef} className='min-h-0 flex-1 overflow-y-auto'>
         <div className='mx-auto flex size-full max-w-3xl flex-col'>
           {!hasMessages ? (
             <WelcomeScreen
               userName={userName}
+              isAuthenticated={isAuthenticated}
               hasExistingStyle={hasExistingStyle}
               styleProfile={styleProfile}
               onCategorySelect={onCategorySelect}
+              onLoginClick={onLoginClick}
             />
           ) : (
             <MessageList
@@ -98,7 +102,6 @@ export function ChatContainer({
         </div>
       </div>
 
-      {/* Input area - only when chat is active */}
       {hasMessages && (
         <div className='shrink-0'>
           <InputArea
@@ -111,7 +114,6 @@ export function ChatContainer({
         </div>
       )}
 
-      {/* Recent reviews - only render when no messages */}
       {!hasMessages && recentReviews.length > 0 && (
         <div className='shrink-0 border-t border-stone-100 px-6 pb-6'>
           <div className='mx-auto max-w-3xl'>
@@ -127,7 +129,6 @@ export function ChatContainer({
               </Link>
             </div>
 
-            {/* Horizontal scroll cards */}
             <div className='scrollbar-hide -mx-6 flex gap-3 overflow-x-auto px-6 pb-2'>
               {recentReviews.slice(0, 6).map((review) => (
                 <Link

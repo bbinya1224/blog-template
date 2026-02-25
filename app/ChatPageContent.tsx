@@ -43,6 +43,7 @@ export function ChatPageContent({
         onPlaceConfirm={handlePlaceConfirmation}
         onReviewAction={handleReviewAction}
         onCategorySelect={handleCategorySelect}
+        isAuthenticated
         hasExistingStyle={state.hasExistingStyle}
         styleProfile={state.styleProfile}
         recentReviews={recentReviews}

@@ -3,6 +3,9 @@
 import { useState, useCallback } from 'react';
 import { signIn } from 'next-auth/react';
 import { ChatContainer } from '@/widgets/chat';
+import { Modal } from '@/shared/ui/Modal';
+import { MESSAGES } from '@/features/chat-review';
+import { LogIn } from 'lucide-react';
 import type { ChatMessage } from '@/entities/chat-message';
 
 const LOGIN_PROMPT_MESSAGES: ChatMessage[] = [
@@ -27,6 +30,7 @@ const LOGIN_PROMPT_MESSAGES: ChatMessage[] = [
 export function PublicChatView() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isInputDisabled, setIsInputDisabled] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const showLoginPrompt = useCallback(() => {
     setMessages((prev) => [
@@ -51,15 +55,14 @@ export function PublicChatView() {
       };
       setMessages((prev) => [...prev, userMsg]);
 
-      // Show login prompt after user message
-      setTimeout(() => showLoginPrompt(), 500);
+      showLoginPrompt();
     },
     [showLoginPrompt],
   );
 
   const handleCategorySelect = useCallback(() => {
-    showLoginPrompt();
-  }, [showLoginPrompt]);
+    setIsLoginModalOpen(true);
+  }, []);
 
   const handleChoiceSelect = useCallback(
     (_messageId: string, optionId: string) => {
@@ -70,15 +73,43 @@ export function PublicChatView() {
     [],
   );
 
+  const handleLoginClick = useCallback(() => {
+    signIn('google', { callbackUrl: '/' });
+  }, []);
+
   return (
-    <ChatContainer
-      messages={messages}
-      currentStep="topic-select"
-      isInputDisabled={isInputDisabled}
-      inputPlaceholder="기록하고 싶은 경험을 알려주세요..."
-      onSendMessage={handleSendMessage}
-      onChoiceSelect={handleChoiceSelect}
-      onCategorySelect={handleCategorySelect}
-    />
+    <>
+      <ChatContainer
+        messages={messages}
+        currentStep='topic-select'
+        isAuthenticated={false}
+        isInputDisabled={isInputDisabled}
+        inputPlaceholder='기록하고 싶은 경험을 알려주세요...'
+        onSendMessage={handleSendMessage}
+        onChoiceSelect={handleChoiceSelect}
+        onCategorySelect={handleCategorySelect}
+        onLoginClick={handleLoginClick}
+      />
+
+      <Modal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        title={MESSAGES.welcome.loginModalTitle}
+        size='sm'
+      >
+        <div className='flex flex-col items-center gap-5 py-2 text-center'>
+          <p className='text-sm/relaxed whitespace-pre-line text-stone-600'>
+            {MESSAGES.welcome.loginModalMessage}
+          </p>
+          <button
+            onClick={handleLoginClick}
+            className='inline-flex items-center gap-2 rounded-xl bg-stone-800 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-stone-700'
+          >
+            <LogIn className='size-4' />
+            {MESSAGES.welcome.loginModalButton}
+          </button>
+        </div>
+      </Modal>
+    </>
   );
 }
