@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { Popover as PopoverPrimitive } from '@base-ui/react/popover';
 import { cn } from '@/shared/lib/utils';
 
@@ -8,18 +8,27 @@ function Popover({ children }: { children: ReactNode }) {
   return <PopoverPrimitive.Root>{children}</PopoverPrimitive.Root>;
 }
 
-function PopoverTrigger({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+type PopoverTriggerProps = ComponentPropsWithoutRef<
+  typeof PopoverPrimitive.Trigger
+>;
+
+function PopoverTrigger({ children, className, ...props }: PopoverTriggerProps) {
   return (
-    <PopoverPrimitive.Trigger className={className}>
+    <PopoverPrimitive.Trigger className={className} {...props}>
       {children}
     </PopoverPrimitive.Trigger>
   );
+}
+
+interface PopoverContentProps
+  extends Omit<
+    ComponentPropsWithoutRef<typeof PopoverPrimitive.Popup>,
+    'className'
+  > {
+  className?: string;
+  side?: 'top' | 'bottom' | 'left' | 'right';
+  align?: 'start' | 'center' | 'end';
+  sideOffset?: number;
 }
 
 function PopoverContent({
@@ -28,13 +37,8 @@ function PopoverContent({
   side = 'bottom',
   align = 'end',
   sideOffset = 4,
-}: {
-  children: ReactNode;
-  className?: string;
-  side?: 'top' | 'bottom' | 'left' | 'right';
-  align?: 'start' | 'center' | 'end';
-  sideOffset?: number;
-}) {
+  ...popupProps
+}: PopoverContentProps) {
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Positioner
@@ -43,6 +47,7 @@ function PopoverContent({
         sideOffset={sideOffset}
       >
         <PopoverPrimitive.Popup
+          {...popupProps}
           className={cn(
             'z-50 min-w-[8rem] overflow-hidden rounded-xl border border-stone-200 bg-white p-1 shadow-lg',
             'origin-[var(--transform-origin)] transition-[transform,scale,opacity] data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0',

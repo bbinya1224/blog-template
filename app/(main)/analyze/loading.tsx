@@ -1,6 +1,7 @@
 function Bone({ className }: { className?: string }) {
   return (
     <div
+      aria-hidden="true"
       className={`rounded-md bg-stone-200/50 ${className ?? ''}`}
       style={{ animation: 'pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}
     />
@@ -9,7 +10,7 @@ function Bone({ className }: { className?: string }) {
 
 export default function AnalyzeLoading() {
   return (
-    <div className="space-y-10">
+    <div className="space-y-10" role="status" aria-label="스타일 분석 로딩 중">
       <section className="space-y-4">
         <Bone className="h-3 w-16" />
         <div className="space-y-3">
