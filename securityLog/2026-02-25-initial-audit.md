@@ -108,7 +108,7 @@ POST /api/fetch-rss
 | # | 이슈 | 패치 여부 |
 |---|------|-----------|
 | 1 | SSRF 차단 | **패치** — 도메인 allowlist + private IP 차단 |
-| 2 | 쿼터 우회 | **패치** — `/api/chat/generate-review`에 쿼터 체크 추가 |
+| 2 | 쿼터 우회 | **패치** — `/api/chat/*` 전체 쿼터 체크 (generate-review: 원자적 RPC, edit-review/smart-followup: 읽기 전용 체크) |
 | 3 | Admin 브루트포스 | **패치** — 실패 지연 + 인메모리 rate limit |
 | 4 | 로그 PII | 보류 — removeConsole로 대부분 strip됨 |
 | 5 | maxPosts 상한 | **패치** — 상한 50으로 제한 |

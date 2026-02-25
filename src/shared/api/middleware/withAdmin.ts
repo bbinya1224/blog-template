@@ -47,7 +47,7 @@ function recordFailure(ip: string): void {
   const record = failedAttempts.get(ip);
   if (record && Date.now() < record.resetAt) {
     record.count++;
-  } else {
+  } else if (failedAttempts.size < MAX_MAP_ENTRIES) {
     failedAttempts.set(ip, {
       count: 1,
       resetAt: Date.now() + RATE_LIMIT.windowMs,

@@ -44,10 +44,12 @@ async function validateHost(url: string): Promise<void> {
     throw new RssCrawlingError('요청할 수 없는 주소입니다.');
   }
 
-  const { address } = await lookup(hostname);
-  if (isPrivateIp(address)) {
-    console.warn(`SSRF 차단 (DNS rebinding): ${hostname} → ${address}`);
-    throw new RssCrawlingError('요청할 수 없는 주소입니다.');
+  const addresses = await lookup(hostname, { all: true });
+  for (const { address } of addresses) {
+    if (isPrivateIp(address)) {
+      console.warn(`SSRF 차단 (DNS rebinding): ${hostname} → ${address}`);
+      throw new RssCrawlingError('요청할 수 없는 주소입니다.');
+    }
   }
 }
 

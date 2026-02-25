@@ -36,8 +36,9 @@
 ## 5. 쿼터 관리
 
 - [ ] Claude API 호출 전 쿼터 확인
-- [ ] 낙관적 쿼터 증가 (TOCTOU 방지)
-- [ ] **[TODO]** Supabase RPC로 원자적 check-and-increment 구현
+- [x] `generate-review`: Supabase RPC (`try_reserve_usage`)로 원자적 check-and-increment 구현
+- [x] `edit-review` / `smart-followup`: `getUserStatus` 읽기 전용 체크 (Haiku 호출, 쿼터 미소비)
+- [ ] `getUserStatus` null 반환 시 fail-closed 처리
 
 ## 6. 데이터 보호
 

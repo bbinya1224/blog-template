@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userStatus = await getUserStatus(session.user.email);
-    if (userStatus?.is_preview && (userStatus.usage_count || 0) >= 2) {
+    if (!userStatus || (userStatus.is_preview && (userStatus.usage_count || 0) >= 2)) {
       return ApiResponse.quotaExceeded();
     }
 
