@@ -116,22 +116,47 @@ export function ReviewList({ reviews }: ReviewListProps) {
           deleteMutation.reset();
           setDeleteTarget(null);
         }}
-        title="리뷰를 삭제할까요?"
         size="sm"
+        showCloseButton={false}
       >
-        <div className="space-y-6">
-          <p className="text-sm text-gray-600">
-            &apos;{deleteTarget?.storeName}&apos; 리뷰가 영구적으로 삭제됩니다.
-            이 작업은 되돌릴 수 없어요.
+        <div className="flex flex-col items-center pt-2 text-center">
+          <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-red-50">
+            <Trash2 className="size-5 text-red-400" />
+          </div>
+
+          <h3 className="mb-2 text-lg font-semibold text-stone-800">
+            리뷰를 삭제할까요?
+          </h3>
+
+          <p className="mb-1 text-sm text-stone-500">
+            <span className="font-medium text-stone-700">
+              &apos;{deleteTarget?.storeName}&apos;
+            </span>
+            {' '}리뷰가 영구적으로 삭제돼요.
+          </p>
+          <p className="mb-6 text-xs text-stone-400">
+            한 번 삭제하면 되돌릴 수 없어요.
           </p>
 
           {deleteMutation.isError && (
-            <p className="text-sm text-red-500">
+            <div className="mb-4 w-full rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-500">
               삭제에 실패했어요. 잠시 후 다시 시도해주세요.
-            </p>
+            </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="flex w-full gap-3">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="flex-1"
+              onClick={() => {
+                deleteMutation.reset();
+                setDeleteTarget(null);
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              유지할게요
+            </Button>
             <Button
               variant="danger"
               size="sm"
@@ -140,15 +165,6 @@ export function ReviewList({ reviews }: ReviewListProps) {
               isLoading={deleteMutation.isPending}
             >
               삭제하기
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="flex-1"
-              onClick={() => setDeleteTarget(null)}
-              disabled={deleteMutation.isPending}
-            >
-              취소
             </Button>
           </div>
         </div>

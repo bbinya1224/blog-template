@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Trash2 } from 'lucide-react';
 import { apiDelete } from '@/shared/api/httpClient';
 import { Modal } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
@@ -27,6 +28,11 @@ export function DeleteReviewButton({ reviewId, storeName }: DeleteReviewButtonPr
     },
   });
 
+  const handleClose = () => {
+    deleteMutation.reset();
+    setIsOpen(false);
+  };
+
   const { deleteModal } = REVIEW_MESSAGES;
 
   return (
@@ -42,20 +48,45 @@ export function DeleteReviewButton({ reviewId, storeName }: DeleteReviewButtonPr
 
       <Modal
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        title={deleteModal.title}
+        onClose={handleClose}
         size="sm"
+        showCloseButton={false}
       >
-        <div className="space-y-6">
-          <p className="text-sm text-gray-600">
-            {deleteModal.description(storeName)}
+        <div className="flex flex-col items-center pt-2 text-center">
+          <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-red-50">
+            <Trash2 className="size-5 text-red-400" />
+          </div>
+
+          <h3 className="mb-2 text-lg font-semibold text-stone-800">
+            {deleteModal.title}
+          </h3>
+
+          <p className="mb-1 text-sm text-stone-500">
+            <span className="font-medium text-stone-700">
+              &apos;{storeName}&apos;
+            </span>
+            {' '}리뷰가 영구적으로 삭제돼요.
+          </p>
+          <p className="mb-6 text-xs text-stone-400">
+            {deleteModal.warning}
           </p>
 
           {deleteMutation.isError && (
-            <p className="text-sm text-red-500">{deleteModal.error}</p>
+            <div className="mb-4 w-full rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-500">
+              {deleteModal.error}
+            </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="flex w-full gap-3">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="flex-1"
+              onClick={handleClose}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteModal.cancel}
+            </Button>
             <Button
               variant="danger"
               size="sm"
@@ -64,15 +95,6 @@ export function DeleteReviewButton({ reviewId, storeName }: DeleteReviewButtonPr
               isLoading={deleteMutation.isPending}
             >
               {deleteModal.confirm}
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="flex-1"
-              onClick={() => setIsOpen(false)}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteModal.cancel}
             </Button>
           </div>
         </div>
