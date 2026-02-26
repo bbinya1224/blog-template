@@ -40,7 +40,7 @@ export function WhitelistTable({
   };
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow">
+    <div className="rounded-lg bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-semibold">
           승인된 사용자 ({users.length}명)
@@ -91,11 +91,11 @@ export function WhitelistTable({
                   </td>
                   <td className="px-4 py-3 text-sm">
                     {user.is_preview !== false ? (
-                      <span className="inline-flex rounded-full bg-yellow-100 px-2 text-xs font-semibold leading-5 text-yellow-800">
+                      <span className="inline-flex rounded-full bg-yellow-100 px-2 text-xs/5 font-semibold text-yellow-800">
                         Preview
                       </span>
                     ) : (
-                      <span className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
+                      <span className="inline-flex rounded-full bg-green-100 px-2 text-xs/5 font-semibold text-green-800">
                         Premium
                       </span>
                     )}

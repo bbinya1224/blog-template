@@ -2,7 +2,7 @@ import {
   createPromptGetHandler,
   createPromptPutHandler,
   createPromptDeleteHandler,
-} from '@/features/admin/api/create-prompt-handler';
+} from '@/features/admin/api/createPromptHandler';
 import {
   getAllCategories,
   getAllPrompts,
@@ -10,7 +10,7 @@ import {
   createPrompt,
   updatePrompt,
   deletePrompt,
-} from '@/features/admin/api/prompt-repository';
+} from '@/features/admin/api/promptRepository';
 
 const deps = {
   getAllCategories,

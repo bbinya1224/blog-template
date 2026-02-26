@@ -4,4 +4,4 @@ export type {
   StructurePattern,
   KeywordProfile,
   VisualStructure,
-} from '@/shared/types/style-profile';
+} from '@/shared/types/styleProfile';

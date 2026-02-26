@@ -78,6 +78,14 @@
   - 사용하지 않는 CSS 자동 제거 (최종 CSS 크기 3KB)
   - 커스텀 디자인 시스템 구축 용이
 
+**Zustand (클라이언트 상태 관리)**
+
+- **선택 이유 — Top-down vs Bottom-up**:
+  - 이 앱의 채팅 상태는 step, subStep, selectedTopic, collectedInfo 등 여러 필드가 하나의 대화 흐름으로 묶여 있어, 개별 atom을 조합하는 bottom-up(Jotai)보다 단일 store로 응집하는 top-down(Zustand)이 자연스러움
+  - `getState()`로 렌더 사이클과 무관하게 항상 최신 상태를 동기적으로 읽을 수 있어, 비동기 흐름이 많은 채팅 앱에 적합
+  - Provider 없이 어디서든 store에 접근 가능 → 컴포넌트 트리 간소화
+  - 서버 상태는 tRPC/React Query로 분리되어 있어, 클라이언트 상태 전용으로 가벼운 Zustand가 적합
+
 ---
 
 ### Backend/API

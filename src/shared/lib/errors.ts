@@ -68,6 +68,24 @@ export class RetryExhaustedError extends AppError {
   }
 }
 
+export class HttpError extends AppError {
+  constructor(
+    message: string,
+    statusCode: number,
+    code?: string,
+  ) {
+    super(message, code || `HTTP_${statusCode}`, statusCode);
+    this.name = 'HttpError';
+  }
+}
+
+export class SSEError extends AppError {
+  constructor(message: string) {
+    super(message, 'SSE_ERROR', 502);
+    this.name = 'SSEError';
+  }
+}
+
 /**
  * Result 타입 - 함수형 에러 처리
  */

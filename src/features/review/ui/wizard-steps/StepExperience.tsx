@@ -1,147 +1,122 @@
 import type { ChangeEvent } from 'react';
 import type { ReviewPayload } from '@/shared/types/review';
+import {
+  KEYWORD_CHIPS,
+  STEP_EXPERIENCE_MESSAGES as MSG,
+} from '../../constants/messages';
 
 interface StepExperienceProps {
   form: ReviewPayload;
   onChange: (
-    field: keyof ReviewPayload
+    field: keyof ReviewPayload,
   ) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onAppendDraft: (text: string) => void;
 }
 
-const KEYWORD_CHIPS = [
-  '분위기가 깡패예요 ✨',
-  '가성비가 좋아요 💰',
-  '직원이 친절해요 😊',
-  '사진이 잘 나와요 📸',
-  '웨이팅이 있어요 ⏳',
-  '주차가 편해요 🚗',
-  '양이 정말 많아요 🍜',
-  '재료가 신선해요 🥬',
-  '특별한 날 가기 좋아요 🎉',
-  '혼밥하기 좋아요 🍚',
-];
-
-export const StepExperience = ({
+export function StepExperience({
   form,
   onChange,
   onAppendDraft,
-}: StepExperienceProps) => {
+}: StepExperienceProps) {
   const draftLength = form.user_draft?.length || 0;
   const minRecommended = 30;
   const isShort = draftLength > 0 && draftLength < minRecommended;
 
   return (
-    <div className='space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500'>
-      <div className='text-center space-y-3 mb-8'>
-        <div className='inline-block px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full mb-2'>
-          <span className='text-white font-bold text-sm'>
-            ⭐ 가장 중요한 단계입니다 (필수!)
-          </span>
+    <div className='animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-500'>
+      <div className='mb-8 space-y-3 text-center'>
+        <div className='mb-2 inline-block rounded-full bg-linear-to-r from-orange-500 to-pink-500 px-4 py-2'>
+          <span className='text-sm font-bold text-white'>{MSG.badge}</span>
         </div>
         <h2 className='text-3xl font-bold text-gray-900'>
-          어떤 점이 기억에 남으세요? <span className='text-red-500'>*</span>
+          {MSG.title} <span className='text-red-500'>*</span>
         </h2>
-        <p className='text-gray-500 text-lg'>
-          키워드를 선택하거나, 의식의 흐름대로 편하게 적어주세요.
-        </p>
+        <p className='text-lg text-gray-500'>{MSG.subtitle}</p>
       </div>
 
-      <div className='flex flex-wrap justify-center gap-2 mb-6'>
+      <div className='mb-6 flex flex-wrap justify-center gap-2'>
         {KEYWORD_CHIPS.map((chip) => (
           <button
             key={chip}
             type='button'
             onClick={() => onAppendDraft(chip)}
-            className='px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-600 text-sm hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all active:scale-95 shadow-sm'
+            className='rounded-full border border-gray-200 bg-white px-4 py-2 text-sm text-gray-600 shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 active:scale-95'
           >
             {chip}
           </button>
         ))}
       </div>
 
-      <div className='bg-gradient-to-br from-orange-50 to-pink-50 border-2 border-orange-200 rounded-2xl p-6 shadow-sm'>
-        <p className='text-base text-orange-900 font-bold mb-3 flex items-center gap-2'>
-          <span className='text-2xl'>✍️</span>
-          작성 팁 - 이렇게 작성하면 최고의 리뷰가 만들어져요!
+      <div className='rounded-2xl border-2 border-orange-200 bg-linear-to-br from-orange-50 to-pink-50 p-6 shadow-sm'>
+        <p className='mb-3 flex items-center gap-2 text-base font-bold text-orange-900'>
+          {MSG.tipTitle}
         </p>
-        <ul className='text-sm text-orange-800 space-y-2'>
+        <ul className='space-y-2 text-sm text-orange-800'>
+          {MSG.tips.map((tip, i) => (
+            <li key={i} className='flex items-start gap-2'>
+              <span className='mt-0.5 font-bold text-orange-500'>•</span>
+              <span>
+                {'prefix' in tip && tip.prefix}
+                <strong>{tip.emphasis}</strong>
+                {'example' in tip && ` ${tip.example}`}
+                {'detail' in tip && tip.detail}
+                {'suffix' in tip && tip.suffix}
+              </span>
+            </li>
+          ))}
           <li className='flex items-start gap-2'>
-            <span className='text-orange-500 font-bold mt-0.5'>•</span>
-            <span>
-              <strong>완벽한 문장이 아니어도 괜찮아요!</strong> (예:
-              &ldquo;파스타 좀 짰음, 근데 맛남&rdquo;)
-            </span>
-          </li>
-          <li className='flex items-start gap-2'>
-            <span className='text-orange-500 font-bold mt-0.5'>•</span>
-            <span>
-              <strong>맛, 양, 식감, 분위기, 서비스</strong> 등 떠오르는 대로
-              자유롭게 적어주세요
-            </span>
-          </li>
-          <li className='flex items-start gap-2'>
-            <span className='text-orange-500 font-bold mt-0.5'>•</span>
-            <span>
-              AI가 여러분의 경험을 <strong>1500자 이상의 생생한 리뷰</strong>로
-              확장합니다
-            </span>
-          </li>
-          <li className='flex items-start gap-2'>
-            <span className='text-orange-500 font-bold mt-0.5'>•</span>
-            <span className='text-orange-900 font-semibold'>
-              최소 30자 이상 작성을 권장드려요! 📝
+            <span className='mt-0.5 font-bold text-orange-500'>•</span>
+            <span className='font-semibold text-orange-900'>
+              {MSG.minRecommended}
             </span>
           </li>
         </ul>
       </div>
 
-      <div className='flex justify-between items-center text-sm'>
+      <div className='flex items-center justify-between text-sm'>
         <span
           className={`font-medium ${
             draftLength === 0
               ? 'text-red-500'
               : isShort
-              ? 'text-orange-600'
-              : 'text-green-600'
+                ? 'text-orange-600'
+                : 'text-green-600'
           }`}
         >
           {draftLength === 0 ? (
-            <>⚠️ 필수 항목입니다 - 경험을 작성해주세요!</>
+            <>{MSG.status.empty}</>
           ) : isShort ? (
-            <>
-              ⚠️ {draftLength}자 (최소 {minRecommended}자 이상 권장)
-            </>
+            <>{MSG.status.short(draftLength, minRecommended)}</>
           ) : (
-            <>✅ {draftLength}자 (충분해요!)</>
+            <>{MSG.status.enough(draftLength)}</>
           )}
         </span>
-        <span className='text-gray-400'>AI가 10배 이상 확장해드려요 ✨</span>
+        <span className='text-gray-400'>{MSG.expansion}</span>
       </div>
 
-      <div className='relative group'>
-        <div className='absolute -inset-1 bg-gradient-to-r from-orange-300 via-pink-300 to-rose-300 rounded-2xl blur-sm opacity-60 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-300'></div>
+      <div className='group relative'>
+        <div className='absolute -inset-1 rounded-2xl bg-linear-to-r from-orange-300 via-pink-300 to-rose-300 opacity-60 blur-sm transition duration-300 group-focus-within:opacity-100 group-hover:opacity-100'></div>
         <textarea
           id='user_draft'
           value={form.user_draft || ''}
           onChange={onChange('user_draft')}
-          placeholder='예: 창가 자리에 앉았는데 노을이 너무 예뻤음. 파스타는 좀 짰는데 스테이크는 입에서 살살 녹음. 사장님이 서비스로 주신 샐러드도 맛있었음. 분위기 진짜 좋아서 데이트하기 딱 좋았음...'
-          className='relative w-full h-96 p-6 rounded-xl bg-white border-2 border-gray-200 text-lg leading-relaxed focus:border-orange-500 focus:ring-4 focus:ring-orange-100 focus:outline-none resize-none shadow-lg transition-all'
+          placeholder={MSG.placeholder}
+          className='relative h-96 w-full resize-none rounded-xl border-2 border-gray-200 bg-white p-6 text-lg/relaxed shadow-lg transition-all focus:border-orange-500 focus:ring-4 focus:ring-orange-100 focus:outline-none'
           autoFocus
         />
       </div>
 
       {isShort && (
-        <div className='bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-lg animate-in slide-in-from-top-2 duration-300'>
-          <p className='text-sm text-orange-800 font-medium'>
-            💡 조금만 더 자세히 적어주시면 훨씬 생생한 리뷰가 완성돼요!
+        <div className='animate-in slide-in-from-top-2 rounded-r-lg border-l-4 border-orange-400 bg-orange-50 p-4 duration-300'>
+          <p className='text-sm font-medium text-orange-800'>
+            {MSG.shortWarning}
             <br />
-            <span className='text-orange-900 font-semibold'>
-              예: 맛은 어땠나요? 분위기는요? 서비스는요?
+            <span className='font-semibold text-orange-900'>
+              {MSG.shortExample}
             </span>
           </p>
         </div>
       )}
     </div>
   );
-};
+}

@@ -1,12 +1,8 @@
-/**
- * 스타일 분석 페이지 헤더
- */
-
 import { ANALYSIS_CONFIG } from '@/shared/config/constants';
 
 export const AnalysisPageHeader = () => (
   <section className="space-y-3">
-    <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-500">
+    <p className="text-sm font-semibold uppercase tracking-[0.3em] text-(--primary)">
       Step 1 · Analyze
     </p>
     <div className="space-y-2">

@@ -1,9 +1,8 @@
-export type { Review } from './model/review';
+export type { Review, ConversationMessage } from './model/review';
+
+export { useRecentReviews } from './model/useRecentReviews';
 
 export {
-  getReviews,
-  getReviewById,
-  updateReview,
-} from './api/review-repository';
-
-export { ReviewCard } from './ui/ReviewCard';
+  groupReviewsByMonth,
+  type MonthGroup,
+} from './lib/groupReviewsByMonth';

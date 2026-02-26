@@ -4,6 +4,6 @@ export * from './timeout';
 export * from './utils';
 export * from './validators';
 export * from './search';
-export * from './kakao-local';
-export * from './auth-utils';
+export * from './kakaoLocal';
+export * from './authUtils';
 export * from './supabase';

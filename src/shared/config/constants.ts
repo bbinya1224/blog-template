@@ -1,15 +1,9 @@
-/**
- * 애플리케이션 전역 상수
- */
-
-// LocalStorage 키
 export const STORAGE_KEYS = {
   STYLE_PROFILE: 'styleProfile',
   STYLE_PROFILE_DATE: 'styleProfileDate',
   LAST_REVIEW: 'lastReview',
 } as const;
 
-// API 엔드포인트
 export const API_ENDPOINTS = {
   FETCH_RSS: '/api/fetch-rss',
   ANALYZE_STYLE: '/api/analyze-style',
@@ -18,7 +12,6 @@ export const API_ENDPOINTS = {
   STYLE_PROFILE: '/api/style-profile',
 } as const;
 
-// 분석 설정
 export const ANALYSIS_CONFIG = {
   DEFAULT_MAX_POSTS: 15,
   MIN_POSTS: 5,
@@ -27,7 +20,6 @@ export const ANALYSIS_CONFIG = {
   RECOMMENDED_MAX: 20,
 } as const;
 
-// 상태 메시지
 export const STATUS_MESSAGES = {
   FETCHING_RSS: 'RSS에서 글을 읽어오는 중입니다…',
   ANALYZING_STYLE: '스타일 분석을 시작합니다…',
@@ -43,23 +35,7 @@ export const STATUS_MESSAGES = {
   EDIT_COMPLETE: '리뷰가 수정되었습니다!',
 } as const;
 
-// 사용량 제한
 export const USAGE_LIMITS = {
   PREVIEW_MAX_USES: 2,
 } as const;
 
-// FAQ 목록
-export const FAQ_ITEMS = [
-  {
-    q: '정말 $3만 내면 끝인가요?',
-    a: '네, 맞습니다. API 비용은 제가 부담합니다. 커피 한 잔만 사주세요!',
-  },
-  {
-    q: '어떻게 시작하나요?',
-    a: 'Buy Me a Coffee로 $3를 후원하면서 메시지에 이메일을 남겨주시면, 제가 확인 후 1~2시간 내로 승인해드립니다.',
-  },
-  {
-    q: '무료 체험이 가능한가요?',
-    a: '네! 구글 계정으로 로그인 하시면 무료로 스타일 체험 분석 부터 리뷰 생성까지! 2번의 테스트가 가능합니다.',
-  },
-] as const;

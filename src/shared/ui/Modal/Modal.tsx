@@ -52,10 +52,12 @@ export function Modal({
         }}
         aria-describedby={undefined}
       >
-        {title && (
+        {title ? (
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
           </DialogHeader>
+        ) : (
+          <DialogTitle className="sr-only">알림</DialogTitle>
         )}
 
         <div className={cn(!title && 'pt-6')}>{children}</div>

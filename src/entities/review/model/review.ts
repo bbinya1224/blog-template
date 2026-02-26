@@ -1,7 +1,15 @@
+export interface ConversationMessage {
+  role: 'assistant' | 'user';
+  content: string;
+  type: string;
+}
+
 export interface Review {
-  id: string; // filename without extension
+  id: string;
   storeName: string;
   date: string;
+  createdAt: string;
   content: string;
-  preview: string; // First few lines or summary
+  characterCount: number;
+  conversation: ConversationMessage[];
 }

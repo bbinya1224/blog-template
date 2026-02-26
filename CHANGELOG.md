@@ -2,6 +2,70 @@
 
 All notable changes to this project will be documented in this file.
 
+
+
+<!-- CHANGELOG:AUTO:START -->
+## [2026.02.26] - feat: 리뷰 저니 페이지 — 대화 내역 영속화 + 상세 페이지 리디자인
+
+### ✨ New Features
+- 리뷰 저니 페이지 — 대화 내역 영속화 + 상세 페이지 리디자인
+- 비로그인으로 진입시 로그인 CTA 추가 및 뒤로가기 에러 개선 (#41)
+- 스타일 분석 카드 타이핑 애니메이션 + 코드 품질 개선 (#40)
+- Chat UI v2 리디자인 및 코드 품질 개선
+- 스마트 후속 질문 기능 추가
+- 뇌과학 기반 감각별 질문 리디자인
+- widgets 레이어 추가 (app-shell, sidebar)
+- 채팅 API 클라이언트, 카테고리 설정, Mock 데이터 추가
+- 채팅 UI 컴포넌트 구현 (Claude Desktop 스타일)
+- add chat API routes
+- add constants and utilities
+- add domain-specific hooks
+- add message processor hook
+- add core chat hooks
+- add conversation types and Jotai atoms
+- add chat-message entity types
+
+### 🐛 Bug Fixes
+- 보안 패치 — SSRF, 쿼터 우회, Admin rate limit (#43)
+- 코드 리뷰 피드백 반영 — smart-followup 버그 수정
+- PR 피드백 반영 - className 중복 공백, 타입 안전성, 접근성 개선
+- 사이드바 UX 개선 - 아이콘 위치 고정 및 접힌 상태 클릭 지원
+- ESLint 수정, Tailwind canonical 클래스 변환, 주석 정리
+- 3차 코드리뷰 피드백 반영
+- 보안 이슈 수정 - 인증 이메일 사용 및 에러 메시지 마스킹
+- 2차 코드리뷰 피드백 반영
+- 코드리뷰 피드백 반영
+
+### ♻️ Refactoring
+- 리뷰 보관함 Compact List + Timeline + 삭제 기능 (#42)
+- chat-review 관심사 분리 — sidebar FSD 위반 해소 (#39)
+- tRPC 제거 + 공유 HTTP 클라이언트 도입 (#38)
+- Jotai → Zustand 상태 관리 마이그레이션 (#36)
+- 코드 품질 개선 및 미사용 코드 정리 (#35)
+- 온보딩 단계 제거 및 채팅 UX 개선
+- useIsDesktop 훅 및 OrotiLogo 공유 컴포넌트 추출
+
+### ⚡ Performance
+- Anthropic prompt caching 적용
+
+### 📝 Documentation
+- PROJECT_OVERVIEW => Zustand 추가
+
+### 🔧 Chores
+- Prettier + Tailwind CSS 자동 정렬/정리 설정
+
+### 📦 Other Changes
+- modify: 사용하지않는 함수들, 스토리북 등 정리 (#37)
+- Modify/sse chat ux implement (#34)
+- modify: 코드리뷰 반영
+- modify: 스타일 수정
+- modify: 코드리뷰반영
+- modify:  채팅컨테이너, 메세지 컴포넌트 스타일 작업
+- modify: 일부 UI 스타일 수정
+- modify: 오롯이 리브랜딩
+
+<!-- CHANGELOG:AUTO:END -->
+
 ## [2026.01.14] - Kakao Local API Migration
 
 ### 🚀 Highlights

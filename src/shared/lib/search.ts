@@ -1,7 +1,7 @@
 import { tavily } from '@tavily/core';
 import { AppError } from '@/shared/lib/errors';
 import { withTimeoutAndRetry } from '@/shared/lib/timeout';
-import { searchKakaoPlace, type KakaoPlaceInfo } from './kakao-local';
+import { searchKakaoPlace, type KakaoPlaceInfo } from './kakaoLocal';
 
 let tavilyClient: ReturnType<typeof tavily> | null = null;
 

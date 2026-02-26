@@ -1,10 +1,5 @@
-/**
- * Feature: Analyze Style
- * Public API exports
- */
-
-// Client-side functions
-export { analyzeStyle, saveStyleProfileToStorage } from './api/analyze-style-api';
+// Client-side functions (delegated to shared layer)
+export { analyzeStyle, saveStyleProfileToStorage } from '@/shared/api/styleAnalysisClient';
 
 // UI Components
 export { AnalysisPageHeader } from './ui/AnalysisPageHeader';

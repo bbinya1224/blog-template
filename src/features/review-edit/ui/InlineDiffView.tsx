@@ -1,6 +1,6 @@
 'use client';
 
-import { calculateDiffStats } from '../lib/diff-calculator';
+import { calculateDiffStats } from '../lib/diffCalculator';
 import { DiffHighlight } from './DiffHighlight';
 
 interface InlineDiffViewProps {
@@ -52,7 +52,7 @@ export function InlineDiffView({
           <h4 className='text-sm font-semibold text-gray-700 border-b pb-2'>
             수정 전
           </h4>
-          <div className='bg-gray-50 rounded-lg p-4 text-sm leading-relaxed max-h-[400px] overflow-y-auto'>
+          <div className='bg-gray-50 rounded-lg p-4 text-sm/relaxed max-h-[400px] overflow-y-auto'>
             <DiffHighlight
               content={originalContent}
               newContent={editedContent}
@@ -66,7 +66,7 @@ export function InlineDiffView({
           <h4 className='text-sm font-semibold text-gray-700 border-b pb-2'>
             수정 후
           </h4>
-          <div className='bg-gray-50 rounded-lg p-4 text-sm leading-relaxed max-h-[400px] overflow-y-auto'>
+          <div className='bg-gray-50 rounded-lg p-4 text-sm/relaxed max-h-[400px] overflow-y-auto'>
             <DiffHighlight
               content={editedContent}
               oldContent={originalContent}

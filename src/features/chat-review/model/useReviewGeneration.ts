@@ -1,0 +1,132 @@
+'use client';
+
+import { useCallback } from 'react';
+import { useChatStore } from './store';
+import { handleReviewEdited } from '../lib/step-handlers';
+import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
+import { apiSSE, SSEError } from '@/shared/api/sseClient';
+
+export function useReviewGeneration() {
+  const collectedInfo = useChatStore((s) => s.collectedInfo);
+  const styleProfile = useChatStore((s) => s.styleProfile);
+  const generatedReview = useChatStore((s) => s.generatedReview);
+  const setGeneratedReview = useChatStore((s) => s.setGeneratedReview);
+  const setStep = useChatStore((s) => s.setStep);
+  const dispatchActions = useChatStore((s) => s.dispatchActions);
+  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
+  const updateMessage = useChatStore((s) => s.updateMessage);
+  const setSavedReviewId = useChatStore((s) => s.setSavedReviewId);
+
+  const generateReview = useCallback(async () => {
+    const msgId = addAssistantMessage('', 'text', undefined, {
+      streaming: true,
+    });
+
+    try {
+      let receivedReviewId: string | null = null;
+
+      const fullText = await apiSSE(
+        '/api/chat/generate-review',
+        { payload: collectedInfo, styleProfile },
+        {
+          onToken: (text) => {
+            updateMessage(msgId, {
+              content: text,
+              type: 'text',
+              metadata: { streaming: true },
+            });
+          },
+          onDone: (_fullText, data) => {
+            receivedReviewId = (data?.reviewId as string) ?? null;
+          },
+        },
+      );
+
+      setGeneratedReview(fullText);
+      setSavedReviewId(receivedReviewId);
+      setStep('review-edit');
+
+      updateMessage(msgId, {
+        type: 'review-preview',
+        content: MESSAGES.reviewEdit.complete,
+        metadata: { review: fullText, characterCount: fullText.length },
+      });
+    } catch (error) {
+      console.error('[generateReview] Failed:', error);
+      if (error instanceof SSEError) {
+        addAssistantMessage(
+          MESSAGES.error.network,
+          'choice',
+          CHOICE_OPTIONS.errorRecovery,
+        );
+      } else {
+        addAssistantMessage(MESSAGES.error.unknown, 'text');
+      }
+    }
+  }, [
+    collectedInfo,
+    styleProfile,
+    setGeneratedReview,
+    setSavedReviewId,
+    setStep,
+    addAssistantMessage,
+    updateMessage,
+  ]);
+
+  const editReview = useCallback(
+    async (request: string) => {
+      const msgId = addAssistantMessage('', 'text', undefined, {
+        streaming: true,
+      });
+
+      try {
+        const fullText = await apiSSE(
+          '/api/chat/edit-review',
+          {
+            originalReview: generatedReview || '',
+            editRequest: request,
+            styleProfile,
+          },
+          {
+            onToken: (text) => {
+              updateMessage(msgId, {
+                content: text,
+                type: 'text',
+                metadata: { streaming: true },
+              });
+            },
+          },
+        );
+
+        updateMessage(msgId, {
+          type: 'review-preview',
+          content: MESSAGES.reviewEdit.complete,
+          metadata: { review: fullText, characterCount: fullText.length },
+        });
+
+        const result = handleReviewEdited(fullText);
+        dispatchActions(result.actions);
+      } catch (error) {
+        console.error('[editReview] Failed:', error);
+        if (error instanceof SSEError) {
+          addAssistantMessage(
+            MESSAGES.error.network,
+            'choice',
+            CHOICE_OPTIONS.errorRecovery,
+          );
+        } else {
+          addAssistantMessage(MESSAGES.error.unknown, 'text');
+        }
+      }
+    },
+    [
+      generatedReview,
+      styleProfile,
+      dispatchActions,
+      addAssistantMessage,
+      updateMessage,
+    ],
+  );
+
+  return { generateReview, editReview };
+}

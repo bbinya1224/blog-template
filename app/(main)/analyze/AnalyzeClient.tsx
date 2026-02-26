@@ -8,6 +8,7 @@ import {
   type FormEvent,
 } from 'react';
 import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
 import { SectionCard } from '@/shared/ui/SectionCard';
 import { StatusMessage } from '@/shared/ui/StatusMessage';
 import { DynamicMessage } from '@/shared/ui/DynamicMessage';
@@ -21,9 +22,9 @@ import {
 } from '@/features/analyze-style';
 import { loadStyleProfile } from '@/features/review';
 import { PAGE_TEXTS } from '@/features/analyze-style/constants/texts';
-import type { StyleProfile } from '@/shared/types/style-profile';
+import type { StyleProfile } from '@/shared/types/styleProfile';
 import type { Session } from 'next-auth';
-import { trpc } from '@/shared/api/trpc';
+import { apiPost } from '@/shared/api/httpClient';
 
 interface AnalyzeClientPageProps {
   user: Session['user'];
@@ -51,8 +52,14 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
     });
   }, []);
 
-  const fetchRssMutation = trpc.rss.fetch.useMutation();
-  const analyzeStyleMutation = trpc.style.analyze.useMutation({
+  const fetchRssMutation = useMutation({
+    mutationFn: (input: { rssUrl: string; maxPosts: number }) =>
+      apiPost<{ success: boolean }>('/api/fetch-rss', input),
+  });
+
+  const analyzeStyleMutation = useMutation({
+    mutationFn: () =>
+      apiPost<{ styleProfile: StyleProfile; message: string }>('/api/analyze-style'),
     onSuccess: (data) => {
       setStyleProfile(data.styleProfile);
       saveStyleProfileToStorage(data.styleProfile);
@@ -98,7 +105,8 @@ export default function AnalyzeClientPage({ user }: AnalyzeClientPageProps) {
         console.error('Analysis failed:', error);
       }
     },
-    [rssUrl, maxPosts, fetchRssMutation, analyzeStyleMutation],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mutateAsync is stable from useMutation
+    [rssUrl, maxPosts, fetchRssMutation.mutateAsync, analyzeStyleMutation.mutateAsync],
   );
 
   const handleNextStep = useCallback(() => {
