@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
-import { Review } from '@/entities/review/model/review';
+import type { Review, ConversationMessage } from '@/entities/review/model/review';
 
 /**
  * 현재 로그인한 사용자의 리뷰 목록 조회
@@ -34,6 +34,7 @@ export async function getReviews(): Promise<Review[]> {
         createdAt: review.created_at,
         content,
         characterCount: content.length,
+        conversation: [],
       };
     });
   } catch (error) {
@@ -73,6 +74,7 @@ export async function getReviewById(id: string): Promise<Review | null> {
       createdAt: data.created_at,
       content,
       characterCount: content.length,
+      conversation: (data.conversation as ConversationMessage[] | null) ?? [],
     };
   } catch (error) {
     console.error('리뷰 조회 중 오류:', error);
@@ -97,7 +99,11 @@ export async function deleteReview(id: string, userEmail: string): Promise<void>
   }
 }
 
-export async function updateReview(id: string, content: string): Promise<void> {
+export async function updateReview(
+  id: string,
+  content: string,
+  conversation?: ConversationMessage[]
+): Promise<void> {
   try {
     const session = await getServerSession(authOptions);
 
@@ -105,12 +111,18 @@ export async function updateReview(id: string, content: string): Promise<void> {
       throw new Error('인증 필요');
     }
 
+    const updateData: Record<string, unknown> = {
+      review_content: content,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (conversation !== undefined) {
+      updateData.conversation = conversation;
+    }
+
     const { error } = await supabaseAdmin
       .from('user_reviews')
-      .update({
-        review_content: content,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', id)
       .eq('user_email', session.user.email);
 
