@@ -3,11 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+
 <!-- CHANGELOG:AUTO:START -->
-## [2026.02.25] - refactor: 리뷰 보관함 Compact List + Timeline + 삭제 기능
+## [2026.02.26] - feat: 리뷰 저니 페이지 — 대화 내역 영속화 + 상세 페이지 리디자인
 
 ### ✨ New Features
-- 비로그인으로 진입시 로그인 CTA 추가 및 뒤로가기 에러 개선
+- 리뷰 저니 페이지 — 대화 내역 영속화 + 상세 페이지 리디자인
+- 비로그인으로 진입시 로그인 CTA 추가 및 뒤로가기 에러 개선 (#41)
 - 스타일 분석 카드 타이핑 애니메이션 + 코드 품질 개선 (#40)
 - Chat UI v2 리디자인 및 코드 품질 개선
 - 스마트 후속 질문 기능 추가
@@ -24,6 +26,7 @@ All notable changes to this project will be documented in this file.
 - add chat-message entity types
 
 ### 🐛 Bug Fixes
+- 보안 패치 — SSRF, 쿼터 우회, Admin rate limit (#43)
 - 코드 리뷰 피드백 반영 — smart-followup 버그 수정
 - PR 피드백 반영 - className 중복 공백, 타입 안전성, 접근성 개선
 - 사이드바 UX 개선 - 아이콘 위치 고정 및 접힌 상태 클릭 지원
@@ -34,7 +37,7 @@ All notable changes to this project will be documented in this file.
 - 코드리뷰 피드백 반영
 
 ### ♻️ Refactoring
-- 리뷰 보관함 Compact List + Timeline + 삭제 기능
+- 리뷰 보관함 Compact List + Timeline + 삭제 기능 (#42)
 - chat-review 관심사 분리 — sidebar FSD 위반 해소 (#39)
 - tRPC 제거 + 공유 HTTP 클라이언트 도입 (#38)
 - Jotai → Zustand 상태 관리 마이그레이션 (#36)
@@ -52,7 +55,6 @@ All notable changes to this project will be documented in this file.
 - Prettier + Tailwind CSS 자동 정렬/정리 설정
 
 ### 📦 Other Changes
-- 보안부분수정
 - modify: 사용하지않는 함수들, 스토리북 등 정리 (#37)
 - Modify/sse chat ux implement (#34)
 - modify: 코드리뷰 반영
