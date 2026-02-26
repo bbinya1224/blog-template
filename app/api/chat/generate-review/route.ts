@@ -56,6 +56,14 @@ export async function POST(req: NextRequest) {
 
     const authenticatedEmail = session.user.email;
 
+    // 원자적 쿼터 확인 + 증가 (TOCTOU 레이스 컨디션 방지)
+    const { data: reserved, error: rpcError } = await supabaseAdmin.rpc('try_reserve_usage', {
+      p_email: authenticatedEmail,
+    });
+    if (rpcError || !reserved) {
+      return ApiResponse.quotaExceeded();
+    }
+
     const body = await req.json();
     const parsed = generateReviewInputSchema.safeParse(body);
 

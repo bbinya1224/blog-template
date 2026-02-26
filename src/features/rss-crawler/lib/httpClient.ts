@@ -1,11 +1,57 @@
 import axios from 'axios';
+import { lookup } from 'dns/promises';
+import { isIP } from 'net';
 import { withRetry } from '@/shared/lib/retry';
+import { RssCrawlingError } from '@/shared/lib/errors';
 import { USER_AGENTS, RSS_TIMEOUT_MS, RSS_RETRY_OPTIONS } from './constants';
 import {
   enforceHttps,
   downgradeToHttp,
   isProtocolError,
 } from './urlUtils';
+
+function isPrivateIp(ip: string): boolean {
+  const normalized = ip.startsWith('::ffff:') ? ip.slice(7) : ip;
+
+  const patterns = [
+    /^127\./,
+    /^10\./,
+    /^172\.(1[6-9]|2\d|3[01])\./,
+    /^192\.168\./,
+    /^169\.254\./,
+    /^0\./,
+    /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./,
+    /^::1$/,
+    /^f[cd]/i,
+    /^fe[89ab]/i,
+    /^localhost$/i,
+  ];
+
+  return patterns.some((p) => p.test(normalized));
+}
+
+async function validateHost(url: string): Promise<void> {
+  const { hostname } = new URL(url);
+
+  if (isIP(hostname)) {
+    if (isPrivateIp(hostname)) {
+      throw new RssCrawlingError('요청할 수 없는 주소입니다.');
+    }
+    return;
+  }
+
+  if (isPrivateIp(hostname)) {
+    throw new RssCrawlingError('요청할 수 없는 주소입니다.');
+  }
+
+  const addresses = await lookup(hostname, { all: true });
+  for (const { address } of addresses) {
+    if (isPrivateIp(address)) {
+      console.warn(`SSRF 차단 (DNS rebinding): ${hostname} → ${address}`);
+      throw new RssCrawlingError('요청할 수 없는 주소입니다.');
+    }
+  }
+}
 
 export const getRandomUserAgent = (): string =>
   USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
@@ -62,6 +108,8 @@ export const fetchHtml = async (
   url: string,
   referer?: string,
 ): Promise<string> => {
+  await validateHost(url);
+
   return withProtocolFallback(url, (resolvedUrl) =>
     withRetry(
       () =>

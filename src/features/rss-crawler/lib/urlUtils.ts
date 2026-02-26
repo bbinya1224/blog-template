@@ -8,10 +8,13 @@ export const parseNaverBlogUrl = (
     const [pathBlogId, pathLogNo] = u.pathname.split('/').filter(Boolean);
     const searchLogNo = u.searchParams.get('logNo');
 
-    return {
-      blogId: queryBlogId || pathBlogId,
-      logNo: pathLogNo || searchLogNo || undefined,
-    };
+    const blogId = queryBlogId || pathBlogId;
+    const logNo = pathLogNo || searchLogNo || undefined;
+
+    if (blogId && !/^[\w-]+$/.test(blogId)) return {};
+    if (logNo && !/^\d+$/.test(logNo)) return {};
+
+    return { blogId, logNo };
   } catch {
     return {};
   }

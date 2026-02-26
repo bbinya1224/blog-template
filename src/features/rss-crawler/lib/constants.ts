@@ -28,6 +28,15 @@ export const MOBILE_POST_SELECTORS = [
   'article',
 ];
 
+// 허용된 RSS 피드 호스트 — 새 블로그 플랫폼 추가 시 여기에 추가
+export const ALLOWED_RSS_HOSTS = ['rss.blog.naver.com'];
+
+// RSS에서 추출한 포스트 링크 중 fetch를 허용하는 호스트
+export const ALLOWED_POST_HOSTS = [
+  'blog.naver.com',
+  'm.blog.naver.com',
+];
+
 export const RSS_TIMEOUT_MS = 20000;
 
 export const RSS_RETRY_OPTIONS = {
