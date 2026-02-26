@@ -63,6 +63,7 @@ export function useChatOrchestration({
       isInitializedRef.current = false;
       prevStepRef.current = null;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- messages 배열 참조 대신 length만 추적하여 불필요한 재실행 방지
   }, [messages.length]);
 
   // Handle step changes — getState()로 항상 최신 상태 접근 (stateRef 제거)

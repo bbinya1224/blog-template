@@ -118,7 +118,7 @@ export function AnalyzeStyleContent({
         );
         break;
     }
-  }, [step, addAssistantMessage, userName, storeUserName, router]);
+  }, [step, addAssistantMessage, userName, storeUserName]);
 
   // Custom choice handler - intercepts page-specific actions
   const handleChoiceSelect = useCallback(

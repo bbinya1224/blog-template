@@ -25,13 +25,17 @@ export async function getReviews(): Promise<Review[]> {
       return [];
     }
 
-    return (data || []).map((review) => ({
-      id: review.id,
-      storeName: review.restaurant_name,
-      date: review.visit_date || review.created_at.split('T')[0],
-      content: review.review_content,
-      preview: review.review_content.slice(0, 150) + '...',
-    }));
+    return (data || []).map((review) => {
+      const content = review.review_content ?? '';
+      return {
+        id: review.id,
+        storeName: review.restaurant_name,
+        date: review.visit_date || review.created_at.split('T')[0],
+        createdAt: review.created_at,
+        content,
+        characterCount: content.length,
+      };
+    });
   } catch (error) {
     console.error('리뷰 조회 중 오류:', error);
     return [];
@@ -61,12 +65,14 @@ export async function getReviewById(id: string): Promise<Review | null> {
       return null;
     }
 
+    const content = data.review_content ?? '';
     return {
       id: data.id,
       storeName: data.restaurant_name,
       date: data.visit_date || data.created_at.split('T')[0],
-      content: data.review_content,
-      preview: data.review_content.slice(0, 150) + '...',
+      createdAt: data.created_at,
+      content,
+      characterCount: content.length,
     };
   } catch (error) {
     console.error('리뷰 조회 중 오류:', error);
@@ -74,9 +80,23 @@ export async function getReviewById(id: string): Promise<Review | null> {
   }
 }
 
-/**
- * 리뷰 내용 수정
- */
+export async function deleteReview(id: string, userEmail: string): Promise<void> {
+  const { data, error } = await supabaseAdmin
+    .from('user_reviews')
+    .delete()
+    .eq('id', id)
+    .eq('user_email', userEmail)
+    .select('id');
+
+  if (error) {
+    throw new Error('리뷰 삭제 실패: ' + error.message);
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error('삭제할 리뷰를 찾을 수 없습니다.');
+  }
+}
+
 export async function updateReview(id: string, content: string): Promise<void> {
   try {
     const session = await getServerSession(authOptions);
