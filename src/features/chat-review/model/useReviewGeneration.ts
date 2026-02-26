@@ -15,6 +15,7 @@ export function useReviewGeneration() {
   const dispatchActions = useChatStore((s) => s.dispatchActions);
   const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
   const updateMessage = useChatStore((s) => s.updateMessage);
+  const setSavedReviewId = useChatStore((s) => s.setSavedReviewId);
 
   const generateReview = useCallback(async () => {
     const msgId = addAssistantMessage('', 'text', undefined, {
@@ -22,6 +23,8 @@ export function useReviewGeneration() {
     });
 
     try {
+      let receivedReviewId: string | null = null;
+
       const fullText = await apiSSE(
         '/api/chat/generate-review',
         { payload: collectedInfo, styleProfile },
@@ -33,10 +36,14 @@ export function useReviewGeneration() {
               metadata: { streaming: true },
             });
           },
+          onDone: (_fullText, data) => {
+            receivedReviewId = (data?.reviewId as string) ?? null;
+          },
         },
       );
 
       setGeneratedReview(fullText);
+      setSavedReviewId(receivedReviewId);
       setStep('review-edit');
 
       updateMessage(msgId, {
@@ -60,6 +67,7 @@ export function useReviewGeneration() {
     collectedInfo,
     styleProfile,
     setGeneratedReview,
+    setSavedReviewId,
     setStep,
     addAssistantMessage,
     updateMessage,

@@ -4,9 +4,10 @@ import {
   withQuota,
   type AuthenticatedRequest,
 } from '@/shared/api/middleware';
+import type { ConversationMessage } from '@/entities/review';
 
 type UpdateReviewDeps = {
-  updateReview: (id: string, content: string) => Promise<void>;
+  updateReview: (id: string, content: string, conversation?: ConversationMessage[]) => Promise<void>;
   incrementUsageCount: (email: string) => Promise<void>;
 };
 
@@ -24,13 +25,13 @@ export const createUpdateReviewHandler = (deps: UpdateReviewDeps) => {
         return ApiResponse.validationError('잘못된 요청입니다.');
       }
       const { id } = await context.params;
-      const { content } = await request.json();
+      const { content, conversation } = await request.json();
 
       if (!content) {
         return ApiResponse.validationError('content는 필수입니다.');
       }
 
-      await deps.updateReview(decodeURIComponent(id), content);
+      await deps.updateReview(decodeURIComponent(id), content, conversation);
       await deps.incrementUsageCount(request.user.email);
 
       return ApiResponse.success({ id }, '리뷰가 수정되었습니다.');

@@ -24,6 +24,8 @@ import {
 } from '../lib/step-handlers';
 import { MESSAGES } from '../constants/messages';
 import { isPlaceCardMessage } from '@/entities/chat-message';
+import { filterConversationMessages } from '../lib/filterConversationMessages';
+import { apiPut } from '@/shared/api/httpClient';
 
 interface UseChatHandlersProps {
   userEmail: string;
@@ -164,6 +166,24 @@ export function useChatHandlers({
         const result = await processMessage(content);
         if (result) {
           dispatchActions(result.actions);
+
+          const isCompleting = result.actions.some(
+            (a) => a.type === 'GO_TO_STEP' && a.payload === 'complete',
+          );
+
+          if (isCompleting) {
+            const { savedReviewId, generatedReview, messages: allMessages } =
+              useChatStore.getState();
+            if (savedReviewId && generatedReview) {
+              const conversation = filterConversationMessages(allMessages);
+              apiPut(`/api/reviews/${encodeURIComponent(savedReviewId)}`, {
+                content: generatedReview,
+                conversation,
+              }).catch((err) => {
+                console.error('대화 내역 저장 실패:', err);
+              });
+            }
+          }
         }
       } catch (error) {
         console.error('Message handling error:', error);

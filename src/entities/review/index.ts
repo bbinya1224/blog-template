@@ -1,4 +1,4 @@
-export type { Review } from './model/review';
+export type { Review, ConversationMessage } from './model/review';
 
 export { useRecentReviews } from './model/useRecentReviews';
 

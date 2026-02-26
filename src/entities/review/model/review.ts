@@ -1,3 +1,9 @@
+export interface ConversationMessage {
+  role: 'assistant' | 'user';
+  content: string;
+  type: string;
+}
+
 export interface Review {
   id: string;
   storeName: string;
@@ -5,4 +11,5 @@ export interface Review {
   createdAt: string;
   content: string;
   characterCount: number;
+  conversation: ConversationMessage[];
 }

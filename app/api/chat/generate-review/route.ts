@@ -165,14 +165,19 @@ export async function POST(req: NextRequest) {
           // Use finalText if available, otherwise use accumulated fullText
           const reviewText = finalText || fullText;
 
-          // 리뷰 저장
-          await supabaseAdmin.from('reviews').insert({
-            user_email: authenticatedEmail,
-            content: reviewText,
-            payload: payload,
-            character_count: reviewText.length,
-            created_at: new Date().toISOString(),
-          });
+          const { data: insertedReview } = await supabaseAdmin
+            .from('user_reviews')
+            .insert({
+              user_email: authenticatedEmail,
+              restaurant_name: payload.name,
+              visit_date: payload.date || new Date().toISOString().split('T')[0],
+              review_content: reviewText,
+              metadata: payload,
+              character_count: reviewText.length,
+              created_at: new Date().toISOString(),
+            })
+            .select('id')
+            .single();
 
           console.log(
             `\n✅ [Review Gen API] 리뷰 생성 완료: ${reviewText.length}자`
@@ -181,6 +186,7 @@ export async function POST(req: NextRequest) {
           const doneData = `event: done\ndata: ${JSON.stringify({
             fullText: reviewText,
             characterCount: reviewText.length,
+            reviewId: insertedReview?.id ?? null,
           })}\n\n`;
           controller.enqueue(encoder.encode(doneData));
 
@@ -228,15 +234,23 @@ function createMockReviewResponse(
         controller.enqueue(encoder.encode(data));
       }
 
-      // Mock 리뷰 저장
+      let reviewId: string | null = null;
+
       try {
-        await supabaseAdmin.from('reviews').insert({
-          user_email: userEmail,
-          content: fullText,
-          payload: payload,
-          character_count: fullText.length,
-          created_at: new Date().toISOString(),
-        });
+        const { data: insertedReview } = await supabaseAdmin
+          .from('user_reviews')
+          .insert({
+            user_email: userEmail,
+            restaurant_name: payload.name,
+            visit_date: payload.date || new Date().toISOString().split('T')[0],
+            review_content: fullText,
+            metadata: payload,
+            character_count: fullText.length,
+            created_at: new Date().toISOString(),
+          })
+          .select('id')
+          .single();
+        reviewId = insertedReview?.id ?? null;
         console.log(
           `\n✅ [Review Gen API] MOCK 리뷰 저장 완료: ${fullText.length}자`
         );
@@ -247,6 +261,7 @@ function createMockReviewResponse(
       const doneData = `event: done\ndata: ${JSON.stringify({
         fullText,
         characterCount: fullText.length,
+        reviewId,
       })}\n\n`;
       controller.enqueue(encoder.encode(doneData));
       controller.close();
