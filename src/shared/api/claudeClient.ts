@@ -3,6 +3,8 @@ import { AppError, RateLimitError } from '@/shared/lib/errors';
 import { withTimeoutAndRetry } from '@/shared/lib/timeout';
 import { isRetryableError } from '@/shared/lib/retry';
 import type { ReviewPayload } from '@/shared/types/review';
+import { sanitizeUserInput, wrapInXmlTag } from '@/shared/lib/sanitizeInput';
+import { withPromptDefense } from '@/shared/lib/promptDefense';
 
 export const CLAUDE_SONNET = 'claude-sonnet-4-5-20250929';
 export const CLAUDE_HAIKU = 'claude-haiku-4-5-20251001';
@@ -172,16 +174,19 @@ export const generateReviewWithClaude = async (
   systemPrompt: string,
   userPromptTemplate: string,
 ): Promise<string> => {
+  const wrap = (field: string, value: string) =>
+    wrapInXmlTag('user_input', sanitizeUserInput(value), { field });
+
   const userPrompt = userPromptTemplate
     .replace('{스타일 프로필 JSON}', styleProfileJson)
-    .replace('{name}', reviewData.name)
-    .replace('{location}', reviewData.location)
+    .replace('{name}', wrap('name', reviewData.name))
+    .replace('{location}', wrap('location', reviewData.location))
     .replace('{date}', reviewData.date)
-    .replace('{menu}', reviewData.menu)
-    .replace('{companion}', reviewData.companion)
-    .replace('{pros}', reviewData.pros || '')
-    .replace('{cons}', reviewData.cons || '')
-    .replace('{extra}', reviewData.extra || '')
+    .replace('{menu}', wrap('menu', reviewData.menu))
+    .replace('{companion}', wrap('companion', reviewData.companion))
+    .replace('{pros}', wrap('pros', reviewData.pros || ''))
+    .replace('{cons}', wrap('cons', reviewData.cons || ''))
+    .replace('{extra}', wrap('extra', reviewData.extra || ''))
     .replace(
       '{kakao_place_info}',
       reviewData.kakao_place_info || '카카오 정보 없음',
@@ -191,9 +196,9 @@ export const generateReviewWithClaude = async (
       reviewData.tavily_search_result_context || '정보 없음',
     )
     .replace('{writing_samples}', reviewData.writing_samples || '샘플 없음')
-    .replace('{user_draft}', reviewData.user_draft || '');
+    .replace('{user_draft}', wrap('user_draft', reviewData.user_draft || ''));
 
-  return callClaude(systemPrompt, userPrompt, CLAUDE_SONNET, 4096);
+  return callClaude(withPromptDefense(systemPrompt), userPrompt, CLAUDE_SONNET, 4096);
 };
 
 export const editReviewWithClaude = async (
@@ -203,9 +208,9 @@ export const editReviewWithClaude = async (
   promptTemplate: string,
 ): Promise<string> => {
   const userPrompt = promptTemplate
-    .replace('{기존 리뷰 텍스트}', originalReview)
-    .replace('{수정 요청 텍스트}', editRequest)
+    .replace('{기존 리뷰 텍스트}', wrapInXmlTag('user_input', sanitizeUserInput(originalReview), { field: 'original_review' }))
+    .replace('{수정 요청 텍스트}', wrapInXmlTag('edit_request', sanitizeUserInput(editRequest)))
     .replace('{스타일 JSON}', styleProfileJson);
 
-  return callClaude('', userPrompt, CLAUDE_HAIKU, 4096);
+  return callClaude(withPromptDefense(''), userPrompt, CLAUDE_HAIKU, 4096);
 };

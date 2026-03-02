@@ -1,6 +1,8 @@
 import type { ReviewPayload } from '@/shared/types/review';
 import type { StyleProfile } from '@/entities/style-profile';
 import { formatKoreanDate } from '@/shared/lib/utils';
+import { sanitizeUserInput, wrapInXmlTag } from '@/shared/lib/sanitizeInput';
+import { withPromptDefense } from '@/shared/lib/promptDefense';
 
 export function buildReviewSystemPrompt(
   basePrompt: string,
@@ -9,7 +11,8 @@ export function buildReviewSystemPrompt(
   const styleProfileJson = styleProfile
     ? JSON.stringify(styleProfile, null, 2)
     : '{}';
-  return basePrompt.replace('{스타일 프로필 JSON}', styleProfileJson);
+  const prompt = basePrompt.replace('{스타일 프로필 JSON}', styleProfileJson);
+  return withPromptDefense(prompt);
 }
 
 export function buildReviewUserPrompt(
@@ -24,16 +27,19 @@ export function buildReviewUserPrompt(
     ? JSON.stringify(styleProfile, null, 2)
     : '{}';
 
+  const wrap = (field: string, value: string) =>
+    wrapInXmlTag('user_input', sanitizeUserInput(value), { field });
+
   return basePrompt
     .replace('{스타일 프로필 JSON}', styleProfileJson)
-    .replace('{name}', payload.name)
-    .replace('{location}', payload.location)
+    .replace('{name}', wrap('name', payload.name))
+    .replace('{location}', wrap('location', payload.location))
     .replace('{date}', formatKoreanDate(payload.date))
-    .replace('{menu}', payload.menu)
-    .replace('{companion}', payload.companion)
-    .replace('{pros}', payload.pros || '')
-    .replace('{cons}', payload.cons || '')
-    .replace('{extra}', payload.extra || '')
+    .replace('{menu}', wrap('menu', payload.menu))
+    .replace('{companion}', wrap('companion', payload.companion))
+    .replace('{pros}', wrap('pros', payload.pros || ''))
+    .replace('{cons}', wrap('cons', payload.cons || ''))
+    .replace('{extra}', wrap('extra', payload.extra || ''))
     .replace('{kakao_place_info}', kakaoPlaceInfo)
     .replace(
       '{tavily_search_result_context}',
@@ -43,7 +49,7 @@ export function buildReviewUserPrompt(
       '{writing_samples}',
       writingSamples || '샘플 데이터가 없습니다. 스타일 프로필을 참고해주세요.',
     )
-    .replace('{user_draft}', payload.user_draft || '');
+    .replace('{user_draft}', wrap('user_draft', payload.user_draft || ''));
 }
 
 export function formatCollectedInfo(info: Partial<ReviewPayload>): string {
