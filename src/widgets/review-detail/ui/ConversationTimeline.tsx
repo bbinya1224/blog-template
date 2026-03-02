@@ -1,20 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import type { Ref } from 'react';
+import { ChevronDown } from 'lucide-react';
 import type { ConversationMessage } from '@/entities/review';
 import { cn } from '@/shared/lib/utils';
 
 interface ConversationTimelineProps {
   conversation: ConversationMessage[];
+  isOpen: boolean;
+  onToggle: () => void;
+  ref?: Ref<HTMLDivElement>;
 }
 
-export function ConversationTimeline({ conversation }: ConversationTimelineProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
+export function ConversationTimeline({ conversation, isOpen, onToggle, ref }: ConversationTimelineProps) {
   if (conversation.length === 0) {
     return (
-      <div className="rounded-2xl border border-stone-200 bg-white shadow-sm">
-        <div className="bg-gradient-to-r from-stone-50 to-orange-50/30 px-5 py-4 rounded-2xl">
+      <div ref={ref} className="rounded-2xl border border-stone-200 bg-white shadow-sm">
+        <div className="rounded-2xl bg-gradient-to-r from-stone-50 to-orange-50/30 px-5 py-4">
           <h3 className="text-sm font-semibold text-stone-700">대화 과정</h3>
         </div>
         <div className="px-5 py-8 text-center text-sm text-stone-400">
@@ -25,12 +27,14 @@ export function ConversationTimeline({ conversation }: ConversationTimelineProps
   }
 
   return (
-    <div className="rounded-2xl border border-stone-200 bg-white shadow-sm">
-      {/* Header — mobile: toggleable, desktop: static */}
+    <div ref={ref} className="rounded-2xl border border-stone-200 bg-white shadow-sm">
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between bg-gradient-to-r from-stone-50 to-orange-50/30 px-5 py-4 rounded-t-2xl md:cursor-default"
+        onClick={onToggle}
+        className={cn(
+          'flex w-full items-center justify-between bg-gradient-to-r from-stone-50 to-orange-50/30 px-5 py-4',
+          isOpen ? 'rounded-t-2xl' : 'rounded-2xl',
+        )}
       >
         <h3 className="text-sm font-semibold text-stone-700">
           대화 과정
@@ -38,43 +42,26 @@ export function ConversationTimeline({ conversation }: ConversationTimelineProps
             ({conversation.length}개)
           </span>
         </h3>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        <ChevronDown
           className={cn(
-            'text-stone-400 transition-transform duration-200 md:hidden',
+            'h-4 w-4 text-stone-400 transition-transform duration-200',
             isOpen && 'rotate-180',
           )}
-        >
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
+        />
       </button>
 
-      {/* Desktop: always visible, scrollable */}
-      <div className="hidden md:block max-h-[calc(100vh-200px)] overflow-y-auto sidebar-scrollbar px-4 py-4 space-y-3">
-        {conversation.map((msg, i) => (
-          <MessageBubble key={i} message={msg} />
-        ))}
-      </div>
-
-      {/* Mobile: collapsible */}
       <div
         className={cn(
-          'md:hidden overflow-hidden transition-all duration-300',
-          isOpen ? 'max-h-[60vh] overflow-y-auto sidebar-scrollbar' : 'max-h-0',
+          'grid transition-[grid-template-rows] duration-300',
+          isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
         )}
       >
-        <div className="px-4 py-4 space-y-2">
-          {conversation.map((msg, i) => (
-            <CompactMessage key={i} message={msg} />
-          ))}
+        <div className="overflow-hidden">
+          <div className={cn('space-y-3 px-4 py-4', isOpen && 'overflow-y-auto sidebar-scrollbar max-h-[60vh]')}>
+            {conversation.map((msg, i) => (
+              <MessageBubble key={i} message={msg} />
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -96,24 +83,6 @@ function MessageBubble({ message }: { message: ConversationMessage }) {
       >
         <p className="whitespace-pre-wrap break-words">{message.content}</p>
       </div>
-    </div>
-  );
-}
-
-function CompactMessage({ message }: { message: ConversationMessage }) {
-  const isUser = message.role === 'user';
-
-  return (
-    <div className="flex gap-2 text-sm">
-      <span
-        className={cn(
-          'shrink-0 mt-0.5 text-xs font-semibold',
-          isUser ? 'text-stone-500' : 'text-orange-500',
-        )}
-      >
-        {isUser ? 'A' : 'Q'}
-      </span>
-      <p className="text-stone-600 line-clamp-3">{message.content}</p>
     </div>
   );
 }

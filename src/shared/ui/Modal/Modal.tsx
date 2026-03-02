@@ -14,6 +14,7 @@ type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onExitComplete?: () => void;
   children: ReactNode;
   title?: string;
   size?: ModalSize;
@@ -33,6 +34,7 @@ const SIZE_CLASSES: Record<ModalSize, string> = {
 export function Modal({
   isOpen,
   onClose,
+  onExitComplete,
   children,
   title,
   size = 'md',
@@ -41,7 +43,12 @@ export function Modal({
   className,
 }: ModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        onClose();
+        if (onExitComplete) requestAnimationFrame(onExitComplete);
+      }
+    }}>
       <DialogContent
         className={cn(SIZE_CLASSES[size], className)}
         hideCloseButton={!showCloseButton}

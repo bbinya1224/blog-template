@@ -1,14 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import type { Review } from '@/entities/review';
-import { SectionCard } from '@/shared/ui/SectionCard';
 import { copyToClipboard } from '@/features/review';
-import { InlineDiffView } from '@/features/review-edit';
-import { apiPost, apiPut } from '@/shared/api/httpClient';
+import { apiPut } from '@/shared/api/httpClient';
+import { useOverlay } from '@/shared/providers/overlay';
+import { Modal } from '@/shared/ui/Modal';
+import { REVIEW_MESSAGES } from '../constants/messages';
 import { ConversationTimeline } from './ConversationTimeline';
+import { FloatingActionBar } from './FloatingActionBar';
+import { EditPanel } from './EditPanel';
+
+type SaveStatus = 'idle' | 'saved' | 'error';
 
 interface ReviewDetailViewerProps {
   initialReview: Review;
@@ -16,174 +21,172 @@ interface ReviewDetailViewerProps {
 
 export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
   const router = useRouter();
+  const conversationRef = useRef<HTMLDivElement>(null);
+  const editOverlay = useOverlay();
+  const cancelOverlay = useOverlay();
+
   const [content, setContent] = useState(initialReview.content);
   const [originalContent, setOriginalContent] = useState(initialReview.content);
-  const [editRequest, setEditRequest] = useState('');
   const [isCopying, setIsCopying] = useState(false);
-  const [editedContent, setEditedContent] = useState('');
-  const [showDiff, setShowDiff] = useState(false);
-
-  const editMutation = useMutation({
-    mutationFn: (input: { review: string; request: string }) =>
-      apiPost<{ review: string }>('/api/edit-review', input),
-    onSuccess: (data) => {
-      setEditedContent(data.review);
-      setShowDiff(true);
-    },
-    onError: (error) => {
-      alert(`수정 요청 중 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
-    },
-  });
+  const [isConversationOpen, setIsConversationOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 
   const updateMutation = useMutation({
     mutationFn: (input: { id: string; content: string }) =>
       apiPut<{ id: string }>(`/api/reviews/${encodeURIComponent(input.id)}`, { content: input.content }),
     onSuccess: () => {
       setOriginalContent(content);
-      alert('저장되었습니다.');
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
       router.refresh();
     },
-    onError: (error) => {
-      alert(`저장 중 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+    onError: () => {
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
     },
   });
 
   const hasChanges = content !== originalContent;
+  const hasConversation = initialReview.conversation.length > 0;
 
-  const handleRequestEdit = () => {
-    if (!editRequest.trim()) return;
-    editMutation.mutate({ review: content, request: editRequest });
+  const handleCopy = async () => {
+    try {
+      await copyToClipboard(content);
+      setIsCopying(true);
+      setTimeout(() => setIsCopying(false), 2000);
+    } catch {
+      // Clipboard API 실패 시 무시
+    }
   };
 
   const handleSave = () => {
     updateMutation.mutate({ id: initialReview.id, content });
   };
 
-  const handleCancel = () => {
-    if (confirm('수정 사항을 취소하고 원래대로 되돌리시겠습니까?')) {
-      setContent(originalContent);
-    }
+  const handleEditClick = () => {
+    setIsEditOpen(true);
+    editOverlay.open(({ isOpen, close, unmount }) => (
+      <EditPanel
+        isOpen={isOpen}
+        onClose={() => {
+          close();
+          setIsEditOpen(false);
+        }}
+        onExitComplete={unmount}
+        content={content}
+        onApplyEdit={setContent}
+      />
+    ));
   };
 
-  const handleCopy = async () => {
-    await copyToClipboard(content);
-    setIsCopying(true);
-    setTimeout(() => setIsCopying(false), 2000);
+  const handleCancelClick = () => {
+    const { cancelModal } = REVIEW_MESSAGES;
+    cancelOverlay.open(({ isOpen, close, unmount }) => (
+      <Modal
+        isOpen={isOpen}
+        onClose={close}
+        onExitComplete={unmount}
+        title={cancelModal.title}
+        size="sm"
+      >
+        <p className="text-sm text-stone-600">
+          {cancelModal.description}
+        </p>
+        <div className="mt-5 flex gap-3">
+          <button
+            onClick={() => {
+              setContent(originalContent);
+              close();
+            }}
+            className="flex-1 rounded-2xl bg-stone-900 py-3 text-sm font-semibold text-white transition hover:bg-stone-800"
+          >
+            {cancelModal.confirm}
+          </button>
+          <button
+            onClick={close}
+            className="flex-1 rounded-2xl border border-stone-200 bg-white py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-50"
+          >
+            {cancelModal.cancel}
+          </button>
+        </div>
+      </Modal>
+    ));
   };
 
-  const handleApplyEdit = () => {
-    setContent(editedContent);
-    setShowDiff(false);
-    setEditedContent('');
-    setEditRequest('');
+  const handleConversationClick = () => {
+    setIsConversationOpen(true);
+    requestAnimationFrame(() => {
+      conversationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
-  const handleRetryEdit = () => {
-    if (!editRequest.trim()) return;
-    editMutation.mutate({ review: content, request: editRequest });
+  const { save } = REVIEW_MESSAGES;
+  const saveButtonLabel: Record<SaveStatus, string> = {
+    idle: updateMutation.isPending ? save.pending : save.idle,
+    saved: save.saved,
+    error: save.error,
   };
-
-  const handleCancelEdit = () => {
-    setShowDiff(false);
-    setEditedContent('');
-  };
-
-  const hasConversation = initialReview.conversation.length > 0;
 
   return (
-    <div className={hasConversation
-      ? 'grid grid-cols-1 md:grid-cols-[minmax(280px,1fr)_2fr] gap-6'
-      : 'space-y-8'
-    }>
-      {hasConversation && (
-        <div className="md:sticky md:top-6 md:self-start">
-          <ConversationTimeline conversation={initialReview.conversation} />
+    <>
+      <article>
+        <pre className="whitespace-pre-wrap break-words font-sans text-base/relaxed text-stone-800">
+          {content}
+        </pre>
+      </article>
+
+      <p className="mt-3 text-right text-xs text-stone-400">
+        공백 포함 {content.length.toLocaleString()}자
+      </p>
+
+      {hasChanges && (
+        <div className="mt-4 flex gap-3">
+          <button
+            onClick={handleSave}
+            disabled={updateMutation.isPending || saveStatus === 'saved'}
+            className={
+              saveStatus === 'error'
+                ? 'flex-1 rounded-2xl bg-red-500 py-3 text-sm font-semibold text-white transition hover:bg-red-600'
+                : saveStatus === 'saved'
+                  ? 'flex-1 rounded-2xl bg-green-600 py-3 text-sm font-semibold text-white'
+                  : 'flex-1 rounded-2xl bg-primary py-3 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:bg-primary/50'
+            }
+          >
+            {saveButtonLabel[saveStatus]}
+          </button>
+          <button
+            onClick={handleCancelClick}
+            disabled={updateMutation.isPending}
+            className="flex-1 rounded-2xl border border-stone-200 bg-white py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-50"
+          >
+            취소
+          </button>
         </div>
       )}
 
-      <div className="space-y-6">
-        <SectionCard title="리뷰 내용">
-          <div className="space-y-4">
-            <div className="relative rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm/relaxed text-stone-800 md:p-6 overflow-scroll">
-              <button
-                onClick={handleCopy}
-                className="absolute right-4 top-4 rounded-lg bg-white/80 p-2 text-stone-500 backdrop-blur-sm transition hover:bg-white hover:text-primary shadow-sm border border-stone-100"
-                title="내용 복사"
-              >
-                {isCopying ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                  </svg>
-                )}
-              </button>
-              <pre className="max-h-[600px] whitespace-pre-wrap wrap-break-word font-sans">
-                {content}
-              </pre>
-            </div>
-
-            <div className="text-right text-xs text-stone-500">
-              공백 포함 {content.length.toLocaleString()}자
-            </div>
-
-            {hasChanges && (
-              <div className="flex gap-3">
-                <button
-                  onClick={handleSave}
-                  disabled={updateMutation.isPending}
-                  className="flex-1 rounded-2xl bg-primary py-3 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:bg-primary/50"
-                >
-                  {updateMutation.isPending ? '저장 중...' : '변경사항 저장'}
-                </button>
-                <button
-                  onClick={handleCancel}
-                  disabled={updateMutation.isPending}
-                  className="flex-1 rounded-2xl border border-stone-200 bg-white py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-50"
-                >
-                  취소
-                </button>
-              </div>
-            )}
-          </div>
-        </SectionCard>
-
-        <SectionCard
-          title="AI 수정 요청"
-          description="AI에게 리뷰 수정을 요청할 수 있습니다."
-        >
-          <div className="space-y-4">
-            <textarea
-              value={editRequest}
-              onChange={(e) => setEditRequest(e.target.value)}
-              placeholder="ex. 조금 더 감성적인 말투로 바꿔줘, 메뉴 설명을 더 자세히 해줘"
-              className="w-full rounded-2xl border border-stone-200 p-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              rows={3}
-              disabled={showDiff}
-            />
-            <button
-              onClick={handleRequestEdit}
-              disabled={!editRequest.trim() || editMutation.isPending || showDiff}
-              className="w-full rounded-2xl bg-stone-900 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:bg-stone-400"
-            >
-              {editMutation.isPending ? '수정 중...' : '수정 요청하기'}
-            </button>
-
-            <InlineDiffView
-              show={showDiff}
-              originalContent={content}
-              editedContent={editedContent}
-              editRequest={editRequest}
-              onApply={handleApplyEdit}
-              onRetry={handleRetryEdit}
-              onCancel={handleCancelEdit}
+      {hasConversation && (
+        <>
+          <hr className="mt-8 border-stone-100" />
+          <div className="mt-6">
+            <ConversationTimeline
+              ref={conversationRef}
+              conversation={initialReview.conversation}
+              isOpen={isConversationOpen}
+              onToggle={() => setIsConversationOpen((prev) => !prev)}
             />
           </div>
-        </SectionCard>
-      </div>
-    </div>
+        </>
+      )}
+
+      <FloatingActionBar
+        onCopy={handleCopy}
+        isCopying={isCopying}
+        onEditClick={handleEditClick}
+        onConversationClick={handleConversationClick}
+        conversationCount={initialReview.conversation.length}
+        isEditPanelOpen={isEditOpen}
+      />
+    </>
   );
 }

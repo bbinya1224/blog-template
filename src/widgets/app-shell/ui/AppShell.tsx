@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode } from 'react';
-import { Sidebar, useSidebar } from '@/widgets/sidebar';
+import { Sidebar } from '@/widgets/sidebar';
 import { useChatStore } from '@/features/chat-review';
 
 interface AppShellProps {
@@ -9,15 +9,10 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const { isExpanded, collapse } = useSidebar();
-
   return (
-    <div className='flex h-dvh overflow-hidden'>
+    <div className='flex h-dvh flex-col overflow-hidden md:flex-row'>
       <Sidebar onNewRecord={() => useChatStore.getState().reset()} />
-      <main
-        className='min-h-0 flex-1 overflow-y-auto min-w-0'
-        onClick={() => isExpanded && collapse()}
-      >
+      <main className='min-h-0 flex-1 overflow-y-auto min-w-0'>
         {children}
       </main>
     </div>
