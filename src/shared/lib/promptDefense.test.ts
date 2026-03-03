@@ -53,7 +53,8 @@ describe('withPromptDefense', () => {
   it('should not double-add defense instructions', () => {
     const systemPrompt = '시스템 프롬프트';
     const once = withPromptDefense(systemPrompt);
-    const occurrences = once.split(PROMPT_DEFENSE_INSTRUCTIONS).length - 1;
+    const twice = withPromptDefense(once);
+    const occurrences = twice.split(PROMPT_DEFENSE_INSTRUCTIONS).length - 1;
     expect(occurrences).toBe(1);
   });
 });

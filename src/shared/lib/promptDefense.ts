@@ -17,5 +17,9 @@ export function withPromptDefense(systemPrompt: string): string {
     return PROMPT_DEFENSE_INSTRUCTIONS;
   }
 
+  if (systemPrompt.includes(PROMPT_DEFENSE_INSTRUCTIONS)) {
+    return systemPrompt;
+  }
+
   return `${systemPrompt}\n\n${PROMPT_DEFENSE_INSTRUCTIONS}`;
 }

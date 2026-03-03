@@ -58,13 +58,22 @@ export function sanitizeUserInput(input: string): string {
   if (detection.isSuspicious) {
     console.warn('[sanitizeInput] Suspicious input detected:', {
       matchedPatterns: detection.matchedPatterns,
-      inputPreview: input.slice(0, 100),
+      inputLength: input.length,
     });
   }
 
   return input.replace(PROMPT_STRUCTURE_TAGS, (match) =>
     match.replace(/</g, '\uFF1C').replace(/>/g, '\uFF1E'),
   );
+}
+
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }
 
 export function wrapInXmlTag(
@@ -75,9 +84,9 @@ export function wrapInXmlTag(
   const attrs = attributes
     ? ' ' +
       Object.entries(attributes)
-        .map(([key, value]) => `${key}="${value}"`)
+        .map(([key, value]) => `${escapeXml(key)}="${escapeXml(value)}"`)
         .join(' ')
     : '';
 
-  return `<${tag}${attrs}>${content}</${tag}>`;
+  return `<${tag}${attrs}>${escapeXml(content)}</${tag}>`;
 }
