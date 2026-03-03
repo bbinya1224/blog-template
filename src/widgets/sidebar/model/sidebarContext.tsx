@@ -27,7 +27,6 @@ const STORAGE_KEY = 'oroti-sidebar';
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
   const isDesktop = useIsDesktop();
   const hydratedRef = useRef(false);
 
@@ -47,16 +46,15 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     } else {
       setIsExpanded(isDesktop);
     }
-    setHydrated(true);
   }, [isDesktop]);
 
   // Persist to localStorage (desktop only)
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydratedRef.current) return;
     if (isDesktop) {
       localStorage.setItem(STORAGE_KEY, String(isExpanded));
     }
-  }, [isExpanded, hydrated, isDesktop]);
+  }, [isExpanded, isDesktop]);
 
   // Collapse on mobile resize
   useEffect(() => {
@@ -67,7 +65,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 
   // Label animation sync with expand state
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydratedRef.current) return;
     if (!initializedRef.current) {
       initializedRef.current = true;
       setShowLabels(isExpanded);
@@ -79,7 +77,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     } else {
       setShowLabels(false);
     }
-  }, [isExpanded, hydrated]);
+  }, [isExpanded]);
 
   /* eslint-enable react-hooks/set-state-in-effect */
 

@@ -6,7 +6,7 @@ import type { Review, ConversationMessage } from '@/entities/review/model/review
 /**
  * 현재 로그인한 사용자의 리뷰 목록 조회
  */
-export async function getReviews(): Promise<Review[]> {
+export async function getReviews(limit?: number): Promise<Review[]> {
   try {
     const session = await getServerSession(authOptions);
 
@@ -14,11 +14,17 @@ export async function getReviews(): Promise<Review[]> {
       return [];
     }
 
-    const { data, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('user_reviews')
       .select('*')
       .eq('user_email', session.user.email)
       .order('created_at', { ascending: false });
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('리뷰 조회 실패:', error);

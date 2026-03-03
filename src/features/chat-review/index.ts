@@ -16,5 +16,8 @@ export {
   parseQuestions,
 } from './lib/promptBuilder';
 
+// Lib
+export { formatStyleForDisplay } from './lib/formatStyleForDisplay';
+
 // Constants
 export { MESSAGES, CHOICE_OPTIONS } from './constants/messages';

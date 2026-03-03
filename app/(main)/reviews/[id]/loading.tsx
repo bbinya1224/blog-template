@@ -1,13 +1,4 @@
-import { cn } from '@/shared/lib/utils';
-
-function Bone({ className }: { className?: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      className={cn('animate-pulse rounded-md bg-stone-200/50', className)}
-    />
-  );
-}
+import { Bone } from '@/shared/ui/Skeleton';
 
 export default function ReviewDetailLoading() {
   return (

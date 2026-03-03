@@ -1,12 +1,4 @@
-function Bone({ className }: { className?: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      className={`rounded-md bg-stone-200/50 ${className ?? ''}`}
-      style={{ animation: 'pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}
-    />
-  );
-}
+import { Bone } from '@/shared/ui/Skeleton';
 
 function CardSkeleton() {
   return (

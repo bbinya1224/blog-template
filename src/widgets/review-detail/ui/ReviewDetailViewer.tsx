@@ -38,6 +38,7 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
   const [isConversationOpen, setIsConversationOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const prevConversationOpenRef = useRef(false);
 
   const updateMutation = useMutation({
     mutationFn: (input: { id: string; content: string }) =>
@@ -123,11 +124,15 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
     ));
   };
 
+  useEffect(() => {
+    if (isConversationOpen && !prevConversationOpenRef.current) {
+      conversationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    prevConversationOpenRef.current = isConversationOpen;
+  }, [isConversationOpen]);
+
   const handleConversationClick = () => {
     setIsConversationOpen(true);
-    requestAnimationFrame(() => {
-      conversationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
   };
 
   const { save } = REVIEW_MESSAGES;
