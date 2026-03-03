@@ -10,6 +10,7 @@ function createReview(overrides: Partial<Review> = {}): Review {
     createdAt: '2024-12-15T10:00:00Z',
     content: '맛있었습니다',
     characterCount: 6,
+    conversation: [],
     ...overrides,
   };
 }

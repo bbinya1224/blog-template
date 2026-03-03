@@ -12,7 +12,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onNewRecord }: SidebarProps) {
-  const { isExpanded, isDesktop, showLabels, toggle, collapse } = useSidebar();
+  const { isExpanded, isDesktop, showLabels, toggle, expand, collapse } = useSidebar();
   const router = useRouter();
 
   const handleNewRecord = () => {
@@ -23,27 +23,46 @@ export function Sidebar({ onNewRecord }: SidebarProps) {
 
   return (
     <>
+      {/* Mobile: 로고 헤더 — 탭하면 사이드바 슬라이드 */}
+      <header className='flex h-12 shrink-0 items-center border-b border-stone-100 px-4 md:hidden'>
+        <button
+          onClick={expand}
+          aria-label='메뉴 열기'
+          className='flex items-center gap-2 transition-opacity hover:opacity-70'
+        >
+          <OrotiLogo className='size-7' />
+          <span className='text-sm font-bold tracking-tight text-stone-800'>오롯이</span>
+        </button>
+      </header>
+
       {/* Mobile backdrop */}
-      {isExpanded && (
-        <div
-          role='button'
-          aria-label='사이드바 닫기'
-          tabIndex={0}
-          className='fixed inset-0 z-40 bg-black/30 md:hidden'
-          onClick={collapse}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === 'Escape') collapse();
-          }}
-        />
-      )}
+      <div
+        role='button'
+        aria-label='사이드바 닫기'
+        aria-hidden={!isExpanded}
+        tabIndex={isExpanded ? 0 : -1}
+        className={cn(
+          'fixed inset-0 z-40 bg-black/30 transition-opacity duration-300 md:hidden',
+          isExpanded ? 'opacity-100' : 'pointer-events-none opacity-0',
+        )}
+        onClick={collapse}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+            e.preventDefault();
+            collapse();
+          }
+        }}
+      />
 
       <aside
         className={cn(
-          'z-50 flex h-full flex-col overflow-hidden border-r border-stone-200 bg-white',
-          'shrink-0 transition-[width] duration-300 ease-in-out',
-          isExpanded ? 'w-64' : 'w-16',
-          // Mobile: fixed overlay when expanded
-          isExpanded ? 'fixed top-0 left-0 md:relative' : 'relative',
+          'z-50 flex h-full flex-col overflow-hidden border-r border-stone-200 bg-white shrink-0',
+          // Mobile: fixed + slide transition
+          'fixed top-0 left-0 w-64 transition-transform duration-300 ease-in-out',
+          isExpanded ? 'translate-x-0' : '-translate-x-full',
+          // Desktop: inline + width transition
+          'md:relative md:translate-x-0 md:transition-[width] md:duration-300 md:ease-in-out',
+          isExpanded ? 'md:w-64' : 'md:w-16',
         )}
       >
         {/* Top: Brand + Toggle */}

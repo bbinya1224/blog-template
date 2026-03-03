@@ -24,6 +24,7 @@ function generateId(): string {
 interface ChatStore extends ConversationState {
   messages: ChatMessage[];
   isProcessing: boolean;
+  savedReviewId: string | null;
 
   // Conversation state setters
   setStep: (step: ConversationStep) => void;
@@ -36,6 +37,7 @@ interface ChatStore extends ConversationState {
   setGeneratedReview: (review: string | null) => void;
   setSessionId: (id: string | null) => void;
   setIsProcessing: (processing: boolean) => void;
+  setSavedReviewId: (id: string | null) => void;
 
   // Message actions
   addMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => string;
@@ -61,6 +63,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   ...initialConversationState,
   messages: [],
   isProcessing: false,
+  savedReviewId: null,
 
   // Conversation state setters
   setStep: (step) => set({ step }),
@@ -74,6 +77,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   setGeneratedReview: (generatedReview) => set({ generatedReview }),
   setSessionId: (sessionId) => set({ sessionId }),
   setIsProcessing: (isProcessing) => set({ isProcessing }),
+  setSavedReviewId: (savedReviewId) => set({ savedReviewId }),
 
   // Message actions
   addMessage: (message) => {
@@ -153,5 +157,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       ...initialConversationState,
       messages: [],
       isProcessing: false,
+      savedReviewId: null,
     }),
 }));

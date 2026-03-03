@@ -48,3 +48,5 @@ storybook-static
 .claude/
 .omc/
 .mcp.json
+CLAUDE.md
+AGENTS.md

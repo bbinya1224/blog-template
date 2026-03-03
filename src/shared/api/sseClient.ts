@@ -4,7 +4,7 @@ export { SSEError };
 
 interface SSECallbacks {
   onToken: (fullText: string) => void;
-  onDone?: (fullText: string) => void;
+  onDone?: (fullText: string, data?: Record<string, unknown>) => void;
   onError?: (error: SSEError) => void;
 }
 
@@ -73,7 +73,11 @@ export async function apiSSE(
               if (data.fullText) {
                 fullText = data.fullText;
               }
-              callbacks.onDone?.(fullText);
+              const donePayload =
+                data && typeof data === 'object' && !Array.isArray(data)
+                  ? (data as Record<string, unknown>)
+                  : undefined;
+              callbacks.onDone?.(fullText, donePayload);
             } else {
               if (data.token) {
                 fullText += data.token;

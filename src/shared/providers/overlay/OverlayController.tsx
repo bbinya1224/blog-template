@@ -1,12 +1,12 @@
 'use client';
 
-import { useImperativeHandle, useState } from 'react';
+import { type Ref, useImperativeHandle, useState } from 'react';
 import type { CreateOverlayElement, OverlayControlRef } from './types';
 
 interface OverlayControllerProps {
   element: CreateOverlayElement;
   onExit: () => void;
-  ref?: React.Ref<OverlayControlRef>;
+  ref?: Ref<OverlayControlRef>;
 }
 
 export function OverlayController({

@@ -6,6 +6,7 @@ import type { ReviewPayload } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
 import { getUserStatus } from '@/shared/api/dataFiles';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
+import { USAGE_LIMITS } from '@/shared/config/constants';
 import {
   formatCollectedInfo,
   parseQuestions,
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userStatus = await getUserStatus(session.user.email);
-    if (!userStatus || (userStatus.is_preview && (userStatus.usage_count || 0) >= 2)) {
+    if (!userStatus || (userStatus.is_preview && (userStatus.usage_count || 0) >= USAGE_LIMITS.PREVIEW_MAX_USES)) {
       return ApiResponse.quotaExceeded();
     }
 

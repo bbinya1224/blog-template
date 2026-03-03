@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import { useChatStore } from './store';
 import { analyzeStyle } from '@/shared/api/styleAnalysisClient';
 import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
-import type { StyleProfile } from '@/shared/types/styleProfile';
+import { formatStyleForDisplay } from '../lib/formatStyleForDisplay';
 
 function convertBlogUrlToRss(blogUrl: string): string {
   const match = blogUrl.match(/blog\.naver\.com\/([a-zA-Z0-9_-]+)/);
@@ -12,15 +12,6 @@ function convertBlogUrlToRss(blogUrl: string): string {
     return `https://rss.blog.naver.com/${match[1]}.xml`;
   }
   return blogUrl;
-}
-
-function formatStyleForDisplay(profile: StyleProfile): Record<string, unknown> {
-  return {
-    writingStyle: profile.writing_style?.tone || '친근한 톤',
-    emojiUsage: profile.writing_style?.emoji_usage || '적당히 사용',
-    sentenceLength: profile.writing_style?.sentence_length || '보통',
-    tone: profile.writing_style?.formality || '존댓말',
-  };
 }
 
 export function useBlogAnalysis(userName: string | null) {

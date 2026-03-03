@@ -3,10 +3,10 @@
 import {
   createContext,
   useState,
-  useEffect,
   useCallback,
   useMemo,
   type ReactNode,
+  type ReactElement,
 } from 'react';
 import type { OverlayContextValue, OverlayId } from './types';
 
@@ -18,10 +18,10 @@ interface OverlayProviderProps {
 
 export function OverlayProvider({ children }: OverlayProviderProps) {
   const [overlayMap, setOverlayMap] = useState<
-    Map<OverlayId, React.ReactElement>
+    Map<OverlayId, ReactElement>
   >(new Map());
 
-  const mount = useCallback((id: OverlayId, element: React.ReactElement) => {
+  const mount = useCallback((id: OverlayId, element: ReactElement) => {
     setOverlayMap((prev) => {
       const next = new Map(prev);
       next.set(id, element);
@@ -36,18 +36,6 @@ export function OverlayProvider({ children }: OverlayProviderProps) {
       return next;
     });
   }, []);
-
-  useEffect(() => {
-    if (overlayMap.size > 0) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [overlayMap.size]);
 
   const contextValue = useMemo(() => ({ mount, unmount }), [mount, unmount]);
 

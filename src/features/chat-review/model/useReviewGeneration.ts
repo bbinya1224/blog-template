@@ -15,13 +15,17 @@ export function useReviewGeneration() {
   const dispatchActions = useChatStore((s) => s.dispatchActions);
   const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
   const updateMessage = useChatStore((s) => s.updateMessage);
+  const setSavedReviewId = useChatStore((s) => s.setSavedReviewId);
 
   const generateReview = useCallback(async () => {
+    setSavedReviewId(null);
     const msgId = addAssistantMessage('', 'text', undefined, {
       streaming: true,
     });
 
     try {
+      let receivedReviewId: string | null = null;
+
       const fullText = await apiSSE(
         '/api/chat/generate-review',
         { payload: collectedInfo, styleProfile },
@@ -33,10 +37,20 @@ export function useReviewGeneration() {
               metadata: { streaming: true },
             });
           },
+          onDone: (_fullText, data) => {
+            const candidate = data?.reviewId;
+            receivedReviewId =
+              typeof candidate === 'string' && candidate.length > 0 ? candidate : null;
+          },
         },
       );
 
+      if (!receivedReviewId) {
+        throw new Error('Missing reviewId in SSE done payload');
+      }
+
       setGeneratedReview(fullText);
+      setSavedReviewId(receivedReviewId);
       setStep('review-edit');
 
       updateMessage(msgId, {
@@ -45,6 +59,7 @@ export function useReviewGeneration() {
         metadata: { review: fullText, characterCount: fullText.length },
       });
     } catch (error) {
+      setSavedReviewId(null);
       console.error('[generateReview] Failed:', error);
       if (error instanceof SSEError) {
         addAssistantMessage(
@@ -60,6 +75,7 @@ export function useReviewGeneration() {
     collectedInfo,
     styleProfile,
     setGeneratedReview,
+    setSavedReviewId,
     setStep,
     addAssistantMessage,
     updateMessage,

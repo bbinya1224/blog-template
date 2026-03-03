@@ -10,9 +10,11 @@ export function useRecentReviews(limit: number = 5) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['reviews', 'recent'],
-    queryFn: () => apiGet<Review[]>('/api/reviews'),
-    select: (data) => data.slice(0, limit),
+    queryKey: ['reviews', 'recent', limit],
+    queryFn: () =>
+      apiGet<Review[]>('/api/reviews', {
+        params: { limit: String(limit) },
+      }),
   });
 
   return { reviews, isLoading, error };

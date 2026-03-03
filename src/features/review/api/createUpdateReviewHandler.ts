@@ -4,9 +4,14 @@ import {
   withQuota,
   type AuthenticatedRequest,
 } from '@/shared/api/middleware';
+import type { ConversationMessage } from '@/entities/review';
 
 type UpdateReviewDeps = {
-  updateReview: (id: string, content: string) => Promise<void>;
+  updateReview: (
+    id: string,
+    content: string,
+    conversation?: ConversationMessage[],
+  ) => Promise<void>;
   incrementUsageCount: (email: string) => Promise<void>;
 };
 
@@ -14,23 +19,56 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
+function isValidConversation(value: unknown): value is ConversationMessage[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (msg) =>
+        typeof msg === 'object' &&
+        msg !== null &&
+        (msg.role === 'user' || msg.role === 'assistant') &&
+        typeof msg.content === 'string' &&
+        typeof msg.type === 'string',
+    )
+  );
+}
+
 export const createUpdateReviewHandler = (deps: UpdateReviewDeps) => {
   const handler = async (
     request: AuthenticatedRequest,
-    context?: RouteContext
+    context?: RouteContext,
   ): Promise<Response> => {
     try {
       if (!context) {
         return ApiResponse.validationError('잘못된 요청입니다.');
       }
       const { id } = await context.params;
-      const { content } = await request.json();
+      const body = await request.json();
+      const { content, conversation } = body as {
+        content?: unknown;
+        conversation?: unknown;
+      };
 
-      if (!content) {
+      if (typeof content !== 'string' || !content.trim()) {
         return ApiResponse.validationError('content는 필수입니다.');
       }
 
-      await deps.updateReview(decodeURIComponent(id), content);
+      if (conversation !== undefined && !isValidConversation(conversation)) {
+        return ApiResponse.validationError(
+          'conversation 형식이 올바르지 않습니다.',
+        );
+      }
+
+      const validatedConversation =
+        conversation !== undefined
+          ? (conversation as ConversationMessage[])
+          : undefined;
+
+      await deps.updateReview(
+        decodeURIComponent(id),
+        content,
+        validatedConversation,
+      );
       await deps.incrementUsageCount(request.user.email);
 
       return ApiResponse.success({ id }, '리뷰가 수정되었습니다.');
@@ -40,6 +78,5 @@ export const createUpdateReviewHandler = (deps: UpdateReviewDeps) => {
     }
   };
 
-  // 미들웨어 적용: 인증 → 쿼터 체크 → 핸들러
   return withAuth(withQuota(handler));
 };
