@@ -42,18 +42,26 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
 
   const updateMutation = useMutation({
     mutationFn: (input: { id: string; content: string }) =>
-      apiPut<{ id: string }>(`/api/reviews/${encodeURIComponent(input.id)}`, { content: input.content }),
-    onSuccess: () => {
-      setOriginalContent(content);
+      apiPut<{ id: string }>(`/api/reviews/${encodeURIComponent(input.id)}`, {
+        content: input.content,
+      }),
+    onSuccess: (_data, variables) => {
+      setOriginalContent(variables.content);
       setSaveStatus('saved');
       if (saveStatusTimerRef.current) clearTimeout(saveStatusTimerRef.current);
-      saveStatusTimerRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
+      saveStatusTimerRef.current = setTimeout(
+        () => setSaveStatus('idle'),
+        2000,
+      );
       router.refresh();
     },
     onError: () => {
       setSaveStatus('error');
       if (saveStatusTimerRef.current) clearTimeout(saveStatusTimerRef.current);
-      saveStatusTimerRef.current = setTimeout(() => setSaveStatus('idle'), 3000);
+      saveStatusTimerRef.current = setTimeout(
+        () => setSaveStatus('idle'),
+        3000,
+      );
     },
   });
 
@@ -98,24 +106,22 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
         onClose={close}
         onExitComplete={unmount}
         title={cancelModal.title}
-        size="sm"
+        size='sm'
       >
-        <p className="text-sm text-stone-600">
-          {cancelModal.description}
-        </p>
-        <div className="mt-5 flex gap-3">
+        <p className='text-sm text-stone-600'>{cancelModal.description}</p>
+        <div className='mt-5 flex gap-3'>
           <button
             onClick={() => {
               setContent(originalContent);
               close();
             }}
-            className="flex-1 rounded-2xl bg-stone-900 py-3 text-sm font-semibold text-white transition hover:bg-stone-800"
+            className='flex-1 rounded-2xl bg-stone-900 py-3 text-sm font-semibold text-white transition hover:bg-stone-800'
           >
             {cancelModal.confirm}
           </button>
           <button
             onClick={close}
-            className="flex-1 rounded-2xl border border-stone-200 bg-white py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-50"
+            className='flex-1 rounded-2xl border border-stone-200 bg-white py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-50'
           >
             {cancelModal.cancel}
           </button>
@@ -126,7 +132,10 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
 
   useEffect(() => {
     if (isConversationOpen && !prevConversationOpenRef.current) {
-      conversationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      conversationRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
     }
     prevConversationOpenRef.current = isConversationOpen;
   }, [isConversationOpen]);
@@ -145,17 +154,17 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
   return (
     <>
       <article>
-        <pre className="whitespace-pre-wrap break-words font-sans text-base/relaxed text-stone-800">
+        <pre className='font-sans text-base/relaxed wrap-break-word whitespace-pre-wrap text-stone-800'>
           {content}
         </pre>
       </article>
 
-      <p className="mt-3 text-right text-xs text-stone-400">
+      <p className='mt-3 text-right text-xs text-stone-400'>
         공백 포함 {content.length.toLocaleString()}자
       </p>
 
       {hasChanges && (
-        <div className="mt-4 flex gap-3">
+        <div className='mt-4 flex gap-3'>
           <button
             onClick={handleSave}
             disabled={updateMutation.isPending || saveStatus === 'saved'}
@@ -172,7 +181,7 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
           <button
             onClick={handleCancelClick}
             disabled={updateMutation.isPending}
-            className="flex-1 rounded-2xl border border-stone-200 bg-white py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-50"
+            className='flex-1 rounded-2xl border border-stone-200 bg-white py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-50'
           >
             취소
           </button>
@@ -181,8 +190,8 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
 
       {hasConversation && (
         <>
-          <hr className="mt-8 border-stone-100" />
-          <div className="mt-6">
+          <hr className='mt-8 border-stone-100' />
+          <div className='mt-6'>
             <ConversationTimeline
               ref={conversationRef}
               conversation={initialReview.conversation}
