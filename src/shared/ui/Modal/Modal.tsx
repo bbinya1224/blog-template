@@ -44,10 +44,7 @@ export function Modal({
 }: ModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        onClose();
-        if (onExitComplete) requestAnimationFrame(onExitComplete);
-      }
+      if (!open) onClose();
     }}>
       <DialogContent
         className={cn(SIZE_CLASSES[size], className)}
@@ -56,6 +53,9 @@ export function Modal({
           if (!closeOnOverlayClick) {
             e.preventDefault();
           }
+        }}
+        onAnimationEnd={(e) => {
+          if (e.animationName === 'exit') onExitComplete?.();
         }}
         aria-describedby={undefined}
       >

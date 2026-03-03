@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import type { Review } from '@/entities/review';
@@ -22,8 +22,15 @@ interface ReviewDetailViewerProps {
 export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
   const router = useRouter();
   const conversationRef = useRef<HTMLDivElement>(null);
+  const saveStatusTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const editOverlay = useOverlay();
   const cancelOverlay = useOverlay();
+
+  useEffect(() => {
+    return () => {
+      if (saveStatusTimerRef.current) clearTimeout(saveStatusTimerRef.current);
+    };
+  }, []);
 
   const [content, setContent] = useState(initialReview.content);
   const [originalContent, setOriginalContent] = useState(initialReview.content);
@@ -38,12 +45,14 @@ export function ReviewDetailViewer({ initialReview }: ReviewDetailViewerProps) {
     onSuccess: () => {
       setOriginalContent(content);
       setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
+      if (saveStatusTimerRef.current) clearTimeout(saveStatusTimerRef.current);
+      saveStatusTimerRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
       router.refresh();
     },
     onError: () => {
       setSaveStatus('error');
-      setTimeout(() => setSaveStatus('idle'), 3000);
+      if (saveStatusTimerRef.current) clearTimeout(saveStatusTimerRef.current);
+      saveStatusTimerRef.current = setTimeout(() => setSaveStatus('idle'), 3000);
     },
   });
 

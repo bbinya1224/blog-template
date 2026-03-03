@@ -39,6 +39,7 @@ export function Sidebar({ onNewRecord }: SidebarProps) {
       <div
         role='button'
         aria-label='사이드바 닫기'
+        aria-hidden={!isExpanded}
         tabIndex={isExpanded ? 0 : -1}
         className={cn(
           'fixed inset-0 z-40 bg-black/30 transition-opacity duration-300 md:hidden',
@@ -46,7 +47,10 @@ export function Sidebar({ onNewRecord }: SidebarProps) {
         )}
         onClick={collapse}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === 'Escape') collapse();
+          if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+            e.preventDefault();
+            collapse();
+          }
         }}
       />
 

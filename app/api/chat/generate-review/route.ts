@@ -165,7 +165,7 @@ export async function POST(req: NextRequest) {
           // Use finalText if available, otherwise use accumulated fullText
           const reviewText = finalText || fullText;
 
-          const { data: insertedReview } = await supabaseAdmin
+          const { data: insertedReview, error: insertError } = await supabaseAdmin
             .from('user_reviews')
             .insert({
               user_email: authenticatedEmail,
@@ -178,6 +178,10 @@ export async function POST(req: NextRequest) {
             })
             .select('id')
             .single();
+
+          if (insertError) {
+            throw new Error(`리뷰 저장 실패: ${insertError.message}`);
+          }
 
           console.log(
             `\n✅ [Review Gen API] 리뷰 생성 완료: ${reviewText.length}자`

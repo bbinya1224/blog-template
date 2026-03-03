@@ -18,6 +18,7 @@ export function useReviewGeneration() {
   const setSavedReviewId = useChatStore((s) => s.setSavedReviewId);
 
   const generateReview = useCallback(async () => {
+    setSavedReviewId(null);
     const msgId = addAssistantMessage('', 'text', undefined, {
       streaming: true,
     });
@@ -37,10 +38,16 @@ export function useReviewGeneration() {
             });
           },
           onDone: (_fullText, data) => {
-            receivedReviewId = (data?.reviewId as string) ?? null;
+            const candidate = data?.reviewId;
+            receivedReviewId =
+              typeof candidate === 'string' && candidate.length > 0 ? candidate : null;
           },
         },
       );
+
+      if (!receivedReviewId) {
+        throw new Error('Missing reviewId in SSE done payload');
+      }
 
       setGeneratedReview(fullText);
       setSavedReviewId(receivedReviewId);
@@ -52,6 +59,7 @@ export function useReviewGeneration() {
         metadata: { review: fullText, characterCount: fullText.length },
       });
     } catch (error) {
+      setSavedReviewId(null);
       console.error('[generateReview] Failed:', error);
       if (error instanceof SSEError) {
         addAssistantMessage(

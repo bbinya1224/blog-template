@@ -73,7 +73,11 @@ export async function apiSSE(
               if (data.fullText) {
                 fullText = data.fullText;
               }
-              callbacks.onDone?.(fullText, data as Record<string, unknown>);
+              const donePayload =
+                data && typeof data === 'object' && !Array.isArray(data)
+                  ? (data as Record<string, unknown>)
+                  : undefined;
+              callbacks.onDone?.(fullText, donePayload);
             } else {
               if (data.token) {
                 fullText += data.token;
