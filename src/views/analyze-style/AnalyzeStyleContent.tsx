@@ -8,7 +8,6 @@ import {
   formatStyleForDisplay,
   MESSAGES,
   CHOICE_OPTIONS,
-  type StyleSetupContext,
 } from '@/features/chat-review';
 import { MessageList } from '@/widgets/chat';
 import { InputArea } from '@/shared/ui/InputArea';
@@ -34,9 +33,6 @@ export function AnalyzeStyleContent({
   const setMessages = useChatStore((s) => s.setMessages);
   const setStyleProfile = useChatStore((s) => s.setStyleProfile);
   const setHasExistingStyle = useChatStore((s) => s.setHasExistingStyle);
-  const [styleSetupContext, setStyleSetupContext] = useState<StyleSetupContext>(
-    {},
-  );
   const [isInputEnabled, setIsInputEnabled] = useState(!existingStyleProfile);
   const isInitializedRef = useRef(false);
 
@@ -46,7 +42,7 @@ export function AnalyzeStyleContent({
     handleSendMessage,
     handleChoiceSelect: originalHandleChoiceSelect,
     isProcessing,
-  } = useChatHandlers({ userEmail, styleSetupContext, setStyleSetupContext });
+  } = useChatHandlers({ userEmail });
 
   const reset = useChatStore((s) => s.reset);
 

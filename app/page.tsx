@@ -1,7 +1,6 @@
 import { getSession } from '@/shared/lib/authUtils';
 import { readStyleProfile } from '@/shared/api/dataFiles';
-import { ChatPageContent } from './ChatPageContent';
-import { PublicChatView } from './PublicChatView';
+import { ChatPageContent, PublicChatView } from '@/views/chat';
 import { AppShell } from '@/widgets/app-shell';
 
 export const metadata = {
