@@ -2,8 +2,10 @@ import type {
   ConversationState,
   ReviewTopic,
   StepHandlerResult,
+  UserInput,
 } from '../../model/types';
-import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
+import { MESSAGES } from '../../constants/messages';
+import { CHOICE_OPTIONS } from '../../constants/choiceOptions';
 
 const TOPIC_MAP: Record<string, ReviewTopic> = {
   restaurant: 'restaurant',
@@ -24,10 +26,17 @@ const TOPIC_MAP: Record<string, ReviewTopic> = {
 };
 
 export function handleTopicSelect(
-  userInput: string,
+  input: UserInput,
   _state: ConversationState,
 ): StepHandlerResult {
-  const lowered = userInput.toLowerCase().trim();
+  if (input.optionId) {
+    const topic = TOPIC_MAP[input.optionId];
+    if (topic) {
+      return buildTopicResult(topic);
+    }
+  }
+
+  const lowered = input.text.toLowerCase().trim();
   const topic = TOPIC_MAP[lowered];
 
   if (!topic) {
@@ -41,9 +50,14 @@ export function handleTopicSelect(
         },
       ],
       actions: [],
+      sideEffect: { type: 'none' },
     };
   }
 
+  return buildTopicResult(topic);
+}
+
+function buildTopicResult(topic: ReviewTopic): StepHandlerResult {
   if (topic !== 'restaurant') {
     return {
       messages: [
@@ -60,6 +74,7 @@ export function handleTopicSelect(
         },
       ],
       actions: [],
+      sideEffect: { type: 'none' },
     };
   }
 
@@ -76,6 +91,6 @@ export function handleTopicSelect(
       { type: 'GO_TO_STEP', payload: 'info-gathering' },
       { type: 'SET_SUB_STEP', payload: 'date' },
     ],
-    nextStep: 'info-gathering',
+    sideEffect: { type: 'none' },
   };
 }

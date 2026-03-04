@@ -2,35 +2,53 @@ import type {
   ConversationState,
   StepHandlerResult,
   StyleSetupContext,
-  StyleSetupHandlerResult,
+  StyleSetupMethod,
+  UserInput,
 } from '../../model/types';
-import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
+import { MESSAGES } from '../../constants/messages';
+import { CHOICE_OPTIONS } from '../../constants/choiceOptions';
+import { classifyIntent } from '../conversation/conversationEngine';
 
 export function handleStyleSetup(
-  userInput: string,
+  input: UserInput,
   state: ConversationState,
   context: StyleSetupContext = {},
-): StyleSetupHandlerResult {
+): StepHandlerResult {
+  if (!context.method && input.optionId) {
+    const methodMap: Record<string, StyleSetupMethod> = {
+      'blog-url': 'blog-url',
+      'paste-text': 'paste-text',
+      'questionnaire': 'questionnaire',
+    };
+    if (methodMap[input.optionId]) {
+      return handleMethodSelection(input.optionId, state);
+    }
+  }
+
+  if (!context.method && input.text.includes('blog.naver.com')) {
+    return handleBlogUrlInput(input.text, state);
+  }
+
   if (!context.method) {
-    return handleMethodSelection(userInput, state);
+    return handleMethodSelection(input.text, state);
   }
 
   switch (context.method) {
     case 'blog-url':
-      return handleBlogUrlInput(userInput, state);
+      return handleBlogUrlInput(input.text, state);
     case 'paste-text':
-      return handlePasteText(userInput, state, context);
+      return handlePasteText(input.text, state, context);
     case 'questionnaire':
-      return handleQuestionnaire(userInput, state, context);
+      return handleQuestionnaire(input.text, state, context);
     default:
-      return handleMethodSelection(userInput, state);
+      return handleMethodSelection(input.text, state);
   }
 }
 
 function handleMethodSelection(
   userInput: string,
   state: ConversationState,
-): StyleSetupHandlerResult {
+): StepHandlerResult {
   const methodId = userInput.toLowerCase();
 
   if (
@@ -47,7 +65,8 @@ function handleMethodSelection(
           content: MESSAGES.styleSetup.urlInput,
         },
       ],
-      actions: [],
+      actions: [{ type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'blog-url' } }],
+      sideEffect: { type: 'none' },
     };
   }
 
@@ -65,7 +84,8 @@ function handleMethodSelection(
           content: MESSAGES.styleSetup.pastePrompt,
         },
       ],
-      actions: [],
+      actions: [{ type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'paste-text' } }],
+      sideEffect: { type: 'none' },
     };
   }
 
@@ -89,7 +109,8 @@ function handleMethodSelection(
           options: CHOICE_OPTIONS.toneOptions,
         },
       ],
-      actions: [],
+      actions: [{ type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'questionnaire', questionnaireStep: 0 } }],
+      sideEffect: { type: 'none' },
     };
   }
 
@@ -103,13 +124,14 @@ function handleMethodSelection(
       },
     ],
     actions: [],
+    sideEffect: { type: 'none' },
   };
 }
 
 function handleBlogUrlInput(
   userInput: string,
   _state: ConversationState,
-): StyleSetupHandlerResult {
+): StepHandlerResult {
   const urlPattern =
     /https?:\/\/(blog\.naver\.com|m\.blog\.naver\.com)\/[a-zA-Z0-9_-]+/;
 
@@ -124,6 +146,7 @@ function handleBlogUrlInput(
         },
       ],
       actions: [],
+      sideEffect: { type: 'none' },
     };
   }
 
@@ -136,9 +159,7 @@ function handleBlogUrlInput(
       },
     ],
     actions: [],
-    asyncAction: async () => {
-      return { styleProfile: undefined };
-    },
+    sideEffect: { type: 'blog-analysis', url: userInput },
   };
 }
 
@@ -146,9 +167,8 @@ function handlePasteText(
   userInput: string,
   _state: ConversationState,
   context: StyleSetupContext,
-): StyleSetupHandlerResult {
-  const texts = context.pastedTexts || [];
-  texts.push(userInput);
+): StepHandlerResult {
+  const texts = [...(context.pastedTexts || []), userInput];
 
   if (texts.length < 5) {
     return {
@@ -159,7 +179,8 @@ function handlePasteText(
           content: `좋아요! ${texts.length}개 받았어요.\n${5 - texts.length}개 더 붙여넣어 주세요! 📋`,
         },
       ],
-      actions: [],
+      actions: [{ type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'paste-text', pastedTexts: texts } }],
+      sideEffect: { type: 'none' },
     };
   }
 
@@ -171,7 +192,8 @@ function handlePasteText(
         content: MESSAGES.styleSetup.pasteReceived,
       },
     ],
-    actions: [],
+    actions: [{ type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'paste-text', pastedTexts: texts } }],
+    sideEffect: { type: 'none' },
   };
 }
 
@@ -179,7 +201,7 @@ function handleQuestionnaire(
   userInput: string,
   _state: ConversationState,
   context: StyleSetupContext,
-): StyleSetupHandlerResult {
+): StepHandlerResult {
   const step = context.questionnaireStep || 0;
 
   const questions = [
@@ -208,7 +230,8 @@ function handleQuestionnaire(
           options: nextQuestion.options,
         },
       ],
-      actions: [],
+      actions: [{ type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'questionnaire', questionnaireStep: step + 1 } }],
+      sideEffect: { type: 'none' },
     };
   }
 
@@ -221,33 +244,36 @@ function handleQuestionnaire(
       },
     ],
     actions: [{ type: 'GO_TO_STEP', payload: 'topic-select' }],
-    nextStep: 'topic-select',
+    sideEffect: { type: 'none' },
   };
 }
 
 export function handleStyleCheck(
-  userInput: string,
+  input: UserInput,
   state: ConversationState,
 ): StepHandlerResult {
-  const lowered = userInput.toLowerCase();
+  if (input.optionId === 'yes') {
+    if (state.hasExistingStyle) {
+      return { messages: [], actions: [{ type: 'GO_TO_STEP', payload: 'topic-select' }], sideEffect: { type: 'none' } };
+    }
+  }
+  if (input.optionId === 'no') {
+    if (state.hasExistingStyle) {
+      return { messages: [{ role: 'assistant', type: 'text', content: MESSAGES.styleCheck.styleModifyRequest }], actions: [], sideEffect: { type: 'none' } };
+    }
+  }
+
+  const intent = classifyIntent(input.text);
 
   if (state.hasExistingStyle) {
-    if (
-      lowered === 'yes' ||
-      lowered.includes('좋아') ||
-      lowered.includes('네')
-    ) {
+    if (intent === 'confirm_yes') {
       return {
         messages: [],
         actions: [{ type: 'GO_TO_STEP', payload: 'topic-select' }],
-        nextStep: 'topic-select',
+        sideEffect: { type: 'none' },
       };
     }
-    if (
-      lowered === 'no' ||
-      lowered.includes('수정') ||
-      lowered.includes('아니')
-    ) {
+    if (intent === 'confirm_no') {
       return {
         messages: [
           {
@@ -257,21 +283,35 @@ export function handleStyleCheck(
           },
         ],
         actions: [],
+        sideEffect: { type: 'none' },
+      };
+    }
+    if (intent === 'modify_previous' && !(state.styleProfile && input.text.length > 5)) {
+      return {
+        messages: [
+          {
+            role: 'assistant',
+            type: 'text',
+            content: MESSAGES.styleCheck.styleModifyRequest,
+          },
+        ],
+        actions: [],
+        sideEffect: { type: 'none' },
       };
     }
   }
 
-  if (state.styleProfile && userInput.length > 5) {
+  if (state.styleProfile && input.text.length > 5) {
     return {
       messages: [
         {
           role: 'assistant',
           type: 'text',
-          content: `알겠어요! "${userInput}" 스타일로 수정할게요! ✨`,
+          content: `알겠어요! "${input.text}" 스타일로 수정할게요! ✨`,
         },
       ],
       actions: [{ type: 'GO_TO_STEP', payload: 'topic-select' }],
-      nextStep: 'topic-select',
+      sideEffect: { type: 'none' },
     };
   }
 
@@ -284,7 +324,10 @@ export function handleStyleCheck(
         options: CHOICE_OPTIONS.styleSetupMethod,
       },
     ],
-    actions: [{ type: 'GO_TO_STEP', payload: 'style-setup' }],
-    nextStep: 'style-setup',
+    actions: [
+      { type: 'GO_TO_STEP', payload: 'style-setup' },
+      { type: 'SET_STYLE_SETUP_CONTEXT', payload: {} },
+    ],
+    sideEffect: { type: 'none' },
   };
 }

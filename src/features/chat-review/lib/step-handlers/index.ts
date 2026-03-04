@@ -1,10 +1,8 @@
 export type {
   StepHandlerResult,
   StyleSetupContext,
-  InfoGatheringResult,
-  SmartFollowupResult,
-  ReviewEditResult,
-  StyleSetupHandlerResult,
+  SideEffect,
+  UserInput,
 } from '../../model/types';
 
 export { handleStyleSetup, handleStyleCheck } from './styleSetup';

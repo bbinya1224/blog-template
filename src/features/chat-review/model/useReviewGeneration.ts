@@ -3,7 +3,8 @@
 import { useCallback } from 'react';
 import { useChatStore } from './store';
 import { handleReviewEdited } from '../lib/step-handlers';
-import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
+import { MESSAGES } from '../constants/messages';
+import { CHOICE_OPTIONS } from '../constants/choiceOptions';
 import { apiSSE, SSEError } from '@/shared/api/sseClient';
 
 export function useReviewGeneration() {

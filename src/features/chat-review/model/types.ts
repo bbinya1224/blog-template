@@ -81,6 +81,31 @@ export const stepTransitions: Record<ConversationStep, ConversationStep[]> = {
   complete: [],
 };
 
+// 스타일 설정 방법
+export type StyleSetupMethod =
+  | 'blog-url' // 네이버 블로그 URL 크롤링
+  | 'paste-text' // 글 직접 첨부
+  | 'questionnaire'; // 직접 스타일 설정 (설문)
+
+export interface StyleSetupContext {
+  method?: StyleSetupMethod;
+  blogUrl?: string;
+  pastedTexts?: string[];
+  questionnaireStep?: number;
+}
+
+export type SideEffect =
+  | { type: 'blog-analysis'; url: string }
+  | { type: 'place-search'; query: string }
+  | { type: 'edit-review'; request: string }
+  | { type: 'skip-followup' }
+  | { type: 'none' };
+
+export interface UserInput {
+  text: string;
+  optionId?: string;
+}
+
 // 대화 액션 타입
 export type ConversationAction =
   | { type: 'SET_STYLE_PROFILE'; payload: StyleProfile }
@@ -90,40 +115,11 @@ export type ConversationAction =
   | { type: 'SET_GENERATED_REVIEW'; payload: string }
   | { type: 'GO_TO_STEP'; payload: ConversationStep }
   | { type: 'SET_SUB_STEP'; payload: RestaurantInfoStep }
+  | { type: 'SET_STYLE_SETUP_CONTEXT'; payload: Partial<StyleSetupContext> }
   | { type: 'RESET' };
 
-// 스타일 설정 방법
-export type StyleSetupMethod =
-  | 'blog-url' // 네이버 블로그 URL 크롤링
-  | 'paste-text' // 글 직접 첨부
-  | 'questionnaire'; // 직접 스타일 설정 (설문)
-
-// Step handler result types
 export interface StepHandlerResult {
   messages: Omit<ChatMessage, 'id' | 'timestamp'>[];
   actions: ConversationAction[];
-  nextStep?: string;
-}
-
-export interface ReviewEditResult extends StepHandlerResult {
-  editRequest?: string;
-}
-
-export interface InfoGatheringResult extends StepHandlerResult {
-  placeSearchQuery?: string;
-}
-
-export interface SmartFollowupResult extends StepHandlerResult {
-  skipFollowup?: boolean;
-}
-
-export interface StyleSetupContext {
-  method?: StyleSetupMethod;
-  blogUrl?: string;
-  pastedTexts?: string[];
-  questionnaireStep?: number;
-}
-
-export interface StyleSetupHandlerResult extends StepHandlerResult {
-  asyncAction?: () => Promise<{ styleProfile?: StyleProfile; error?: string }>;
+  sideEffect: SideEffect;
 }

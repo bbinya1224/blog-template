@@ -3,21 +3,26 @@ import type {
   ConversationState,
   RestaurantInfoStep,
   StepHandlerResult,
+  UserInput,
 } from '../../model/types';
-import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
+import { MESSAGES } from '../../constants/messages';
+import { CHOICE_OPTIONS } from '../../constants/choiceOptions';
+import { classifyIntent } from '../conversation/conversationEngine';
 
 export function handleConfirmation(
-  userInput: string,
+  input: UserInput,
   _state: ConversationState,
 ): StepHandlerResult {
-  const lowered = userInput.toLowerCase();
+  if (input.optionId === 'yes') {
+    return { messages: [{ role: 'assistant', type: 'text', content: MESSAGES.confirmation.correct }, { role: 'assistant', type: 'loading', content: MESSAGES.generating.working }], actions: [{ type: 'GO_TO_STEP', payload: 'generating' }], sideEffect: { type: 'none' } };
+  }
+  if (input.optionId === 'no') {
+    return { messages: [{ role: 'assistant', type: 'text', content: MESSAGES.confirmation.needsEdit }], actions: [], sideEffect: { type: 'none' } };
+  }
 
-  if (
-    lowered === 'yes' ||
-    lowered.includes('네') ||
-    lowered.includes('맞아') ||
-    lowered.includes('ㅇㅇ')
-  ) {
+  const intent = classifyIntent(input.text);
+
+  if (intent === 'confirm_yes') {
     return {
       messages: [
         {
@@ -32,27 +37,11 @@ export function handleConfirmation(
         },
       ],
       actions: [{ type: 'GO_TO_STEP', payload: 'generating' }],
-      nextStep: 'generating',
+      sideEffect: { type: 'none' },
     };
   }
 
-  if (
-    lowered === 'no' ||
-    lowered.includes('수정') ||
-    lowered.includes('아니') ||
-    lowered.includes('틀')
-  ) {
-    return {
-      messages: [
-        {
-          role: 'assistant',
-          type: 'text',
-          content: MESSAGES.confirmation.needsEdit,
-        },
-      ],
-      actions: [],
-    };
-  }
+  const lowered = input.text.toLowerCase();
 
   const fieldKeywords: Record<string, RestaurantInfoStep> = {
     날짜: 'date',
@@ -82,9 +71,23 @@ export function handleConfirmation(
           { type: 'GO_TO_STEP', payload: 'info-gathering' },
           { type: 'SET_SUB_STEP', payload: subStep },
         ],
-        nextStep: 'info-gathering',
+        sideEffect: { type: 'none' },
       };
     }
+  }
+
+  if (intent === 'confirm_no' || intent === 'modify_previous') {
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content: MESSAGES.confirmation.needsEdit,
+        },
+      ],
+      actions: [],
+      sideEffect: { type: 'none' },
+    };
   }
 
   return {
@@ -97,6 +100,7 @@ export function handleConfirmation(
       },
     ],
     actions: [],
+    sideEffect: { type: 'none' },
   };
 }
 

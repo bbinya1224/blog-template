@@ -6,7 +6,8 @@ import type {
 } from '../../model/types';
 import type { ChatMessage } from '@/entities/chat-message';
 import type { StyleProfile } from '@/entities/style-profile';
-import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
+import { MESSAGES } from '../../constants/messages';
+import { CHOICE_OPTIONS } from '../../constants/choiceOptions';
 
 export function canTransition(
   currentStep: ConversationStep,
@@ -87,15 +88,15 @@ export function classifyIntent(input: string): UserIntent {
   const lowered = input.toLowerCase().trim();
 
   // 확인 패턴
-  if (/^(네|예|응|좋아|확인|맞아|그래|ㅇㅇ|ok|yes)/.test(lowered)) {
+  if (/^(네|예|응|좋아|확인|맞아|그래|ㅇㅇ|ok|yes|완벽|됐어(?!요)|완성)/.test(lowered)) {
     return 'confirm_yes';
   }
-  if (/^(아니|아뇨|노|no|다시|수정|틀려)/.test(lowered)) {
+  if (/^(아니|아뇨|노|no|다시|수정|틀려|틀렸)/.test(lowered)) {
     return 'confirm_no';
   }
 
   // 건너뛰기
-  if (/^(건너뛰|스킵|skip|패스|pass|없어|몰라)/.test(lowered)) {
+  if (/^(건너뛰|스킵|skip|패스|pass|없어|몰라|충분|됐어요|그만)/.test(lowered)) {
     return 'skip';
   }
 

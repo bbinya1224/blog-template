@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useShallow } from 'zustand/shallow';
-import { useChatStore } from './store';
+import { useChatStore } from '@/features/chat-review/model/store';
 import { useRecentReviews } from '@/entities/review';
-import { useChatHandlers } from './useChatHandlers';
-import { createInitialMessage } from '../lib/conversation/conversationEngine';
-import { createSummaryMessage } from '../lib/step-handlers';
-import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
+import { useChatHandlers } from '@/features/chat-review/model/useChatHandlers';
+import { createInitialMessage } from '@/features/chat-review/lib/conversation/conversationEngine';
+import { createSummaryMessage } from '@/features/chat-review/lib/step-handlers';
+import { MESSAGES } from '@/features/chat-review/constants/messages';
+import { CHOICE_OPTIONS } from '@/features/chat-review/constants/choiceOptions';
 import type { StyleProfile } from '@/entities/style-profile';
-import type { ReviewTopic, ConversationStep } from './types';
-import type { StyleSetupContext } from '../lib/step-handlers';
+import type { ReviewTopic, ConversationStep } from '@/features/chat-review/model/types';
 
 interface UseChatOrchestrationParams {
   userEmail: string;
@@ -21,15 +21,24 @@ export function useChatOrchestration({
   userEmail,
   existingStyleProfile,
 }: UseChatOrchestrationParams) {
-  const step = useChatStore((s) => s.step);
+  const orchestrationState = useChatStore(
+    useShallow((s) => ({
+      step: s.step,
+      subStep: s.subStep,
+      userName: s.userName,
+      hasExistingStyle: s.hasExistingStyle,
+      styleProfile: s.styleProfile,
+      selectedTopic: s.selectedTopic,
+      collectedInfo: s.collectedInfo,
+      generatedReview: s.generatedReview,
+      sessionId: s.sessionId,
+    })),
+  );
   const setStyleProfile = useChatStore((s) => s.setStyleProfile);
   const setHasExistingStyle = useChatStore((s) => s.setHasExistingStyle);
   const setSelectedTopic = useChatStore((s) => s.setSelectedTopic);
   const setStep = useChatStore((s) => s.setStep);
   const setSubStep = useChatStore((s) => s.setSubStep);
-  const [styleSetupContext, setStyleSetupContext] = useState<StyleSetupContext>(
-    {},
-  );
   const isInitializedRef = useRef(false);
   const prevStepRef = useRef<ConversationStep | null>(null);
 
@@ -46,7 +55,7 @@ export function useChatOrchestration({
     consumeNextQuestion,
     generateReview,
     isProcessing,
-  } = useChatHandlers({ userEmail, styleSetupContext, setStyleSetupContext });
+  } = useChatHandlers({ userEmail });
 
   // Initialize existing style profile
   useEffect(() => {
@@ -63,37 +72,34 @@ export function useChatOrchestration({
       isInitializedRef.current = false;
       prevStepRef.current = null;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- messages 배열 참조 대신 length만 추적하여 불필요한 재실행 방지
   }, [messages.length]);
 
-  // Handle step changes — getState()로 항상 최신 상태 접근 (stateRef 제거)
+  // Handle step changes
   useEffect(() => {
     if (!isInitializedRef.current) return;
-    if (step === prevStepRef.current) return;
-    prevStepRef.current = step;
+    if (orchestrationState.step === prevStepRef.current) return;
+    prevStepRef.current = orchestrationState.step;
 
     const handleStepChange = async () => {
-      const s = useChatStore.getState();
-
-      switch (s.step) {
+      switch (orchestrationState.step) {
         case 'style-check':
-          if (s.hasExistingStyle && s.styleProfile) {
-            addMessage(createInitialMessage('style-check', s));
+          if (orchestrationState.hasExistingStyle && orchestrationState.styleProfile) {
+            addMessage(createInitialMessage('style-check', orchestrationState));
           }
           break;
         case 'topic-select':
-          addMessage(createInitialMessage('topic-select', s));
+          addMessage(createInitialMessage('topic-select', orchestrationState));
           break;
         case 'info-gathering':
-          if (!s.subStep) {
-            addMessage(createInitialMessage('info-gathering', s));
+          if (!orchestrationState.subStep) {
+            addMessage(createInitialMessage('info-gathering', orchestrationState));
           }
           break;
         case 'smart-followup': {
           try {
             const questions = await fetchSmartQuestions(
-              s.collectedInfo,
-              s.selectedTopic || 'restaurant',
+              orchestrationState.collectedInfo,
+              orchestrationState.selectedTopic || 'restaurant',
             );
             if (questions.length > 0) {
               const combined = `${MESSAGES.smartFollowup.intro}\n\n${questions[0]}`;
@@ -112,7 +118,7 @@ export function useChatOrchestration({
           break;
         }
         case 'confirmation':
-          addMessage(createSummaryMessage(s));
+          addMessage(createSummaryMessage(orchestrationState));
           addAssistantMessage(
             MESSAGES.confirmation.ask,
             'choice',
@@ -130,7 +136,7 @@ export function useChatOrchestration({
       addAssistantMessage(MESSAGES.error.unknown, 'text');
     });
   }, [
-    step,
+    orchestrationState,
     addMessage,
     addAssistantMessage,
     fetchSmartQuestions,
@@ -169,7 +175,7 @@ export function useChatOrchestration({
       selectedTopic: s.selectedTopic,
     })),
   );
-  const inputPlaceholder = getInputPlaceholder(step, messages.length === 0);
+  const inputPlaceholder = getInputPlaceholder(orchestrationState.step, messages.length === 0);
 
   return {
     messages,
