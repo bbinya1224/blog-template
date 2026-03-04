@@ -13,6 +13,7 @@ import { MessageList } from '@/widgets/chat';
 import { InputArea } from '@/shared/ui/InputArea';
 import type { StyleProfile } from '@/entities/style-profile';
 import { cn } from '@/shared/lib/utils';
+import { useScrollToBottom } from '@/shared/lib/hooks';
 import { ArrowLeft } from 'lucide-react';
 
 interface AnalyzeStyleContentProps {
@@ -126,6 +127,8 @@ export function AnalyzeStyleContent({
     [router, addAssistantMessage, originalHandleChoiceSelect],
   );
 
+  const { containerRef } = useScrollToBottom<HTMLDivElement>();
+
   const inputPlaceholder =
     step === 'style-setup'
       ? '블로그 URL 또는 내용을 입력해주세요'
@@ -151,7 +154,7 @@ export function AnalyzeStyleContent({
           'md:mx-auto md:max-w-3xl',
         )}
       >
-        <div className='min-h-0 flex-1 overflow-y-auto'>
+        <div ref={containerRef} className='min-h-0 flex-1 overflow-y-auto'>
           <MessageList
             messages={messages}
             isTyping={isProcessing}
