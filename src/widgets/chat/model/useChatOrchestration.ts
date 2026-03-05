@@ -2,15 +2,20 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { useShallow } from 'zustand/shallow';
-import { useChatStore } from '@/features/chat-review/model/store';
+import {
+  useChatStore,
+  useChatHandlers,
+  createInitialMessage,
+  createSummaryMessage,
+  MESSAGES,
+  CHOICE_OPTIONS,
+} from '@/features/chat-review';
 import { useRecentReviews } from '@/entities/review';
-import { useChatHandlers } from '@/features/chat-review/model/useChatHandlers';
-import { createInitialMessage } from '@/features/chat-review/lib/conversation/conversationEngine';
-import { createSummaryMessage } from '@/features/chat-review/lib/step-handlers';
-import { MESSAGES } from '@/features/chat-review/constants/messages';
-import { CHOICE_OPTIONS } from '@/features/chat-review/constants/choiceOptions';
 import type { StyleProfile } from '@/entities/style-profile';
-import type { ReviewTopic, ConversationStep } from '@/features/chat-review/model/types';
+import type {
+  ReviewTopic,
+  ConversationStep,
+} from '@/features/chat-review/model/types';
 
 interface UseChatOrchestrationParams {
   userEmail: string;
@@ -34,18 +39,31 @@ export function useChatOrchestration({
       sessionId: s.sessionId,
     })),
   );
-  const setStyleProfile = useChatStore((s) => s.setStyleProfile);
-  const setHasExistingStyle = useChatStore((s) => s.setHasExistingStyle);
-  const setSelectedTopic = useChatStore((s) => s.setSelectedTopic);
-  const setStep = useChatStore((s) => s.setStep);
-  const setSubStep = useChatStore((s) => s.setSubStep);
+  const {
+    messages,
+    setStyleProfile,
+    setHasExistingStyle,
+    setSelectedTopic,
+    setStep,
+    setSubStep,
+    addMessage,
+    addAssistantMessage,
+  } = useChatStore(
+    useShallow((s) => ({
+      messages: s.messages,
+      setStyleProfile: s.setStyleProfile,
+      setHasExistingStyle: s.setHasExistingStyle,
+      setSelectedTopic: s.setSelectedTopic,
+      setStep: s.setStep,
+      setSubStep: s.setSubStep,
+      addMessage: s.addMessage,
+      addAssistantMessage: s.addAssistantMessage,
+    })),
+  );
   const isInitializedRef = useRef(false);
   const prevStepRef = useRef<ConversationStep | null>(null);
 
   const { reviews: recentReviews } = useRecentReviews(5);
-  const messages = useChatStore((s) => s.messages);
-  const addMessage = useChatStore((s) => s.addMessage);
-  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
   const {
     handleSendMessage,
     handleChoiceSelect,
@@ -83,7 +101,10 @@ export function useChatOrchestration({
     const handleStepChange = async () => {
       switch (orchestrationState.step) {
         case 'style-check':
-          if (orchestrationState.hasExistingStyle && orchestrationState.styleProfile) {
+          if (
+            orchestrationState.hasExistingStyle &&
+            orchestrationState.styleProfile
+          ) {
             addMessage(createInitialMessage('style-check', orchestrationState));
           }
           break;
@@ -92,7 +113,9 @@ export function useChatOrchestration({
           break;
         case 'info-gathering':
           if (!orchestrationState.subStep) {
-            addMessage(createInitialMessage('info-gathering', orchestrationState));
+            addMessage(
+              createInitialMessage('info-gathering', orchestrationState),
+            );
           }
           break;
         case 'smart-followup': {
@@ -136,7 +159,12 @@ export function useChatOrchestration({
       addAssistantMessage(MESSAGES.error.unknown, 'text');
     });
   }, [
-    orchestrationState,
+    orchestrationState.step,
+    orchestrationState.hasExistingStyle,
+    orchestrationState.styleProfile,
+    orchestrationState.subStep,
+    orchestrationState.collectedInfo,
+    orchestrationState.selectedTopic,
     addMessage,
     addAssistantMessage,
     fetchSmartQuestions,
@@ -166,16 +194,17 @@ export function useChatOrchestration({
     [setSelectedTopic, setStep, setSubStep, addAssistantMessage],
   );
 
-  const state = useChatStore(
-    useShallow((s) => ({
-      step: s.step,
-      userName: s.userName,
-      hasExistingStyle: s.hasExistingStyle,
-      styleProfile: s.styleProfile,
-      selectedTopic: s.selectedTopic,
-    })),
+  const state = {
+    step: orchestrationState.step,
+    userName: orchestrationState.userName,
+    hasExistingStyle: orchestrationState.hasExistingStyle,
+    styleProfile: orchestrationState.styleProfile,
+    selectedTopic: orchestrationState.selectedTopic,
+  };
+  const inputPlaceholder = getInputPlaceholder(
+    orchestrationState.step,
+    messages.length === 0,
   );
-  const inputPlaceholder = getInputPlaceholder(orchestrationState.step, messages.length === 0);
 
   return {
     messages,

@@ -2,27 +2,25 @@ import type {
   ConversationState,
   StepHandlerResult,
   StyleSetupContext,
-  StyleSetupMethod,
   UserInput,
 } from '../../model/types';
 import { MESSAGES } from '../../constants/messages';
 import { CHOICE_OPTIONS } from '../../constants/choiceOptions';
 import { classifyIntent } from '../conversation/conversationEngine';
 
+const VALID_METHODS = new Set<string>([
+  'blog-url',
+  'paste-text',
+  'questionnaire',
+]);
+
 export function handleStyleSetup(
   input: UserInput,
   state: ConversationState,
   context: StyleSetupContext = {},
 ): StepHandlerResult {
-  if (!context.method && input.optionId) {
-    const methodMap: Record<string, StyleSetupMethod> = {
-      'blog-url': 'blog-url',
-      'paste-text': 'paste-text',
-      'questionnaire': 'questionnaire',
-    };
-    if (methodMap[input.optionId]) {
-      return handleMethodSelection(input.optionId, state);
-    }
+  if (!context.method && input.optionId && VALID_METHODS.has(input.optionId)) {
+    return handleMethodSelection(input.optionId, state);
   }
 
   if (!context.method && input.text.includes('blog.naver.com')) {
@@ -65,7 +63,9 @@ function handleMethodSelection(
           content: MESSAGES.styleSetup.urlInput,
         },
       ],
-      actions: [{ type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'blog-url' } }],
+      actions: [
+        { type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'blog-url' } },
+      ],
       sideEffect: { type: 'none' },
     };
   }
@@ -84,7 +84,9 @@ function handleMethodSelection(
           content: MESSAGES.styleSetup.pastePrompt,
         },
       ],
-      actions: [{ type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'paste-text' } }],
+      actions: [
+        { type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'paste-text' } },
+      ],
       sideEffect: { type: 'none' },
     };
   }
@@ -109,7 +111,12 @@ function handleMethodSelection(
           options: CHOICE_OPTIONS.toneOptions,
         },
       ],
-      actions: [{ type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'questionnaire', questionnaireStep: 0 } }],
+      actions: [
+        {
+          type: 'SET_STYLE_SETUP_CONTEXT',
+          payload: { method: 'questionnaire', questionnaireStep: 0 },
+        },
+      ],
       sideEffect: { type: 'none' },
     };
   }
@@ -179,7 +186,12 @@ function handlePasteText(
           content: `좋아요! ${texts.length}개 받았어요.\n${5 - texts.length}개 더 붙여넣어 주세요! 📋`,
         },
       ],
-      actions: [{ type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'paste-text', pastedTexts: texts } }],
+      actions: [
+        {
+          type: 'SET_STYLE_SETUP_CONTEXT',
+          payload: { method: 'paste-text', pastedTexts: texts },
+        },
+      ],
       sideEffect: { type: 'none' },
     };
   }
@@ -192,7 +204,12 @@ function handlePasteText(
         content: MESSAGES.styleSetup.pasteReceived,
       },
     ],
-    actions: [{ type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'paste-text', pastedTexts: texts } }],
+    actions: [
+      {
+        type: 'SET_STYLE_SETUP_CONTEXT',
+        payload: { method: 'paste-text', pastedTexts: texts },
+      },
+    ],
     sideEffect: { type: 'none' },
   };
 }
@@ -230,7 +247,12 @@ function handleQuestionnaire(
           options: nextQuestion.options,
         },
       ],
-      actions: [{ type: 'SET_STYLE_SETUP_CONTEXT', payload: { method: 'questionnaire', questionnaireStep: step + 1 } }],
+      actions: [
+        {
+          type: 'SET_STYLE_SETUP_CONTEXT',
+          payload: { method: 'questionnaire', questionnaireStep: step + 1 },
+        },
+      ],
       sideEffect: { type: 'none' },
     };
   }
@@ -254,12 +276,26 @@ export function handleStyleCheck(
 ): StepHandlerResult {
   if (input.optionId === 'yes') {
     if (state.hasExistingStyle) {
-      return { messages: [], actions: [{ type: 'GO_TO_STEP', payload: 'topic-select' }], sideEffect: { type: 'none' } };
+      return {
+        messages: [],
+        actions: [{ type: 'GO_TO_STEP', payload: 'topic-select' }],
+        sideEffect: { type: 'none' },
+      };
     }
   }
   if (input.optionId === 'no') {
     if (state.hasExistingStyle) {
-      return { messages: [{ role: 'assistant', type: 'text', content: MESSAGES.styleCheck.styleModifyRequest }], actions: [], sideEffect: { type: 'none' } };
+      return {
+        messages: [
+          {
+            role: 'assistant',
+            type: 'text',
+            content: MESSAGES.styleCheck.styleModifyRequest,
+          },
+        ],
+        actions: [],
+        sideEffect: { type: 'none' },
+      };
     }
   }
 
@@ -286,7 +322,10 @@ export function handleStyleCheck(
         sideEffect: { type: 'none' },
       };
     }
-    if (intent === 'modify_previous' && !(state.styleProfile && input.text.length > 5)) {
+    if (
+      intent === 'modify_previous' &&
+      !(state.styleProfile && input.text.length > 5)
+    ) {
       return {
         messages: [
           {

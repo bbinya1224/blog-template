@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useShallow } from 'zustand/shallow';
 import {
   useChatStore,
   useChatHandlers,
@@ -28,24 +29,37 @@ export function AnalyzeStyleContent({
   existingStyleProfile,
 }: AnalyzeStyleContentProps) {
   const router = useRouter();
-  const step = useChatStore((s) => s.step);
-  const storeUserName = useChatStore((s) => s.userName);
-  const setStep = useChatStore((s) => s.setStep);
-  const setMessages = useChatStore((s) => s.setMessages);
-  const setStyleProfile = useChatStore((s) => s.setStyleProfile);
-  const setHasExistingStyle = useChatStore((s) => s.setHasExistingStyle);
+  const {
+    step,
+    userName: storeUserName,
+    messages,
+    setStep,
+    setMessages,
+    setStyleProfile,
+    setHasExistingStyle,
+    addAssistantMessage,
+    reset,
+  } = useChatStore(
+    useShallow((s) => ({
+      step: s.step,
+      userName: s.userName,
+      messages: s.messages,
+      setStep: s.setStep,
+      setMessages: s.setMessages,
+      setStyleProfile: s.setStyleProfile,
+      setHasExistingStyle: s.setHasExistingStyle,
+      addAssistantMessage: s.addAssistantMessage,
+      reset: s.reset,
+    })),
+  );
   const [isInputEnabled, setIsInputEnabled] = useState(!existingStyleProfile);
   const isInitializedRef = useRef(false);
 
-  const messages = useChatStore((s) => s.messages);
-  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
   const {
     handleSendMessage,
     handleChoiceSelect: originalHandleChoiceSelect,
     isProcessing,
   } = useChatHandlers({ userEmail });
-
-  const reset = useChatStore((s) => s.reset);
 
   useEffect(
     () => () => {

@@ -12,10 +12,30 @@ export function handleReviewEdit(
   state: ConversationState,
 ): StepHandlerResult {
   if (input.optionId === 'complete') {
-    return { messages: [{ role: 'assistant', type: 'text', content: MESSAGES.complete.thanks(state.userName || '') }], actions: [{ type: 'GO_TO_STEP', payload: 'complete' }], sideEffect: { type: 'none' } };
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content: MESSAGES.complete.thanks(state.userName || ''),
+        },
+      ],
+      actions: [{ type: 'GO_TO_STEP', payload: 'complete' }],
+      sideEffect: { type: 'none' },
+    };
   }
   if (input.optionId === 'edit') {
-    return { messages: [{ role: 'assistant', type: 'text', content: MESSAGES.reviewEdit.askEdit }], actions: [], sideEffect: { type: 'none' } };
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content: MESSAGES.reviewEdit.askEdit,
+        },
+      ],
+      actions: [],
+      sideEffect: { type: 'none' },
+    };
   }
 
   const intent = classifyIntent(input.text);

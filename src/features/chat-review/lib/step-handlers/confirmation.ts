@@ -14,10 +14,35 @@ export function handleConfirmation(
   _state: ConversationState,
 ): StepHandlerResult {
   if (input.optionId === 'yes') {
-    return { messages: [{ role: 'assistant', type: 'text', content: MESSAGES.confirmation.correct }, { role: 'assistant', type: 'loading', content: MESSAGES.generating.working }], actions: [{ type: 'GO_TO_STEP', payload: 'generating' }], sideEffect: { type: 'none' } };
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content: MESSAGES.confirmation.correct,
+        },
+        {
+          role: 'assistant',
+          type: 'loading',
+          content: MESSAGES.generating.working,
+        },
+      ],
+      actions: [{ type: 'GO_TO_STEP', payload: 'generating' }],
+      sideEffect: { type: 'none' },
+    };
   }
   if (input.optionId === 'no') {
-    return { messages: [{ role: 'assistant', type: 'text', content: MESSAGES.confirmation.needsEdit }], actions: [], sideEffect: { type: 'none' } };
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content: MESSAGES.confirmation.needsEdit,
+        },
+      ],
+      actions: [],
+      sideEffect: { type: 'none' },
+    };
   }
 
   const intent = classifyIntent(input.text);
@@ -104,9 +129,7 @@ export function handleConfirmation(
   };
 }
 
-export function createSummaryMessage(
-  state: ConversationState,
-): ChatMessage {
+export function createSummaryMessage(state: ConversationState): ChatMessage {
   const info = state.collectedInfo;
 
   const summaryLines = [

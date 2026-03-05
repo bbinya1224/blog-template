@@ -127,12 +127,19 @@ export const CHOICE_OPTIONS: Record<string, ChoiceOption[]> = {
   ],
 } as const;
 
+function buildLabelMap(
+  options: readonly { id: string; label: string }[],
+): Record<string, string> {
+  return Object.fromEntries(options.map((o) => [o.id, o.label]));
+}
+
+const COMPANION_LABEL_MAP = buildLabelMap(CHOICE_OPTIONS.companion);
+const DATE_LABEL_MAP = buildLabelMap(CHOICE_OPTIONS.visitDate);
+
 export function getCompanionLabel(id: string): string {
-  const option = CHOICE_OPTIONS.companion.find((o) => o.id === id);
-  return option?.label || id;
+  return COMPANION_LABEL_MAP[id] ?? id;
 }
 
 export function getDateLabel(id: string): string {
-  const option = CHOICE_OPTIONS.visitDate.find((o) => o.id === id);
-  return option?.label || id;
+  return DATE_LABEL_MAP[id] ?? id;
 }

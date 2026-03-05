@@ -25,7 +25,9 @@ interface UseChatHandlersProps {
   userEmail: string;
 }
 
-export function useChatHandlers({ userEmail: _userEmail }: UseChatHandlersProps) {
+export function useChatHandlers({
+  userEmail: _userEmail,
+}: UseChatHandlersProps) {
   const state = useChatStore(
     useShallow((s) => ({
       step: s.step,
@@ -39,21 +41,31 @@ export function useChatHandlers({ userEmail: _userEmail }: UseChatHandlersProps)
       sessionId: s.sessionId,
     })),
   );
-  const styleSetupContext = useChatStore((s) => s.styleSetupContext);
-  const isProcessing = useChatStore((s) => s.isProcessing);
-  const setIsProcessing = useChatStore((s) => s.setIsProcessing);
-  const dispatchActions = useChatStore((s) => s.dispatchActions);
-  const messages = useChatStore((s) => s.messages);
-  const addMessage = useChatStore((s) => s.addMessage);
-  const addUserMessage = useChatStore((s) => s.addUserMessage);
-  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
+  const {
+    styleSetupContext,
+    isProcessing,
+    messages,
+    setIsProcessing,
+    dispatchActions,
+    addMessage,
+    addUserMessage,
+    addAssistantMessage,
+  } = useChatStore(
+    useShallow((s) => ({
+      styleSetupContext: s.styleSetupContext,
+      isProcessing: s.isProcessing,
+      messages: s.messages,
+      setIsProcessing: s.setIsProcessing,
+      dispatchActions: s.dispatchActions,
+      addMessage: s.addMessage,
+      addUserMessage: s.addUserMessage,
+      addAssistantMessage: s.addAssistantMessage,
+    })),
+  );
 
   const { executeSideEffect, generateReview } = useSideEffects(state.userName);
-  const {
-    fetchSmartQuestions,
-    consumeNextQuestion,
-    getRemainingQuestions,
-  } = useSmartFollowup();
+  const { fetchSmartQuestions, consumeNextQuestion, getRemainingQuestions } =
+    useSmartFollowup();
   const persistConversation = useConversationPersistence();
 
   const processMessage = useCallback(
@@ -80,7 +92,10 @@ export function useChatHandlers({ userEmail: _userEmail }: UseChatHandlersProps)
         case 'smart-followup': {
           const remaining = getRemainingQuestions();
           result = handleSmartFollowup(input, state, remaining);
-          if (result.sideEffect.type !== 'skip-followup' && remaining.length > 0) {
+          if (
+            result.sideEffect.type !== 'skip-followup' &&
+            remaining.length > 0
+          ) {
             consumeNextQuestion();
           }
           break;
@@ -140,7 +155,7 @@ export function useChatHandlers({ userEmail: _userEmail }: UseChatHandlersProps)
           }
         }
       } catch (error) {
-        console.error('Message handling error:', error);
+        console.error('[useChatHandlers] 메시지 처리 에러:', error);
         addAssistantMessage(MESSAGES.error.unknown, 'text');
       } finally {
         setIsProcessing(false);
@@ -193,7 +208,10 @@ export function useChatHandlers({ userEmail: _userEmail }: UseChatHandlersProps)
 
   const handleReviewAction = useCallback(
     (_messageId: string, action: 'complete' | 'edit') => {
-      handleSendMessage(action === 'complete' ? '완벽해요!' : '수정해주세요', action);
+      handleSendMessage(
+        action === 'complete' ? '완벽해요!' : '수정해주세요',
+        action,
+      );
     },
     [handleSendMessage],
   );
