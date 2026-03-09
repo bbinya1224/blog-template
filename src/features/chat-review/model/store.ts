@@ -27,7 +27,7 @@ interface ChatStore extends ConversationState {
   isProcessing: boolean;
   savedReviewId: string | null;
   styleSetupContext: StyleSetupContext;
-  setStyleSetupContext: (ctx: StyleSetupContext) => void;
+  setStyleSetupContext: (ctx: Partial<StyleSetupContext>) => void;
 
   // Conversation state setters
   setStep: (step: ConversationStep) => void;
@@ -82,7 +82,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   setSessionId: (sessionId) => set({ sessionId }),
   setIsProcessing: (isProcessing) => set({ isProcessing }),
   setSavedReviewId: (savedReviewId) => set({ savedReviewId }),
-  setStyleSetupContext: (ctx) => set({ styleSetupContext: ctx }),
+  setStyleSetupContext: (ctx) =>
+    set((state) => ({ styleSetupContext: { ...state.styleSetupContext, ...ctx } })),
 
   // Message actions
   addMessage: (message) => {

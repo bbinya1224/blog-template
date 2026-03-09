@@ -119,11 +119,13 @@ export function useChatOrchestration({
           }
           break;
         case 'smart-followup': {
+          const stepAtRequest = orchestrationState.step;
           try {
             const questions = await fetchSmartQuestions(
               orchestrationState.collectedInfo,
               orchestrationState.selectedTopic || 'restaurant',
             );
+            if (useChatStore.getState().step !== stepAtRequest) return;
             if (questions.length > 0) {
               const combined = `${MESSAGES.smartFollowup.intro}\n\n${questions[0]}`;
               addAssistantMessage(
@@ -136,6 +138,7 @@ export function useChatOrchestration({
               addAssistantMessage(MESSAGES.smartFollowup.error, 'text');
             }
           } catch {
+            if (useChatStore.getState().step !== stepAtRequest) return;
             addAssistantMessage(MESSAGES.smartFollowup.error, 'text');
           }
           break;
@@ -148,9 +151,12 @@ export function useChatOrchestration({
             CHOICE_OPTIONS.confirmInfo,
           );
           break;
-        case 'generating':
+        case 'generating': {
+          const stepBeforeGenerate = orchestrationState.step;
           await generateReview();
+          if (useChatStore.getState().step !== stepBeforeGenerate) return;
           break;
+        }
       }
     };
 
