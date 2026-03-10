@@ -1,7 +1,7 @@
 import type { CategoryConfig } from './types';
 import type { RestaurantPayload } from '@/shared/types/review';
 import type { RestaurantInfoStep } from '../../model/types';
-import { CHOICE_OPTIONS } from '../../constants/messages';
+import { CHOICE_OPTIONS } from '../../constants/choiceOptions';
 import {
   extractDateInfo,
   extractCompanionInfo,

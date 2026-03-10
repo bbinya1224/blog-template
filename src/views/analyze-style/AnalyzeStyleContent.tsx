@@ -2,18 +2,19 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useShallow } from 'zustand/shallow';
 import {
   useChatStore,
   useChatHandlers,
   formatStyleForDisplay,
   MESSAGES,
   CHOICE_OPTIONS,
-  type StyleSetupContext,
 } from '@/features/chat-review';
 import { MessageList } from '@/widgets/chat';
 import { InputArea } from '@/shared/ui/InputArea';
 import type { StyleProfile } from '@/entities/style-profile';
 import { cn } from '@/shared/lib/utils';
+import { useScrollToBottom } from '@/shared/lib/hooks';
 import { ArrowLeft } from 'lucide-react';
 
 interface AnalyzeStyleContentProps {
@@ -28,27 +29,37 @@ export function AnalyzeStyleContent({
   existingStyleProfile,
 }: AnalyzeStyleContentProps) {
   const router = useRouter();
-  const step = useChatStore((s) => s.step);
-  const storeUserName = useChatStore((s) => s.userName);
-  const setStep = useChatStore((s) => s.setStep);
-  const setMessages = useChatStore((s) => s.setMessages);
-  const setStyleProfile = useChatStore((s) => s.setStyleProfile);
-  const setHasExistingStyle = useChatStore((s) => s.setHasExistingStyle);
-  const [styleSetupContext, setStyleSetupContext] = useState<StyleSetupContext>(
-    {},
+  const {
+    step,
+    userName: storeUserName,
+    messages,
+    setStep,
+    setMessages,
+    setStyleProfile,
+    setHasExistingStyle,
+    addAssistantMessage,
+    reset,
+  } = useChatStore(
+    useShallow((s) => ({
+      step: s.step,
+      userName: s.userName,
+      messages: s.messages,
+      setStep: s.setStep,
+      setMessages: s.setMessages,
+      setStyleProfile: s.setStyleProfile,
+      setHasExistingStyle: s.setHasExistingStyle,
+      addAssistantMessage: s.addAssistantMessage,
+      reset: s.reset,
+    })),
   );
   const [isInputEnabled, setIsInputEnabled] = useState(!existingStyleProfile);
   const isInitializedRef = useRef(false);
 
-  const messages = useChatStore((s) => s.messages);
-  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
   const {
     handleSendMessage,
     handleChoiceSelect: originalHandleChoiceSelect,
     isProcessing,
-  } = useChatHandlers({ userEmail, styleSetupContext, setStyleSetupContext });
-
-  const reset = useChatStore((s) => s.reset);
+  } = useChatHandlers({ userEmail });
 
   useEffect(
     () => () => {
@@ -130,6 +141,8 @@ export function AnalyzeStyleContent({
     [router, addAssistantMessage, originalHandleChoiceSelect],
   );
 
+  const { containerRef } = useScrollToBottom<HTMLDivElement>();
+
   const inputPlaceholder =
     step === 'style-setup'
       ? '블로그 URL 또는 내용을 입력해주세요'
@@ -155,7 +168,7 @@ export function AnalyzeStyleContent({
           'md:mx-auto md:max-w-3xl',
         )}
       >
-        <div className='min-h-0 flex-1 overflow-y-auto'>
+        <div ref={containerRef} className='min-h-0 flex-1 overflow-y-auto'>
           <MessageList
             messages={messages}
             isTyping={isProcessing}

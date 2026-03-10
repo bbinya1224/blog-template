@@ -1,10 +1,7 @@
 'use client';
 
-import {
-  ChatErrorBoundary,
-  useChatOrchestration,
-} from '@/features/chat-review';
-import { ChatContainer } from '@/widgets/chat';
+import { ChatErrorBoundary } from '@/features/chat-review';
+import { ChatContainer, useChatOrchestration } from '@/widgets/chat';
 import type { StyleProfile } from '@/entities/style-profile';
 
 interface ChatPageContentProps {

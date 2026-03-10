@@ -7,6 +7,7 @@ import type {
   ConversationAction,
   RestaurantInfoStep,
   ReviewTopic,
+  StyleSetupContext,
 } from './types';
 import { initialConversationState } from './types';
 import type { StyleProfile } from '@/entities/style-profile';
@@ -25,6 +26,8 @@ interface ChatStore extends ConversationState {
   messages: ChatMessage[];
   isProcessing: boolean;
   savedReviewId: string | null;
+  styleSetupContext: StyleSetupContext;
+  setStyleSetupContext: (ctx: Partial<StyleSetupContext>) => void;
 
   // Conversation state setters
   setStep: (step: ConversationStep) => void;
@@ -64,6 +67,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   messages: [],
   isProcessing: false,
   savedReviewId: null,
+  styleSetupContext: {},
 
   // Conversation state setters
   setStep: (step) => set({ step }),
@@ -78,6 +82,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   setSessionId: (sessionId) => set({ sessionId }),
   setIsProcessing: (isProcessing) => set({ isProcessing }),
   setSavedReviewId: (savedReviewId) => set({ savedReviewId }),
+  setStyleSetupContext: (ctx) =>
+    set((state) => ({ styleSetupContext: { ...state.styleSetupContext, ...ctx } })),
 
   // Message actions
   addMessage: (message) => {
@@ -144,6 +150,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         case 'SET_SUB_STEP':
           store.setSubStep(action.payload);
           break;
+        case 'SET_STYLE_SETUP_CONTEXT':
+          store.setStyleSetupContext(action.payload);
+          break;
         case 'RESET':
           store.reset();
           break;
@@ -158,5 +167,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       messages: [],
       isProcessing: false,
       savedReviewId: null,
+      styleSetupContext: {},
     }),
 }));

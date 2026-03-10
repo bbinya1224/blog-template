@@ -29,8 +29,15 @@ describe('conversationEngine', () => {
         'ㅇㅇ',
         'ok',
         'yes',
+        '완벽',
+        '됐어',
+        '완성',
       ])('should classify "%s" as confirm_yes', (input) => {
         expect(classifyIntent(input)).toBe('confirm_yes');
+      });
+
+      it('should classify "됐어 완벽해" as confirm_yes', () => {
+        expect(classifyIntent('됐어 완벽해')).toBe('confirm_yes');
       });
 
       it('should handle whitespace', () => {
@@ -66,8 +73,27 @@ describe('conversationEngine', () => {
         'pass',
         '없어',
         '몰라',
+        '충분',
+        '됐어요',
+        '그만',
       ])('should classify "%s" as skip', (input) => {
         expect(classifyIntent(input)).toBe('skip');
+      });
+
+      it('should classify "됐어요" as skip, not confirm_yes', () => {
+        expect(classifyIntent('됐어요')).toBe('skip');
+      });
+
+      it('should classify "됐어요 그만" as skip', () => {
+        expect(classifyIntent('됐어요 그만')).toBe('skip');
+      });
+
+      it('should classify "충분해요" as skip', () => {
+        expect(classifyIntent('충분해요')).toBe('skip');
+      });
+
+      it('should classify "그만할래" as skip', () => {
+        expect(classifyIntent('그만할래')).toBe('skip');
       });
     });
 

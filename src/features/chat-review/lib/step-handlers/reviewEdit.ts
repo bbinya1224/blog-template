@@ -1,22 +1,17 @@
 import type {
   ConversationState,
   StepHandlerResult,
-  ReviewEditResult,
+  UserInput,
 } from '../../model/types';
-import { MESSAGES, CHOICE_OPTIONS } from '../../constants/messages';
+import { MESSAGES } from '../../constants/messages';
+import { CHOICE_OPTIONS } from '../../constants/choiceOptions';
+import { classifyIntent } from '../conversation/conversationEngine';
 
 export function handleReviewEdit(
-  userInput: string,
+  input: UserInput,
   state: ConversationState,
-): ReviewEditResult {
-  const lowered = userInput.toLowerCase();
-
-  if (
-    lowered === 'complete' ||
-    lowered.includes('완벽') ||
-    lowered.includes('좋아') ||
-    lowered.includes('됐어')
-  ) {
+): StepHandlerResult {
+  if (input.optionId === 'complete') {
     return {
       messages: [
         {
@@ -26,12 +21,41 @@ export function handleReviewEdit(
         },
       ],
       actions: [{ type: 'GO_TO_STEP', payload: 'complete' }],
-      nextStep: 'complete',
+      sideEffect: { type: 'none' },
+    };
+  }
+  if (input.optionId === 'edit') {
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content: MESSAGES.reviewEdit.askEdit,
+        },
+      ],
+      actions: [],
+      sideEffect: { type: 'none' },
     };
   }
 
-  if (lowered === 'edit' || lowered.includes('수정')) {
-    if (userInput.length < 10) {
+  const intent = classifyIntent(input.text);
+
+  if (intent === 'confirm_yes') {
+    return {
+      messages: [
+        {
+          role: 'assistant',
+          type: 'text',
+          content: MESSAGES.complete.thanks(state.userName || ''),
+        },
+      ],
+      actions: [{ type: 'GO_TO_STEP', payload: 'complete' }],
+      sideEffect: { type: 'none' },
+    };
+  }
+
+  if (intent === 'confirm_no' || intent === 'modify_previous') {
+    if (input.text.length < 10) {
       return {
         messages: [
           {
@@ -41,11 +65,12 @@ export function handleReviewEdit(
           },
         ],
         actions: [],
+        sideEffect: { type: 'none' },
       };
     }
   }
 
-  if (userInput.length >= 5) {
+  if (input.text.length >= 5) {
     return {
       messages: [
         {
@@ -55,7 +80,7 @@ export function handleReviewEdit(
         },
       ],
       actions: [],
-      editRequest: userInput,
+      sideEffect: { type: 'edit-review', request: input.text },
     };
   }
 
@@ -69,6 +94,7 @@ export function handleReviewEdit(
       },
     ],
     actions: [],
+    sideEffect: { type: 'none' },
   };
 }
 
@@ -86,5 +112,6 @@ export function handleReviewEdited(editedReview: string): StepHandlerResult {
       },
     ],
     actions: [{ type: 'SET_GENERATED_REVIEW', payload: editedReview }],
+    sideEffect: { type: 'none' },
   };
 }

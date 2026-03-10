@@ -3,9 +3,8 @@
 import { useCallback } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { useChatStore } from './store';
-import { useBlogAnalysis } from './useBlogAnalysis';
-import { usePlaceSearch } from './usePlaceSearch';
-import { useReviewGeneration } from './useReviewGeneration';
+import { useConversationPersistence } from './useConversationPersistence';
+import { useSideEffects } from './useSideEffects';
 import { useSmartFollowup } from './useSmartFollowup';
 import {
   handleStyleSetup,
@@ -17,26 +16,17 @@ import {
   handleReviewEdit,
   handlePlaceConfirmed,
   type StepHandlerResult,
-  type StyleSetupContext,
-  type InfoGatheringResult,
-  type SmartFollowupResult,
-  type ReviewEditResult,
 } from '../lib/step-handlers';
 import { MESSAGES } from '../constants/messages';
 import { isPlaceCardMessage } from '@/entities/chat-message';
-import { filterConversationMessages } from '../lib/filterConversationMessages';
-import { apiPut } from '@/shared/api/httpClient';
+import type { UserInput } from './types';
 
 interface UseChatHandlersProps {
   userEmail: string;
-  styleSetupContext: StyleSetupContext;
-  setStyleSetupContext: React.Dispatch<React.SetStateAction<StyleSetupContext>>;
 }
 
 export function useChatHandlers({
   userEmail: _userEmail,
-  styleSetupContext,
-  setStyleSetupContext,
 }: UseChatHandlersProps) {
   const state = useChatStore(
     useShallow((s) => ({
@@ -51,69 +41,59 @@ export function useChatHandlers({
       sessionId: s.sessionId,
     })),
   );
-  const isProcessing = useChatStore((s) => s.isProcessing);
-  const setIsProcessing = useChatStore((s) => s.setIsProcessing);
-  const dispatchActions = useChatStore((s) => s.dispatchActions);
-  const messages = useChatStore((s) => s.messages);
-  const addMessage = useChatStore((s) => s.addMessage);
-  const addUserMessage = useChatStore((s) => s.addUserMessage);
-  const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
-
-  const { analyzeBlogUrl } = useBlogAnalysis(state.userName);
-  const { searchPlace } = usePlaceSearch();
-  const { editReview, generateReview } = useReviewGeneration();
   const {
-    fetchSmartQuestions,
-    consumeNextQuestion,
-    getRemainingQuestions,
-  } = useSmartFollowup();
+    styleSetupContext,
+    isProcessing,
+    messages,
+    setIsProcessing,
+    dispatchActions,
+    addMessage,
+    addUserMessage,
+    addAssistantMessage,
+  } = useChatStore(
+    useShallow((s) => ({
+      styleSetupContext: s.styleSetupContext,
+      isProcessing: s.isProcessing,
+      messages: s.messages,
+      setIsProcessing: s.setIsProcessing,
+      dispatchActions: s.dispatchActions,
+      addMessage: s.addMessage,
+      addUserMessage: s.addUserMessage,
+      addAssistantMessage: s.addAssistantMessage,
+    })),
+  );
 
-  // Step별 메시지 처리 — 이전 useMessageProcessor의 역할을 직접 수행
+  const { executeSideEffect, generateReview } = useSideEffects(state.userName);
+  const { fetchSmartQuestions, consumeNextQuestion, getRemainingQuestions } =
+    useSmartFollowup();
+  const persistConversation = useConversationPersistence();
+
   const processMessage = useCallback(
-    async (content: string) => {
-      let result:
-        | StepHandlerResult
-        | InfoGatheringResult
-        | SmartFollowupResult
-        | ReviewEditResult;
+    async (input: UserInput) => {
+      let result: StepHandlerResult;
 
       switch (state.step) {
         case 'style-check':
-          result = handleStyleCheck(content, state);
-          if (result.nextStep === 'style-setup') {
-            setStyleSetupContext({});
-          }
+          result = handleStyleCheck(input, state);
           break;
 
         case 'style-setup':
-          if (content.includes('blog.naver.com')) {
-            updateStyleSetupMethod(content, setStyleSetupContext);
-            await analyzeBlogUrl(content);
-            return null;
-          }
-          result = handleStyleSetup(content, state, styleSetupContext);
-          updateStyleSetupMethod(content, setStyleSetupContext);
+          result = handleStyleSetup(input, state, styleSetupContext);
           break;
 
         case 'topic-select':
-          result = handleTopicSelect(content, state);
+          result = handleTopicSelect(input, state);
           break;
 
-        case 'info-gathering': {
-          const infoResult = handleInfoGathering(content, state);
-          if (infoResult.placeSearchQuery) {
-            await searchPlace(infoResult.placeSearchQuery);
-            return null;
-          }
-          result = infoResult;
+        case 'info-gathering':
+          result = handleInfoGathering(input, state);
           break;
-        }
 
         case 'smart-followup': {
           const remaining = getRemainingQuestions();
-          result = handleSmartFollowup(content, state, remaining);
+          result = handleSmartFollowup(input, state, remaining);
           if (
-            !(result as SmartFollowupResult).skipFollowup &&
+            result.sideEffect.type !== 'skip-followup' &&
             remaining.length > 0
           ) {
             consumeNextQuestion();
@@ -122,48 +102,47 @@ export function useChatHandlers({
         }
 
         case 'confirmation':
-          result = handleConfirmation(content, state);
+          result = handleConfirmation(input, state);
           break;
 
-        case 'review-edit': {
-          const editResult = handleReviewEdit(content, state);
-          if (editResult.editRequest) {
-            await editReview(editResult.editRequest);
-            return null;
-          }
-          result = editResult;
+        case 'review-edit':
+          result = handleReviewEdit(input, state);
           break;
-        }
 
         default:
-          result = { messages: [], actions: [] };
+          result = { messages: [], actions: [], sideEffect: { type: 'none' } };
       }
 
       result.messages.forEach((msg) => addMessage(msg));
+
+      const hadAsyncEffect = await executeSideEffect(result.sideEffect);
+      if (hadAsyncEffect) {
+        dispatchActions(result.actions);
+        return null;
+      }
+
       return { actions: result.actions };
     },
     [
       state,
       styleSetupContext,
-      setStyleSetupContext,
       addMessage,
-      analyzeBlogUrl,
-      searchPlace,
-      editReview,
+      dispatchActions,
+      executeSideEffect,
       getRemainingQuestions,
       consumeNextQuestion,
     ],
   );
 
   const handleSendMessage = useCallback(
-    async (content: string) => {
+    async (content: string, optionId?: string) => {
       if (isProcessing) return;
 
       setIsProcessing(true);
       addUserMessage(content);
 
       try {
-        const result = await processMessage(content);
+        const result = await processMessage({ text: content, optionId });
         if (result) {
           dispatchActions(result.actions);
 
@@ -172,21 +151,11 @@ export function useChatHandlers({
           );
 
           if (isCompleting) {
-            const { savedReviewId, generatedReview, messages: allMessages } =
-              useChatStore.getState();
-            if (savedReviewId && generatedReview) {
-              const conversation = filterConversationMessages(allMessages);
-              apiPut(`/api/reviews/${encodeURIComponent(savedReviewId)}`, {
-                content: generatedReview,
-                conversation,
-              }).catch((err) => {
-                console.error('대화 내역 저장 실패:', err);
-              });
-            }
+            persistConversation();
           }
         }
       } catch (error) {
-        console.error('Message handling error:', error);
+        console.error('[useChatHandlers] 메시지 처리 에러:', error);
         addAssistantMessage(MESSAGES.error.unknown, 'text');
       } finally {
         setIsProcessing(false);
@@ -199,6 +168,7 @@ export function useChatHandlers({
       processMessage,
       dispatchActions,
       addAssistantMessage,
+      persistConversation,
     ],
   );
 
@@ -207,7 +177,7 @@ export function useChatHandlers({
       const message = messages.find((m) => m.id === messageId);
       const option = message?.options?.find((o) => o.id === optionId);
       if (option) {
-        handleSendMessage(option.label);
+        handleSendMessage(option.label, optionId);
       }
     },
     [messages, handleSendMessage],
@@ -238,7 +208,10 @@ export function useChatHandlers({
 
   const handleReviewAction = useCallback(
     (_messageId: string, action: 'complete' | 'edit') => {
-      handleSendMessage(action === 'complete' ? '완벽해요!' : '수정해주세요');
+      handleSendMessage(
+        action === 'complete' ? '완벽해요!' : '수정해주세요',
+        action,
+      );
     },
     [handleSendMessage],
   );
@@ -253,34 +226,4 @@ export function useChatHandlers({
     generateReview,
     isProcessing,
   };
-}
-
-function updateStyleSetupMethod(
-  content: string,
-  setStyleSetupContext: React.Dispatch<React.SetStateAction<StyleSetupContext>>,
-) {
-  setStyleSetupContext((prev) => {
-    if (prev.method) return prev;
-
-    if (
-      content.includes('블로그') ||
-      content.includes('주소') ||
-      content === '1'
-    ) {
-      return { ...prev, method: 'blog-url' };
-    } else if (
-      content.includes('첨부') ||
-      content.includes('붙여') ||
-      content === '2'
-    ) {
-      return { ...prev, method: 'paste-text' };
-    } else if (
-      content.includes('직접') ||
-      content.includes('설정') ||
-      content === '3'
-    ) {
-      return { ...prev, method: 'questionnaire', questionnaireStep: 0 };
-    }
-    return prev;
-  });
 }

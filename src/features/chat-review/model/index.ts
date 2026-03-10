@@ -1,4 +1,5 @@
 export * from './types';
 export { useChatStore } from './store';
 export { useChatHandlers } from './useChatHandlers';
-export { useChatOrchestration } from './useChatOrchestration';
+export { useConversationPersistence } from './useConversationPersistence';
+export { useSideEffects } from './useSideEffects';

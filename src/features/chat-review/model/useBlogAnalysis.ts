@@ -3,7 +3,8 @@
 import { useCallback } from 'react';
 import { useChatStore } from './store';
 import { analyzeStyle } from '@/shared/api/styleAnalysisClient';
-import { MESSAGES, CHOICE_OPTIONS } from '../constants/messages';
+import { MESSAGES } from '../constants/messages';
+import { CHOICE_OPTIONS } from '../constants/choiceOptions';
 import { formatStyleForDisplay } from '../lib/formatStyleForDisplay';
 
 function convertBlogUrlToRss(blogUrl: string): string {

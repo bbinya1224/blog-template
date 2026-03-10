@@ -2,7 +2,7 @@ import { getSession } from '@/shared/lib/authUtils';
 import { readStyleProfile } from '@/shared/api/dataFiles';
 import { redirect } from 'next/navigation';
 import { AppShell } from '@/widgets/app-shell';
-import { AnalyzeStyleContent } from './AnalyzeStyleContent';
+import { AnalyzeStyleContent } from '@/views/analyze-style';
 
 export const metadata = {
   title: '글 스타일 분석 — 오롯이',

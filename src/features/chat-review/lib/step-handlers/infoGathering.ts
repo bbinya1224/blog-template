@@ -1,11 +1,7 @@
-import type { ConversationState, InfoGatheringResult } from '../../model/types';
+import type { ConversationState, StepHandlerResult, UserInput } from '../../model/types';
 import type { ReviewPayload } from '@/shared/types/review';
-import {
-  MESSAGES,
-  CHOICE_OPTIONS,
-  getCompanionLabel,
-  getDateLabel,
-} from '../../constants/messages';
+import { MESSAGES } from '../../constants/messages';
+import { CHOICE_OPTIONS, getCompanionLabel, getDateLabel } from '../../constants/choiceOptions';
 import {
   extractDateInfo,
   extractCompanionInfo,
@@ -14,35 +10,36 @@ import {
 import { restaurantConfig } from '../categories/restaurant.config';
 
 export function handleInfoGathering(
-  userInput: string,
+  input: UserInput,
   state: ConversationState,
-): InfoGatheringResult {
+): StepHandlerResult {
   const subStep = state.subStep || determineInfoSubStep(state);
+  const dateCompanionValue = input.optionId || input.text;
 
   switch (subStep) {
     case 'date':
-      return handleDateInput(userInput, state);
+      return handleDateInput(dateCompanionValue, state);
     case 'companion':
-      return handleCompanionInput(userInput, state);
+      return handleCompanionInput(dateCompanionValue, state);
     case 'place':
-      return handlePlaceInput(userInput, state);
+      return handlePlaceInput(input.text, state);
     case 'menu':
-      return handleMenuInput(userInput, state);
+      return handleMenuInput(input.text, state);
     case 'taste':
-      return handleTasteInput(userInput, state);
+      return handleTasteInput(input.text, state);
     case 'atmosphere':
-      return handleAtmosphereInput(userInput, state);
+      return handleAtmosphereInput(input.text, state);
     case 'highlight':
-      return handleHighlightInput(userInput, state);
+      return handleHighlightInput(input.text, state);
     default:
-      return handleDateInput(userInput, state);
+      return handleDateInput(dateCompanionValue, state);
   }
 }
 
 function handleDateInput(
   userInput: string,
   _state: ConversationState,
-): InfoGatheringResult {
+): StepHandlerResult {
   const dateLabel = getDateLabel(userInput) || userInput;
   const dateValue = extractDateInfo(dateLabel);
 
@@ -59,13 +56,14 @@ function handleDateInput(
       { type: 'UPDATE_COLLECTED_INFO', payload: { date: dateValue } },
       { type: 'SET_SUB_STEP', payload: 'companion' },
     ],
+    sideEffect: { type: 'none' },
   };
 }
 
 function handleCompanionInput(
   userInput: string,
   _state: ConversationState,
-): InfoGatheringResult {
+): StepHandlerResult {
   const companionLabel = getCompanionLabel(userInput) || userInput;
   const companionValue = extractCompanionInfo(companionLabel);
 
@@ -81,13 +79,14 @@ function handleCompanionInput(
       { type: 'UPDATE_COLLECTED_INFO', payload: { companion: companionValue } },
       { type: 'SET_SUB_STEP', payload: 'place' },
     ],
+    sideEffect: { type: 'none' },
   };
 }
 
 function handlePlaceInput(
   userInput: string,
   _state: ConversationState,
-): InfoGatheringResult {
+): StepHandlerResult {
   return {
     messages: [
       {
@@ -97,7 +96,7 @@ function handlePlaceInput(
       },
     ],
     actions: [],
-    placeSearchQuery: userInput,
+    sideEffect: { type: 'place-search', query: userInput },
   };
 }
 
@@ -107,7 +106,7 @@ export function handlePlaceConfirmed(
   placeAddress: string,
   _state: ConversationState,
   category?: string,
-): InfoGatheringResult {
+): StepHandlerResult {
   if (!confirmed) {
     return {
       messages: [
@@ -118,6 +117,7 @@ export function handlePlaceConfirmed(
         },
       ],
       actions: [],
+      sideEffect: { type: 'none' },
     };
   }
 
@@ -142,13 +142,14 @@ export function handlePlaceConfirmed(
       },
       { type: 'SET_SUB_STEP', payload: 'menu' },
     ],
+    sideEffect: { type: 'none' },
   };
 }
 
 function handleMenuInput(
   userInput: string,
   _state: ConversationState,
-): InfoGatheringResult {
+): StepHandlerResult {
   return {
     messages: [
       {
@@ -161,13 +162,14 @@ function handleMenuInput(
       { type: 'UPDATE_COLLECTED_INFO', payload: { menu: userInput } },
       { type: 'SET_SUB_STEP', payload: 'taste' },
     ],
+    sideEffect: { type: 'none' },
   };
 }
 
 function handleTasteInput(
   userInput: string,
   _state: ConversationState,
-): InfoGatheringResult {
+): StepHandlerResult {
   return {
     messages: [
       {
@@ -180,13 +182,14 @@ function handleTasteInput(
       { type: 'UPDATE_COLLECTED_INFO', payload: { pros: userInput } },
       { type: 'SET_SUB_STEP', payload: 'atmosphere' },
     ],
+    sideEffect: { type: 'none' },
   };
 }
 
 function handleAtmosphereInput(
   userInput: string,
   state: ConversationState,
-): InfoGatheringResult {
+): StepHandlerResult {
   const currentExtra = state.collectedInfo.extra || '';
   const extraValue = currentExtra
     ? `${currentExtra}\n분위기: ${userInput}`
@@ -204,13 +207,14 @@ function handleAtmosphereInput(
       { type: 'UPDATE_COLLECTED_INFO', payload: { extra: extraValue } },
       { type: 'SET_SUB_STEP', payload: 'highlight' },
     ],
+    sideEffect: { type: 'none' },
   };
 }
 
 function handleHighlightInput(
   userInput: string,
   state: ConversationState,
-): InfoGatheringResult {
+): StepHandlerResult {
   const { positive, negative } = restaurantConfig.experienceKeywords!;
 
   const hasPositive = positive.some((k) => userInput.includes(k));
@@ -239,6 +243,6 @@ function handleHighlightInput(
       { type: 'UPDATE_COLLECTED_INFO', payload },
       { type: 'GO_TO_STEP', payload: 'smart-followup' },
     ],
-    nextStep: 'smart-followup',
+    sideEffect: { type: 'none' },
   };
 }
