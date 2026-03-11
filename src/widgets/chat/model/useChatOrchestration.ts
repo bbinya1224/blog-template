@@ -62,11 +62,13 @@ export function useChatOrchestration({
   const isInitializedRef = useRef(false);
   const prevStepRef = useRef<ConversationStep | null>(null);
 
-  // Prop → store 동기화 (render 중 실행, useEffect 불필요)
-  if (existingStyleProfile && !orchestrationState.hasExistingStyle) {
-    setStyleProfile(existingStyleProfile);
-    setHasExistingStyle(true);
-  }
+  // Prop → store 동기화
+  useEffect(() => {
+    if (existingStyleProfile && !orchestrationState.hasExistingStyle) {
+      setStyleProfile(existingStyleProfile);
+      setHasExistingStyle(true);
+    }
+  }, [existingStyleProfile, orchestrationState.hasExistingStyle, setStyleProfile, setHasExistingStyle]);
 
   const { reviews: recentReviews } = useRecentReviews(5);
   const {
