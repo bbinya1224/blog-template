@@ -5,16 +5,16 @@ import { useShallow } from 'zustand/shallow';
 import {
   useChatStore,
   useChatHandlers,
+  FLOW_GRAPH,
   MESSAGES,
 } from '@/features/chat-review';
-import { FLOW_GRAPH } from '@/features/chat-review/model/flow';
-import type { FlowEnterContext } from '@/features/chat-review/model/flow';
+import type { FlowEnterContext } from '@/features/chat-review';
 import { useRecentReviews } from '@/entities/review';
 import type { StyleProfile } from '@/entities/style-profile';
 import type {
   ReviewTopic,
   ConversationStep,
-} from '@/features/chat-review/model/types';
+} from '@/features/chat-review';
 
 interface UseChatOrchestrationParams {
   userEmail: string;
