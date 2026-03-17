@@ -112,8 +112,8 @@ export function useChatOrchestration({
         return result;
       },
       consumeNextQuestion: () => {
-        if (isStale()) return;
-        consumeNextQuestion();
+        if (isStale()) return null;
+        return consumeNextQuestion();
       },
       generateReview: async () => {
         if (isStale()) return;
