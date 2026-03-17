@@ -99,16 +99,27 @@ export function useChatOrchestration({
 
     const stepAtEntry = orchestrationState.step;
     const tokenAtEntry = ++onEnterTokenRef.current;
-    const ctx: FlowEnterContext = {
-      state: orchestrationState,
-      fetchSmartQuestions,
-      consumeNextQuestion,
-      generateReview,
-    };
 
     const isStale = () =>
       useChatStore.getState().step !== stepAtEntry ||
       onEnterTokenRef.current !== tokenAtEntry;
+
+    const ctx: FlowEnterContext = {
+      state: orchestrationState,
+      fetchSmartQuestions: async (...args) => {
+        const result = await fetchSmartQuestions(...args);
+        if (isStale()) return [];
+        return result;
+      },
+      consumeNextQuestion: () => {
+        if (isStale()) return;
+        consumeNextQuestion();
+      },
+      generateReview: async () => {
+        if (isStale()) return;
+        await generateReview();
+      },
+    };
 
     const applyResult = (result: { messages: Parameters<typeof addMessage>[0][] }) => {
       if (isStale()) return;
