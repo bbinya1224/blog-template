@@ -61,14 +61,13 @@ export function useChatOrchestration({
   );
   const isInitializedRef = useRef(false);
   const prevStepRef = useRef<ConversationStep | null>(null);
+  const onEnterTokenRef = useRef(0);
 
-  // Prop → store 동기화
+  // Prop → store 동기화 (prop 변경/삭제도 반영)
   useEffect(() => {
-    if (existingStyleProfile && !orchestrationState.hasExistingStyle) {
-      setStyleProfile(existingStyleProfile);
-      setHasExistingStyle(true);
-    }
-  }, [existingStyleProfile, orchestrationState.hasExistingStyle, setStyleProfile, setHasExistingStyle]);
+    setStyleProfile(existingStyleProfile);
+    setHasExistingStyle(Boolean(existingStyleProfile));
+  }, [existingStyleProfile, setStyleProfile, setHasExistingStyle]);
 
   const { reviews: recentReviews } = useRecentReviews(5);
   const {
@@ -87,6 +86,7 @@ export function useChatOrchestration({
     if (messages.length === 0) {
       isInitializedRef.current = false;
       prevStepRef.current = null;
+      onEnterTokenRef.current += 1;
       return;
     }
 
@@ -98,6 +98,7 @@ export function useChatOrchestration({
     if (!node?.onEnter) return;
 
     const stepAtEntry = orchestrationState.step;
+    const tokenAtEntry = ++onEnterTokenRef.current;
     const ctx: FlowEnterContext = {
       state: orchestrationState,
       fetchSmartQuestions,
@@ -105,16 +106,22 @@ export function useChatOrchestration({
       generateReview,
     };
 
+    const isStale = () =>
+      useChatStore.getState().step !== stepAtEntry ||
+      onEnterTokenRef.current !== tokenAtEntry;
+
     const applyResult = (result: { messages: Parameters<typeof addMessage>[0][] }) => {
-      if (useChatStore.getState().step !== stepAtEntry) return;
-      result.messages.forEach((msg) => addMessage(msg));
+      if (isStale()) return;
+      result.messages.forEach((msg) => {
+        addMessage(msg);
+      });
     };
 
     try {
       const result = node.onEnter(ctx);
       if (result instanceof Promise) {
         result.then(applyResult).catch((error) => {
-          if (useChatStore.getState().step !== stepAtEntry) return;
+          if (isStale()) return;
           console.error('[useChatOrchestration] onEnter 에러:', error);
           addAssistantMessage(MESSAGES.error.unknown, 'text');
         });
@@ -122,7 +129,7 @@ export function useChatOrchestration({
         applyResult(result);
       }
     } catch (error) {
-      if (useChatStore.getState().step !== stepAtEntry) return;
+      if (isStale()) return;
       console.error('[useChatOrchestration] onEnter 에러:', error);
       addAssistantMessage(MESSAGES.error.unknown, 'text');
     }
