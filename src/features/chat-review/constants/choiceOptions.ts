@@ -57,21 +57,6 @@ export const CHOICE_OPTIONS: Record<string, ChoiceOption[]> = {
     { id: 'custom', label: '✏️ 직접 입력' },
   ],
 
-  // 웨이팅 시간
-  waitingTime: [
-    { id: 'under-10', label: '10분 이하' },
-    { id: '10-30', label: '10-30분' },
-    { id: 'over-30', label: '30분 이상' },
-  ],
-
-  // 가격대
-  priceRange: [
-    { id: 'under-10000', label: '1만원 이하' },
-    { id: '10000-20000', label: '1-2만원' },
-    { id: '20000-30000', label: '2-3만원' },
-    { id: 'over-30000', label: '3만원 이상' },
-  ],
-
   // 스마트 후속 질문 스킵
   smartFollowupSkip: [{ id: 'skip', label: '충분해요! 리뷰 작성해주세요' }],
 
