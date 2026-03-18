@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { z } from 'zod';
 import { authOptions } from '@/auth';
 import type { ReviewPayload } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
@@ -13,10 +14,10 @@ import {
 } from '@/features/chat-review';
 import { shouldUseMock } from '@/shared/lib/mock/chatMock';
 
-interface SmartFollowupInput {
-  collectedInfo: Partial<ReviewPayload>;
-  selectedTopic: string;
-}
+const smartFollowupInputSchema = z.object({
+  collectedInfo: z.record(z.string(), z.unknown()),
+  selectedTopic: z.string().min(1),
+});
 
 const SYSTEM_PROMPT = `당신은 맛집 리뷰 작성을 돕는 어시스턴트입니다.
 사용자가 수집한 리뷰 정보를 보고, 리뷰를 더 생생하고 풍부하게 만들어줄 후속 질문 2~3개를 생성하세요.
@@ -40,8 +41,14 @@ export async function POST(req: NextRequest) {
       return ApiResponse.quotaExceeded();
     }
 
-    const { collectedInfo, selectedTopic }: SmartFollowupInput =
-      await req.json();
+    const body = await req.json();
+    const parsed = smartFollowupInputSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return ApiResponse.validationError('잘못된 요청 형식입니다.', parsed.error.flatten());
+    }
+
+    const { collectedInfo, selectedTopic } = parsed.data;
 
     if (shouldUseMock()) {
       console.log('[Smart Followup API] 🎭 MOCK MODE');
@@ -54,7 +61,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const infoSummary = formatCollectedInfo(collectedInfo);
+    const infoSummary = formatCollectedInfo(collectedInfo as Partial<ReviewPayload>);
 
     console.log(
       `\n[Smart Followup API] 후속 질문 생성 시작 (${selectedTopic})`,
