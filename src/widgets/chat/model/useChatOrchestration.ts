@@ -5,17 +5,16 @@ import { useShallow } from 'zustand/shallow';
 import {
   useChatStore,
   useChatHandlers,
-  createInitialMessage,
-  createSummaryMessage,
+  FLOW_GRAPH,
   MESSAGES,
-  CHOICE_OPTIONS,
 } from '@/features/chat-review';
+import type { FlowEnterContext } from '@/features/chat-review';
 import { useRecentReviews } from '@/entities/review';
 import type { StyleProfile } from '@/entities/style-profile';
 import type {
   ReviewTopic,
   ConversationStep,
-} from '@/features/chat-review/model/types';
+} from '@/features/chat-review';
 
 interface UseChatOrchestrationParams {
   userEmail: string;
@@ -62,6 +61,13 @@ export function useChatOrchestration({
   );
   const isInitializedRef = useRef(false);
   const prevStepRef = useRef<ConversationStep | null>(null);
+  const onEnterTokenRef = useRef(0);
+
+  // Prop → store 동기화 (prop 변경/삭제도 반영)
+  useEffect(() => {
+    setStyleProfile(existingStyleProfile);
+    setHasExistingStyle(Boolean(existingStyleProfile));
+  }, [existingStyleProfile, setStyleProfile, setHasExistingStyle]);
 
   const { reviews: recentReviews } = useRecentReviews(5);
   const {
@@ -75,102 +81,72 @@ export function useChatOrchestration({
     isProcessing,
   } = useChatHandlers({ userEmail });
 
-  // Initialize existing style profile
-  useEffect(() => {
-    if (existingStyleProfile) {
-      setStyleProfile(existingStyleProfile);
-      setHasExistingStyle(true);
-    }
-  }, [existingStyleProfile, setStyleProfile, setHasExistingStyle]);
-
-  // Reset initialized flag when conversation is reset
-  // step change effect보다 먼저 선언하여 같은 렌더 사이클에서 ref가 먼저 초기화됨
+  // Conversation flow — reset guard + step entry (onEnter)
   useEffect(() => {
     if (messages.length === 0) {
       isInitializedRef.current = false;
       prevStepRef.current = null;
+      onEnterTokenRef.current += 1;
+      return;
     }
-  }, [messages.length]);
 
-  // Handle step changes
-  useEffect(() => {
     if (!isInitializedRef.current) return;
     if (orchestrationState.step === prevStepRef.current) return;
     prevStepRef.current = orchestrationState.step;
 
-    const handleStepChange = async () => {
-      switch (orchestrationState.step) {
-        case 'style-check':
-          if (
-            orchestrationState.hasExistingStyle &&
-            orchestrationState.styleProfile
-          ) {
-            addMessage(createInitialMessage('style-check', orchestrationState));
-          }
-          break;
-        case 'topic-select':
-          addMessage(createInitialMessage('topic-select', orchestrationState));
-          break;
-        case 'info-gathering':
-          if (!orchestrationState.subStep) {
-            addMessage(
-              createInitialMessage('info-gathering', orchestrationState),
-            );
-          }
-          break;
-        case 'smart-followup': {
-          const stepAtRequest = orchestrationState.step;
-          try {
-            const questions = await fetchSmartQuestions(
-              orchestrationState.collectedInfo,
-              orchestrationState.selectedTopic || 'restaurant',
-            );
-            if (useChatStore.getState().step !== stepAtRequest) return;
-            if (questions.length > 0) {
-              const combined = `${MESSAGES.smartFollowup.intro}\n\n${questions[0]}`;
-              addAssistantMessage(
-                combined,
-                'choice',
-                CHOICE_OPTIONS.smartFollowupSkip,
-              );
-              consumeNextQuestion();
-            } else {
-              addAssistantMessage(MESSAGES.smartFollowup.error, 'text');
-            }
-          } catch {
-            if (useChatStore.getState().step !== stepAtRequest) return;
-            addAssistantMessage(MESSAGES.smartFollowup.error, 'text');
-          }
-          break;
-        }
-        case 'confirmation':
-          addMessage(createSummaryMessage(orchestrationState));
-          addAssistantMessage(
-            MESSAGES.confirmation.ask,
-            'choice',
-            CHOICE_OPTIONS.confirmInfo,
-          );
-          break;
-        case 'generating': {
-          const stepBeforeGenerate = orchestrationState.step;
-          await generateReview();
-          if (useChatStore.getState().step !== stepBeforeGenerate) return;
-          break;
-        }
-      }
+    const node = FLOW_GRAPH[orchestrationState.step];
+    if (!node?.onEnter) return;
+
+    const stepAtEntry = orchestrationState.step;
+    const tokenAtEntry = ++onEnterTokenRef.current;
+
+    const isStale = () =>
+      useChatStore.getState().step !== stepAtEntry ||
+      onEnterTokenRef.current !== tokenAtEntry;
+
+    const ctx: FlowEnterContext = {
+      state: orchestrationState,
+      fetchSmartQuestions: async (...args) => {
+        const result = await fetchSmartQuestions(...args);
+        if (isStale()) return [];
+        return result;
+      },
+      consumeNextQuestion: () => {
+        if (isStale()) return null;
+        return consumeNextQuestion();
+      },
+      generateReview: async () => {
+        if (isStale()) return;
+        await generateReview();
+      },
     };
 
-    handleStepChange().catch((error) => {
-      console.error('[useChatOrchestration] handleStepChange 에러:', error);
+    const applyResult = (result: { messages: Parameters<typeof addMessage>[0][] }) => {
+      if (isStale()) return;
+      result.messages.forEach((msg) => {
+        addMessage(msg);
+      });
+    };
+
+    try {
+      const result = node.onEnter(ctx);
+      if (result instanceof Promise) {
+        result.then(applyResult).catch((error) => {
+          if (isStale()) return;
+          console.error('[useChatOrchestration] onEnter 에러:', error);
+          addAssistantMessage(MESSAGES.error.unknown, 'text');
+        });
+      } else {
+        applyResult(result);
+      }
+    } catch (error) {
+      if (isStale()) return;
+      console.error('[useChatOrchestration] onEnter 에러:', error);
       addAssistantMessage(MESSAGES.error.unknown, 'text');
-    });
+    }
   }, [
-    orchestrationState.step,
-    orchestrationState.hasExistingStyle,
-    orchestrationState.styleProfile,
-    orchestrationState.subStep,
-    orchestrationState.collectedInfo,
-    orchestrationState.selectedTopic,
+    messages.length,
+    orchestrationState,
     addMessage,
     addAssistantMessage,
     fetchSmartQuestions,
