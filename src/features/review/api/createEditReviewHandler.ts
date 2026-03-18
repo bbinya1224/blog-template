@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import type { ReviewEditPayload } from '@/shared/types/review';
 import type { StyleProfile } from '@/shared/types/styleProfile';
 import { AppError, NotFoundError } from '@/shared/lib/errors';
+import { ApiResponse } from '@/shared/api/response';
 
 type EditReviewDeps = {
   validateEditRequest: (payload: unknown) => payload is ReviewEditPayload;
@@ -27,10 +27,7 @@ export const createEditReviewHandler = ({
       const session = await getServerSession(authOptions);
 
       if (!session?.user?.email) {
-        return NextResponse.json(
-          { error: '인증이 필요합니다.' },
-          { status: 401 },
-        );
+        return ApiResponse.unauthorized();
       }
 
       const body: unknown = await request.json();
@@ -52,24 +49,15 @@ export const createEditReviewHandler = ({
 
       await incrementUsageCount?.(session.user.email);
 
-      return NextResponse.json({
-        review,
-        message: 'Claude API를 통한 리뷰 수정이 완료되었습니다.',
-      });
+      return ApiResponse.success({ review, message: 'Claude API를 통한 리뷰 수정이 완료되었습니다.' });
     } catch (error) {
       console.error('리뷰 수정 오류:', error);
 
       if (error instanceof AppError) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: error.statusCode },
-        );
+        return ApiResponse.error(error.code || 'INTERNAL_ERROR', error.message, error.statusCode);
       }
 
-      return NextResponse.json(
-        { error: '리뷰 수정 중 예상치 못한 오류가 발생했습니다.' },
-        { status: 500 },
-      );
+      return ApiResponse.serverError('리뷰 수정 중 예상치 못한 오류가 발생했습니다.');
     }
   };
 };

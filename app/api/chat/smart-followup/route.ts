@@ -5,9 +5,8 @@ import { z } from 'zod';
 import { authOptions } from '@/auth';
 import type { ReviewPayload } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
-import { getUserStatus } from '@/shared/api/dataFiles';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
-import { USAGE_LIMITS } from '@/shared/config/constants';
+import { supabaseAdmin } from '@/shared/lib/supabase';
 import {
   formatCollectedInfo,
   parseQuestions,
@@ -36,8 +35,10 @@ export async function POST(req: NextRequest) {
       return ApiResponse.unauthorized();
     }
 
-    const userStatus = await getUserStatus(session.user.email);
-    if (!userStatus || (userStatus.is_preview && (userStatus.usage_count || 0) >= USAGE_LIMITS.PREVIEW_MAX_USES)) {
+    const { data: reserved, error: rpcError } = await supabaseAdmin.rpc('try_reserve_usage', {
+      p_email: session.user.email,
+    });
+    if (rpcError || !reserved) {
       return ApiResponse.quotaExceeded();
     }
 
