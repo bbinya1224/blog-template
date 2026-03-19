@@ -61,12 +61,12 @@ export const createGenerateReviewHandler = ({
       // 2. Increment Usage Count
       await incrementUsageCount(email);
 
-      return ApiResponse.success({ review, message: `리뷰 생성 및 저장 완료 (ID: ${savedId})` });
+      return ApiResponse.success({ review }, `리뷰 생성 및 저장 완료 (ID: ${savedId})`);
     } catch (error) {
       console.error('리뷰 생성 오류:', error);
 
       if (error instanceof AppError) {
-        return ApiResponse.error(error.code || 'INTERNAL_ERROR', error.message, error.statusCode);
+        return ApiResponse.error(error.code, error.message, error.statusCode);
       }
 
       return ApiResponse.serverError('리뷰 생성 중 예상치 못한 오류가 발생했습니다.');

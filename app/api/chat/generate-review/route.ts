@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
       writingSamples
     );
 
-    const stream = createSSEStream(async (emit) => {
+    const stream = createSSEStream(async (emit, _signal) => {
       console.log('\n[Review Gen API] Claude API 스트리밍 시작...');
       const response = await getAnthropicClient().messages.stream({
         model: CLAUDE_SONNET,
@@ -182,7 +182,7 @@ export async function POST(req: NextRequest) {
 }
 
 function createMockReviewResponse(userEmail: string, payload: ReviewPayload): Response {
-  const stream = createSSEStream(async (emit) => {
+  const stream = createSSEStream(async (emit, _signal) => {
     let fullText = '';
     for await (const word of generateMockReview()) {
       fullText += word;

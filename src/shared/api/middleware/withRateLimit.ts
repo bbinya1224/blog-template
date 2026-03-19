@@ -9,12 +9,12 @@ const requestCounts = new Map<string, { count: number; resetAt: number }>();
 
 const MAX_MAP_ENTRIES = 10000;
 
-function getClientIp(request: Request): string {
+function getClientIp(request: Request): string | null {
   return (
     request.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim() ||
     request.headers.get('cf-connecting-ip') ||
     request.headers.get('x-real-ip') ||
-    'unknown'
+    null
   );
 }
 
@@ -31,6 +31,12 @@ export function withRateLimit(
 ) {
   return async (request: Request): Promise<Response> => {
     const ip = getClientIp(request);
+
+    // IP를 식별할 수 없으면 rate limit 없이 통과 (fail-open)
+    if (!ip) {
+      return handler(request);
+    }
+
     const now = Date.now();
     const record = requestCounts.get(ip);
 
@@ -42,6 +48,10 @@ export function withRateLimit(
     } else {
       if (requestCounts.size >= MAX_MAP_ENTRIES) {
         cleanExpiredEntries();
+      }
+      // 정리 후에도 여전히 가득 차면 rate limit 없이 통과
+      if (requestCounts.size >= MAX_MAP_ENTRIES) {
+        return handler(request);
       }
       requestCounts.set(ip, { count: 1, resetAt: now + config.windowMs });
     }

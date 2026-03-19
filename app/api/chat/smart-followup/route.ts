@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 import { authOptions } from '@/auth';
-import type { ReviewPayload } from '@/shared/types/review';
+import { reviewPayloadSchema } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import { supabaseAdmin } from '@/shared/lib/supabase';
@@ -14,7 +14,7 @@ import {
 import { shouldUseMock } from '@/shared/lib/mock/chatMock';
 
 const smartFollowupInputSchema = z.object({
-  collectedInfo: z.record(z.string(), z.unknown()),
+  collectedInfo: reviewPayloadSchema.partial(),
   selectedTopic: z.string().min(1),
 });
 
@@ -33,13 +33,6 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return ApiResponse.unauthorized();
-    }
-
-    const { data: reserved, error: rpcError } = await supabaseAdmin.rpc('try_reserve_usage', {
-      p_email: session.user.email,
-    });
-    if (rpcError || !reserved) {
-      return ApiResponse.quotaExceeded();
     }
 
     const body = await req.json();
@@ -62,7 +55,14 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const infoSummary = formatCollectedInfo(collectedInfo as Partial<ReviewPayload>);
+    const { data: reserved, error: rpcError } = await supabaseAdmin.rpc('try_reserve_usage', {
+      p_email: session.user.email,
+    });
+    if (rpcError || !reserved) {
+      return ApiResponse.quotaExceeded();
+    }
+
+    const infoSummary = formatCollectedInfo(collectedInfo);
 
     console.log(
       `\n[Smart Followup API] 후속 질문 생성 시작 (${selectedTopic})`,

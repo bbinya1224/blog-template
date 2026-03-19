@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       .replace('{수정 요청 텍스트}', editRequest)
       .replace('{스타일 JSON}', styleProfileJson);
 
-    const stream = createSSEStream(async (emit) => {
+    const stream = createSSEStream(async (emit, _signal) => {
       console.log('\n[Review Edit API] Claude API 스트리밍 시작...');
       const response = await getAnthropicClient().messages.stream({
         model: CLAUDE_HAIKU,
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
 }
 
 function createMockEditResponse(originalReview: string, editRequest: string): Response {
-  const stream = createSSEStream(async (emit) => {
+  const stream = createSSEStream(async (emit, _signal) => {
     let fullText = '';
     for await (const word of generateMockEditReview(originalReview, editRequest)) {
       fullText += word;

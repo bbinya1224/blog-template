@@ -49,12 +49,12 @@ export const createEditReviewHandler = ({
 
       await incrementUsageCount?.(session.user.email);
 
-      return ApiResponse.success({ review, message: 'Claude API를 통한 리뷰 수정이 완료되었습니다.' });
+      return ApiResponse.success({ review }, 'Claude API를 통한 리뷰 수정이 완료되었습니다.');
     } catch (error) {
       console.error('리뷰 수정 오류:', error);
 
       if (error instanceof AppError) {
-        return ApiResponse.error(error.code || 'INTERNAL_ERROR', error.message, error.statusCode);
+        return ApiResponse.error(error.code, error.message, error.statusCode);
       }
 
       return ApiResponse.serverError('리뷰 수정 중 예상치 못한 오류가 발생했습니다.');

@@ -100,11 +100,7 @@ export const createFetchRssHandler = ({
       });
     } catch (error) {
       console.error('fetch-rss error:', error);
-
-      const message =
-        error instanceof Error ? error.message : 'RSS 크롤링 실패';
-
-      return ApiResponse.serverError(message);
+      return ApiResponse.serverError('RSS 크롤링 중 오류가 발생했습니다.');
     }
   };
 };
