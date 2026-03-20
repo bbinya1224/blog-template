@@ -42,8 +42,9 @@ function createSSEStream<TDone>(
           controller.close();
           return;
         }
+        console.error('[SSE Stream] error:', error);
         const errorData = `event: error\ndata: ${JSON.stringify({
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: '스트리밍 처리 중 오류가 발생했습니다.',
         })}\n\n`;
         controller.enqueue(encoder.encode(errorData));
         controller.close();

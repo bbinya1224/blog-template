@@ -13,9 +13,11 @@ import {
 } from '@/features/chat-review';
 import { shouldUseMock } from '@/shared/lib/mock/chatMock';
 
+const reviewTopicSchema = z.enum(['restaurant', 'beauty', 'product']);
+
 const smartFollowupInputSchema = z.object({
   collectedInfo: reviewPayloadSchema.partial(),
-  selectedTopic: z.string().min(1),
+  selectedTopic: reviewTopicSchema,
 });
 
 const SYSTEM_PROMPT = `당신은 맛집 리뷰 작성을 돕는 어시스턴트입니다.

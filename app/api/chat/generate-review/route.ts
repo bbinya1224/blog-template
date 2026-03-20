@@ -191,7 +191,7 @@ function createMockReviewResponse(userEmail: string, payload: ReviewPayload): Re
 
     let reviewId: string | null = null;
     try {
-      const { data: insertedReview } = await supabaseAdmin
+      const { data: insertedReview, error: insertError } = await supabaseAdmin
         .from('user_reviews')
         .insert({
           user_email: userEmail,
@@ -204,6 +204,9 @@ function createMockReviewResponse(userEmail: string, payload: ReviewPayload): Re
         })
         .select('id')
         .single();
+      if (insertError) {
+        throw insertError;
+      }
       reviewId = insertedReview?.id ?? null;
       console.log(`\n✅ [Review Gen API] MOCK 리뷰 저장 완료: ${fullText.length}자`);
     } catch (error) {
