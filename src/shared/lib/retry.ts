@@ -1,4 +1,4 @@
-import { Result, Err, AppError } from './errors';
+import { AppError } from './errors';
 
 /**
  * 재시도 설정 옵션
@@ -132,93 +132,4 @@ export const withRetry = async <T>(
   }
 
   throw lastError;
-};
-
-/**
- * 재시도 가능 여부를 확인하고 지연 시간만큼 대기
- * @returns 재시도 가능 여부
- */
-const handleRetryDelay = async (
-  error: unknown,
-  attempt: number,
-  opts: RetryOptions,
-  retryableCheck: (error: unknown) => boolean,
-): Promise<boolean> => {
-  if (!retryableCheck(error)) {
-    return false;
-  }
-
-  if (opts.onRetry) {
-    opts.onRetry(attempt, error);
-  }
-
-  const delayMs = calculateBackoff(
-    attempt,
-    opts.initialDelayMs,
-    opts.maxDelayMs,
-    opts.backoffMultiplier,
-  );
-
-  await new Promise((resolve) => setTimeout(resolve, delayMs));
-  return true;
-};
-
-/**
- * Result 타입을 반환하는 함수에 재시도 로직 적용
- */
-export const withRetryResult = async <T, E = AppError>(
-  fn: () => Promise<Result<T, E>>,
-  options: Partial<RetryOptions> = {},
-): Promise<Result<T, E>> => {
-  const opts = { ...DEFAULT_RETRY_OPTIONS, ...options };
-  const maxAttempts = Math.max(1, opts.maxAttempts);
-  const retryableCheck = opts.retryableErrors ?? isRetryableError;
-
-  let lastResult: Result<T, E> | null = null;
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const isLastAttempt = attempt === maxAttempts;
-
-    try {
-      const result = await fn();
-
-      if (result.success) {
-        return result;
-      }
-
-      lastResult = result;
-
-      if (isLastAttempt) {
-        return result;
-      }
-
-      const shouldRetry = await handleRetryDelay(
-        result.error,
-        attempt,
-        opts,
-        retryableCheck,
-      );
-
-      if (!shouldRetry) {
-        return result;
-      }
-    } catch (error) {
-      if (isLastAttempt) {
-        return Err(error as E);
-      }
-
-      const shouldRetry = await handleRetryDelay(
-        error,
-        attempt,
-        opts,
-        retryableCheck,
-      );
-
-      if (!shouldRetry) {
-        return Err(error as E);
-      }
-    }
-  }
-
-  return lastResult ?? Err(new Error('No result available') as E);
 };

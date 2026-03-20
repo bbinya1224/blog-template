@@ -2,63 +2,11 @@ import type {
   ConversationStep,
   ConversationState,
   RestaurantInfoStep,
-  stepTransitions,
 } from '../../model/types';
 import type { ChatMessage } from '@/entities/chat-message';
 import type { StyleProfile } from '@/entities/style-profile';
 import { MESSAGES } from '../../constants/messages';
 import { CHOICE_OPTIONS } from '../../constants/choiceOptions';
-
-export function canTransition(
-  currentStep: ConversationStep,
-  targetStep: ConversationStep,
-  transitions: typeof stepTransitions
-): boolean {
-  const allowed = transitions[currentStep];
-  return allowed?.includes(targetStep) ?? false;
-}
-
-export function determineNextStep(state: ConversationState): ConversationStep {
-  switch (state.step) {
-    case 'style-check':
-      return state.hasExistingStyle ? 'topic-select' : 'style-setup';
-
-    case 'style-setup':
-      return state.styleProfile ? 'topic-select' : 'style-setup';
-
-    case 'topic-select':
-      return state.selectedTopic ? 'info-gathering' : 'topic-select';
-
-    case 'info-gathering':
-      return isInfoGatheringComplete(state) ? 'smart-followup' : 'info-gathering';
-
-    case 'smart-followup':
-      return 'confirmation';
-
-    case 'confirmation':
-      return 'generating';
-
-    case 'generating':
-      return state.generatedReview ? 'review-edit' : 'generating';
-
-    case 'review-edit':
-      return 'complete';
-
-    default:
-      return state.step;
-  }
-}
-
-export function isInfoGatheringComplete(state: ConversationState): boolean {
-  const info = state.collectedInfo;
-  return !!(
-    info.date &&
-    info.companion &&
-    info.location &&
-    info.menu &&
-    info.pros
-  );
-}
 
 export function determineInfoSubStep(
   state: ConversationState
@@ -159,47 +107,6 @@ export function createInitialMessage(
     case 'info-gathering':
       const subStep = determineInfoSubStep(state);
       return createInfoGatheringMessage(subStep, state.collectedInfo.menu);
-
-    case 'smart-followup':
-      return {
-        ...baseMessage,
-        type: 'loading',
-        content: MESSAGES.smartFollowup.loading,
-      };
-
-    case 'confirmation':
-      return {
-        ...baseMessage,
-        type: 'summary',
-        content: MESSAGES.confirmation.summary,
-        metadata: state.collectedInfo,
-        options: CHOICE_OPTIONS.confirmInfo,
-      };
-
-    case 'generating':
-      return {
-        ...baseMessage,
-        type: 'loading',
-        content: MESSAGES.generating.working,
-      };
-
-    case 'review-edit':
-      return {
-        ...baseMessage,
-        type: 'review-preview',
-        content: MESSAGES.reviewEdit.complete,
-        metadata: {
-          review: state.generatedReview || '',
-          characterCount: state.generatedReview?.length || 0,
-        },
-      };
-
-    case 'complete':
-      return {
-        ...baseMessage,
-        type: 'text',
-        content: MESSAGES.complete.thanks(state.userName || ''),
-      };
 
     default:
       return {

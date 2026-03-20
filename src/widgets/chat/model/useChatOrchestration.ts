@@ -1,20 +1,16 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useShallow } from 'zustand/shallow';
 import {
   useChatStore,
   useChatHandlers,
-  FLOW_GRAPH,
   MESSAGES,
 } from '@/features/chat-review';
-import type { FlowEnterContext } from '@/features/chat-review';
 import { useRecentReviews } from '@/entities/review';
+import { useStepEntry } from './useStepEntry';
 import type { StyleProfile } from '@/entities/style-profile';
-import type {
-  ReviewTopic,
-  ConversationStep,
-} from '@/features/chat-review';
+import type { ReviewTopic } from '@/features/chat-review';
 
 interface UseChatOrchestrationParams {
   userEmail: string;
@@ -28,14 +24,10 @@ export function useChatOrchestration({
   const orchestrationState = useChatStore(
     useShallow((s) => ({
       step: s.step,
-      subStep: s.subStep,
       userName: s.userName,
       hasExistingStyle: s.hasExistingStyle,
       styleProfile: s.styleProfile,
       selectedTopic: s.selectedTopic,
-      collectedInfo: s.collectedInfo,
-      generatedReview: s.generatedReview,
-      sessionId: s.sessionId,
     })),
   );
   const {
@@ -45,7 +37,6 @@ export function useChatOrchestration({
     setSelectedTopic,
     setStep,
     setSubStep,
-    addMessage,
     addAssistantMessage,
   } = useChatStore(
     useShallow((s) => ({
@@ -55,13 +46,9 @@ export function useChatOrchestration({
       setSelectedTopic: s.setSelectedTopic,
       setStep: s.setStep,
       setSubStep: s.setSubStep,
-      addMessage: s.addMessage,
       addAssistantMessage: s.addAssistantMessage,
     })),
   );
-  const isInitializedRef = useRef(false);
-  const prevStepRef = useRef<ConversationStep | null>(null);
-  const onEnterTokenRef = useRef(0);
 
   // Prop → store 동기화 (prop 변경/삭제도 반영)
   useEffect(() => {
@@ -81,78 +68,11 @@ export function useChatOrchestration({
     isProcessing,
   } = useChatHandlers({ userEmail });
 
-  // Conversation flow — reset guard + step entry (onEnter)
-  useEffect(() => {
-    if (messages.length === 0) {
-      isInitializedRef.current = false;
-      prevStepRef.current = null;
-      onEnterTokenRef.current += 1;
-      return;
-    }
-
-    if (!isInitializedRef.current) return;
-    if (orchestrationState.step === prevStepRef.current) return;
-    prevStepRef.current = orchestrationState.step;
-
-    const node = FLOW_GRAPH[orchestrationState.step];
-    if (!node?.onEnter) return;
-
-    const stepAtEntry = orchestrationState.step;
-    const tokenAtEntry = ++onEnterTokenRef.current;
-
-    const isStale = () =>
-      useChatStore.getState().step !== stepAtEntry ||
-      onEnterTokenRef.current !== tokenAtEntry;
-
-    const ctx: FlowEnterContext = {
-      state: orchestrationState,
-      fetchSmartQuestions: async (...args) => {
-        const result = await fetchSmartQuestions(...args);
-        if (isStale()) return [];
-        return result;
-      },
-      consumeNextQuestion: () => {
-        if (isStale()) return null;
-        return consumeNextQuestion();
-      },
-      generateReview: async () => {
-        if (isStale()) return;
-        await generateReview();
-      },
-    };
-
-    const applyResult = (result: { messages: Parameters<typeof addMessage>[0][] }) => {
-      if (isStale()) return;
-      result.messages.forEach((msg) => {
-        addMessage(msg);
-      });
-    };
-
-    try {
-      const result = node.onEnter(ctx);
-      if (result instanceof Promise) {
-        result.then(applyResult).catch((error) => {
-          if (isStale()) return;
-          console.error('[useChatOrchestration] onEnter 에러:', error);
-          addAssistantMessage(MESSAGES.error.unknown, 'text');
-        });
-      } else {
-        applyResult(result);
-      }
-    } catch (error) {
-      if (isStale()) return;
-      console.error('[useChatOrchestration] onEnter 에러:', error);
-      addAssistantMessage(MESSAGES.error.unknown, 'text');
-    }
-  }, [
-    messages.length,
-    orchestrationState,
-    addMessage,
-    addAssistantMessage,
+  const { isInitializedRef } = useStepEntry({
     fetchSmartQuestions,
     consumeNextQuestion,
     generateReview,
-  ]);
+  });
 
   const handleCategorySelect = useCallback(
     (categoryId: string) => {

@@ -68,19 +68,6 @@ export const initialConversationState: ConversationState = {
   sessionId: null,
 };
 
-// 상태 전이 규칙
-export const stepTransitions: Record<ConversationStep, ConversationStep[]> = {
-  'style-check': ['style-setup', 'topic-select'],
-  'style-setup': ['topic-select'],
-  'topic-select': ['info-gathering'],
-  'info-gathering': ['smart-followup', 'info-gathering'],
-  'smart-followup': ['confirmation', 'smart-followup'],
-  confirmation: ['generating', 'info-gathering'],
-  generating: ['review-edit'],
-  'review-edit': ['review-edit', 'complete'],
-  complete: [],
-};
-
 // 스타일 설정 방법
 export type StyleSetupMethod =
   | 'blog-url' // 네이버 블로그 URL 크롤링

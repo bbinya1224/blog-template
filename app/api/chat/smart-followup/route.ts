@@ -1,22 +1,24 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { z } from 'zod';
 import { authOptions } from '@/auth';
-import type { ReviewPayload } from '@/shared/types/review';
+import { reviewPayloadSchema } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
-import { getUserStatus } from '@/shared/api/dataFiles';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
-import { USAGE_LIMITS } from '@/shared/config/constants';
+import { supabaseAdmin } from '@/shared/lib/supabase';
 import {
   formatCollectedInfo,
   parseQuestions,
 } from '@/features/chat-review';
 import { shouldUseMock } from '@/shared/lib/mock/chatMock';
 
-interface SmartFollowupInput {
-  collectedInfo: Partial<ReviewPayload>;
-  selectedTopic: string;
-}
+const reviewTopicSchema = z.enum(['restaurant', 'beauty', 'product']);
+
+const smartFollowupInputSchema = z.object({
+  collectedInfo: reviewPayloadSchema.partial(),
+  selectedTopic: reviewTopicSchema,
+});
 
 const SYSTEM_PROMPT = `당신은 맛집 리뷰 작성을 돕는 어시스턴트입니다.
 사용자가 수집한 리뷰 정보를 보고, 리뷰를 더 생생하고 풍부하게 만들어줄 후속 질문 2~3개를 생성하세요.
@@ -35,13 +37,14 @@ export async function POST(req: NextRequest) {
       return ApiResponse.unauthorized();
     }
 
-    const userStatus = await getUserStatus(session.user.email);
-    if (!userStatus || (userStatus.is_preview && (userStatus.usage_count || 0) >= USAGE_LIMITS.PREVIEW_MAX_USES)) {
-      return ApiResponse.quotaExceeded();
+    const body = await req.json();
+    const parsed = smartFollowupInputSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return ApiResponse.validationError('잘못된 요청 형식입니다.', parsed.error.flatten());
     }
 
-    const { collectedInfo, selectedTopic }: SmartFollowupInput =
-      await req.json();
+    const { collectedInfo, selectedTopic } = parsed.data;
 
     if (shouldUseMock()) {
       console.log('[Smart Followup API] 🎭 MOCK MODE');
@@ -52,6 +55,13 @@ export async function POST(req: NextRequest) {
           '다음에 또 가고 싶으세요? 다른 메뉴도 도전해보고 싶은 게 있나요?',
         ],
       });
+    }
+
+    const { data: reserved, error: rpcError } = await supabaseAdmin.rpc('try_reserve_usage', {
+      p_email: session.user.email,
+    });
+    if (rpcError || !reserved) {
+      return ApiResponse.quotaExceeded();
     }
 
     const infoSummary = formatCollectedInfo(collectedInfo);

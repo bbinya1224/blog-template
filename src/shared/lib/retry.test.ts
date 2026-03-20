@@ -3,9 +3,8 @@ import {
   calculateBackoff,
   isRetryableError,
   withRetry,
-  withRetryResult,
 } from './retry';
-import { AppError, Ok, Err } from './errors';
+import { AppError } from './errors';
 
 describe('calculateBackoff', () => {
   it('should calculate exponential backoff correctly', () => {
@@ -172,90 +171,6 @@ describe('withRetry', () => {
     await vi.runAllTimersAsync();
 
     await expectation;
-    expect(fn).toHaveBeenCalledTimes(2);
-  });
-});
-
-describe('withRetryResult', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('should return success result immediately', async () => {
-    const fn = vi.fn().mockResolvedValue(Ok('success'));
-    const promise = withRetryResult(fn, {
-      maxAttempts: 3,
-      initialDelayMs: 1000,
-    });
-
-    await vi.runAllTimersAsync();
-    const result = await promise;
-
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data).toBe('success');
-    }
-    expect(fn).toHaveBeenCalledTimes(1);
-  });
-
-  it('should retry on retryable error in Result', async () => {
-    const error = new AppError('Timeout', 'ERROR', 500);
-    const fn = vi
-      .fn()
-      .mockResolvedValueOnce(Err(error))
-      .mockResolvedValue(Ok('success'));
-
-    const promise = withRetryResult(fn, {
-      maxAttempts: 3,
-      initialDelayMs: 1000,
-    });
-
-    await vi.runAllTimersAsync();
-    const result = await promise;
-
-    expect(result.success).toBe(true);
-    expect(fn).toHaveBeenCalledTimes(2);
-  });
-
-  it('should not retry on non-retryable error in Result', async () => {
-    const error = new AppError('Bad request', 'ERROR', 400);
-    const fn = vi.fn().mockResolvedValue(Err(error));
-
-    const promise = withRetryResult(fn, {
-      maxAttempts: 3,
-      initialDelayMs: 1000,
-    });
-
-    await vi.runAllTimersAsync();
-    const result = await promise;
-
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.message).toBe('Bad request');
-    }
-    expect(fn).toHaveBeenCalledTimes(1);
-  });
-
-  it('should handle thrown exceptions and convert to Result', async () => {
-    const error = new AppError('Server error', 'ERROR', 500);
-    const fn = vi
-      .fn()
-      .mockRejectedValueOnce(error)
-      .mockResolvedValue(Ok('success'));
-
-    const promise = withRetryResult(fn, {
-      maxAttempts: 3,
-      initialDelayMs: 1000,
-    });
-
-    await vi.runAllTimersAsync();
-    const result = await promise;
-
-    expect(result.success).toBe(true);
     expect(fn).toHaveBeenCalledTimes(2);
   });
 });
