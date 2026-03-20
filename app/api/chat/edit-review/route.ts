@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       .replace('{수정 요청 텍스트}', editRequest)
       .replace('{스타일 JSON}', styleProfileJson);
 
-    const stream = createSSEStream(async (emit, _signal) => {
+    const stream = createSSEStream(async (emit, signal) => {
       console.log('\n[Review Edit API] Claude API 스트리밍 시작...');
       const response = await getAnthropicClient().messages.stream({
         model: CLAUDE_HAIKU,
@@ -75,6 +75,8 @@ export async function POST(req: NextRequest) {
         system: [{ type: 'text', text: '당신은 블로그 리뷰 수정 전문가입니다. 사용자의 글쓰기 스타일을 유지하면서 요청된 부분만 정확하게 수정합니다. 전체 리뷰의 흐름과 톤을 해치지 않으면서 자연스럽게 수정해주세요.', cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: userPrompt }],
       });
+
+      signal.addEventListener('abort', () => response.abort(), { once: true });
 
       let fullText = '';
       for await (const event of response) {

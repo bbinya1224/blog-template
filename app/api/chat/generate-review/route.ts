@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
       writingSamples
     );
 
-    const stream = createSSEStream(async (emit, _signal) => {
+    const stream = createSSEStream(async (emit, signal) => {
       console.log('\n[Review Gen API] Claude API 스트리밍 시작...');
       const response = await getAnthropicClient().messages.stream({
         model: CLAUDE_SONNET,
@@ -129,6 +129,8 @@ export async function POST(req: NextRequest) {
         system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: userPrompt }],
       });
+
+      signal.addEventListener('abort', () => response.abort(), { once: true });
 
       let fullText = '';
       for await (const event of response) {
@@ -189,29 +191,26 @@ function createMockReviewResponse(userEmail: string, payload: ReviewPayload): Re
       emit(word);
     }
 
-    let reviewId: string | null = null;
-    try {
-      const { data: insertedReview, error: insertError } = await supabaseAdmin
-        .from('user_reviews')
-        .insert({
-          user_email: userEmail,
-          restaurant_name: payload.name,
-          visit_date: payload.date || new Date().toISOString().split('T')[0],
-          review_content: fullText,
-          metadata: payload,
-          character_count: fullText.length,
-          created_at: new Date().toISOString(),
-        })
-        .select('id')
-        .single();
-      if (insertError) {
-        throw insertError;
-      }
-      reviewId = insertedReview?.id ?? null;
-      console.log(`\n✅ [Review Gen API] MOCK 리뷰 저장 완료: ${fullText.length}자`);
-    } catch (error) {
-      console.warn('[Review Gen API] MOCK 리뷰 저장 실패:', error);
+    const { data: insertedReview, error: insertError } = await supabaseAdmin
+      .from('user_reviews')
+      .insert({
+        user_email: userEmail,
+        restaurant_name: payload.name,
+        visit_date: payload.date || new Date().toISOString().split('T')[0],
+        review_content: fullText,
+        metadata: payload,
+        character_count: fullText.length,
+        created_at: new Date().toISOString(),
+      })
+      .select('id')
+      .single();
+
+    if (insertError) {
+      throw new Error(`MOCK 리뷰 저장 실패: ${insertError.message}`);
     }
+
+    const reviewId = insertedReview?.id ?? null;
+    console.log(`\n✅ [Review Gen API] MOCK 리뷰 저장 완료: ${fullText.length}자`);
 
     return {
       fullText,

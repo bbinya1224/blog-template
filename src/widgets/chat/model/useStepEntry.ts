@@ -3,19 +3,18 @@
 import { useEffect, useRef } from 'react';
 import {
   useChatStore,
-  createInitialMessage,
-  createSummaryMessage,
+  FLOW_GRAPH,
   MESSAGES,
-  CHOICE_OPTIONS,
 } from '@/features/chat-review';
-import type { ConversationStep } from '@/features/chat-review/model/types';
+import type { FlowEnterContext } from '@/features/chat-review';
+import type { ConversationStep } from '@/features/chat-review';
 
 interface UseStepEntryParams {
   fetchSmartQuestions: (
     collectedInfo: Record<string, unknown>,
     selectedTopic: string,
   ) => Promise<string[]>;
-  consumeNextQuestion: () => void;
+  consumeNextQuestion: () => string | null;
   generateReview: () => Promise<void>;
 }
 
@@ -26,103 +25,81 @@ export function useStepEntry({
 }: UseStepEntryParams) {
   const isInitializedRef = useRef(false);
   const prevStepRef = useRef<ConversationStep | null>(null);
+  const onEnterTokenRef = useRef(0);
 
   const messages = useChatStore((s) => s.messages);
   const step = useChatStore((s) => s.step);
-  const subStep = useChatStore((s) => s.subStep);
-  const hasExistingStyle = useChatStore((s) => s.hasExistingStyle);
-  const styleProfile = useChatStore((s) => s.styleProfile);
-  const collectedInfo = useChatStore((s) => s.collectedInfo);
-  const selectedTopic = useChatStore((s) => s.selectedTopic);
+  const orchestrationState = useChatStore((s) => s);
   const addMessage = useChatStore((s) => s.addMessage);
   const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
 
-  // Reset initialized flag when conversation is reset
+  // Reset guard when conversation is cleared
   useEffect(() => {
     if (messages.length === 0) {
       isInitializedRef.current = false;
       prevStepRef.current = null;
+      onEnterTokenRef.current += 1;
+      return;
     }
-  }, [messages.length]);
 
-  // Handle step changes
-  useEffect(() => {
     if (!isInitializedRef.current) return;
     if (step === prevStepRef.current) return;
     prevStepRef.current = step;
 
-    const orchestrationState = useChatStore.getState();
+    const node = FLOW_GRAPH[step];
+    if (!node?.onEnter) return;
 
-    const handleStepChange = async () => {
-      switch (step) {
-        case 'style-check':
-          if (hasExistingStyle && styleProfile) {
-            addMessage(createInitialMessage('style-check', orchestrationState));
-          }
-          break;
-        case 'topic-select':
-          addMessage(createInitialMessage('topic-select', orchestrationState));
-          break;
-        case 'info-gathering':
-          if (!subStep) {
-            addMessage(
-              createInitialMessage('info-gathering', orchestrationState),
-            );
-          }
-          break;
-        case 'smart-followup': {
-          const stepAtRequest = step;
-          try {
-            const questions = await fetchSmartQuestions(
-              collectedInfo,
-              selectedTopic || 'restaurant',
-            );
-            if (useChatStore.getState().step !== stepAtRequest) return;
-            if (questions.length > 0) {
-              const combined = `${MESSAGES.smartFollowup.intro}\n\n${questions[0]}`;
-              addAssistantMessage(
-                combined,
-                'choice',
-                CHOICE_OPTIONS.smartFollowupSkip,
-              );
-              consumeNextQuestion();
-            } else {
-              addAssistantMessage(MESSAGES.smartFollowup.error, 'text');
-            }
-          } catch {
-            if (useChatStore.getState().step !== stepAtRequest) return;
-            addAssistantMessage(MESSAGES.smartFollowup.error, 'text');
-          }
-          break;
-        }
-        case 'confirmation':
-          addMessage(createSummaryMessage(orchestrationState));
-          addAssistantMessage(
-            MESSAGES.confirmation.ask,
-            'choice',
-            CHOICE_OPTIONS.confirmInfo,
-          );
-          break;
-        case 'generating': {
-          const stepBeforeGenerate = step;
-          await generateReview();
-          if (useChatStore.getState().step !== stepBeforeGenerate) return;
-          break;
-        }
-      }
+    const stepAtEntry = step;
+    const tokenAtEntry = ++onEnterTokenRef.current;
+
+    const isStale = () =>
+      useChatStore.getState().step !== stepAtEntry ||
+      onEnterTokenRef.current !== tokenAtEntry;
+
+    const ctx: FlowEnterContext = {
+      state: orchestrationState,
+      fetchSmartQuestions: async (...args) => {
+        const result = await fetchSmartQuestions(...args);
+        if (isStale()) return [];
+        return result;
+      },
+      consumeNextQuestion: () => {
+        if (isStale()) return null;
+        return consumeNextQuestion();
+      },
+      generateReview: async () => {
+        if (isStale()) return;
+        await generateReview();
+      },
     };
 
-    handleStepChange().catch((error) => {
-      console.error('[useStepEntry] handleStepChange 에러:', error);
+    const applyResult = (result: { messages: Parameters<typeof addMessage>[0][] }) => {
+      if (isStale()) return;
+      result.messages.forEach((msg) => {
+        addMessage(msg);
+      });
+    };
+
+    try {
+      const result = node.onEnter(ctx);
+      if (result instanceof Promise) {
+        result.then(applyResult).catch((error) => {
+          if (isStale()) return;
+          console.error('[useStepEntry] onEnter 에러:', error);
+          addAssistantMessage(MESSAGES.error.unknown, 'text');
+        });
+      } else {
+        applyResult(result);
+      }
+    } catch (error) {
+      if (isStale()) return;
+      console.error('[useStepEntry] onEnter 에러:', error);
       addAssistantMessage(MESSAGES.error.unknown, 'text');
-    });
+    }
   }, [
+    messages.length,
     step,
-    hasExistingStyle,
-    styleProfile,
-    subStep,
-    collectedInfo,
-    selectedTopic,
+    orchestrationState,
     addMessage,
     addAssistantMessage,
     fetchSmartQuestions,

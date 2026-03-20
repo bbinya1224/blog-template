@@ -6,20 +6,12 @@ import { useChatStore } from './store';
 import { useConversationPersistence } from './useConversationPersistence';
 import { useSideEffects } from './useSideEffects';
 import { useSmartFollowup } from './useSmartFollowup';
-import {
-  handleStyleSetup,
-  handleStyleCheck,
-  handleTopicSelect,
-  handleInfoGathering,
-  handleConfirmation,
-  handleSmartFollowup,
-  handleReviewEdit,
-  handlePlaceConfirmed,
-  type StepHandlerResult,
-} from '../lib/step-handlers';
+import { handlePlaceConfirmed } from '../lib/step-handlers';
+import { FLOW_GRAPH } from './flow';
 import { MESSAGES } from '../constants/messages';
 import { isPlaceCardMessage } from '@/entities/chat-message';
-import type { UserInput } from './types';
+import type { FlowInputContext } from './flow';
+import type { ConversationAction, UserInput } from './types';
 
 interface UseChatHandlersProps {
   userEmail: string;
@@ -70,48 +62,18 @@ export function useChatHandlers({
 
   const processMessage = useCallback(
     async (input: UserInput) => {
-      let result: StepHandlerResult;
-
-      switch (state.step) {
-        case 'style-check':
-          result = handleStyleCheck(input, state);
-          break;
-
-        case 'style-setup':
-          result = handleStyleSetup(input, state, styleSetupContext);
-          break;
-
-        case 'topic-select':
-          result = handleTopicSelect(input, state);
-          break;
-
-        case 'info-gathering':
-          result = handleInfoGathering(input, state);
-          break;
-
-        case 'smart-followup': {
-          const remaining = getRemainingQuestions();
-          result = handleSmartFollowup(input, state, remaining);
-          if (
-            result.sideEffect.type !== 'skip-followup' &&
-            remaining.length > 0
-          ) {
-            consumeNextQuestion();
-          }
-          break;
-        }
-
-        case 'confirmation':
-          result = handleConfirmation(input, state);
-          break;
-
-        case 'review-edit':
-          result = handleReviewEdit(input, state);
-          break;
-
-        default:
-          result = { messages: [], actions: [], sideEffect: { type: 'none' } };
+      const node = FLOW_GRAPH[state.step];
+      if (!node?.onInput) {
+        return { actions: [] as ConversationAction[] };
       }
+
+      const ctx: FlowInputContext = {
+        state,
+        styleSetupContext,
+        getRemainingQuestions,
+        consumeNextQuestion,
+      };
+      const result = node.onInput(input, ctx);
 
       result.messages.forEach((msg) => addMessage(msg));
 

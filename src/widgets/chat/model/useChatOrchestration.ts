@@ -10,7 +10,7 @@ import {
 import { useRecentReviews } from '@/entities/review';
 import { useStepEntry } from './useStepEntry';
 import type { StyleProfile } from '@/entities/style-profile';
-import type { ReviewTopic } from '@/features/chat-review/model/types';
+import type { ReviewTopic } from '@/features/chat-review';
 
 interface UseChatOrchestrationParams {
   userEmail: string;
@@ -50,6 +50,12 @@ export function useChatOrchestration({
     })),
   );
 
+  // Prop → store 동기화 (prop 변경/삭제도 반영)
+  useEffect(() => {
+    setStyleProfile(existingStyleProfile);
+    setHasExistingStyle(Boolean(existingStyleProfile));
+  }, [existingStyleProfile, setStyleProfile, setHasExistingStyle]);
+
   const { reviews: recentReviews } = useRecentReviews(5);
   const {
     handleSendMessage,
@@ -67,14 +73,6 @@ export function useChatOrchestration({
     consumeNextQuestion,
     generateReview,
   });
-
-  // Initialize existing style profile
-  useEffect(() => {
-    if (existingStyleProfile) {
-      setStyleProfile(existingStyleProfile);
-      setHasExistingStyle(true);
-    }
-  }, [existingStyleProfile, setStyleProfile, setHasExistingStyle]);
 
   const handleCategorySelect = useCallback(
     (categoryId: string) => {
