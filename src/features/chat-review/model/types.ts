@@ -7,9 +7,7 @@ export type ConversationStep =
   | 'style-check' // 기존 스타일 확인
   | 'style-setup' // 스타일 설정 (URL/직접입력/설문)
   | 'topic-select' // 주제 선택
-  | 'info-gathering' // 정보 수집
-  | 'smart-followup' // 스마트 후속 질문 (Haiku)
-  | 'confirmation' // 수집 정보 확인
+  | 'conversation' // 자유 대화형 정보 수집
   | 'generating' // 리뷰 생성 중
   | 'review-edit' // 리뷰 수정
   | 'complete'; // 완료
@@ -57,7 +55,7 @@ export interface ConversationState {
 
 // 초기 상태
 export const initialConversationState: ConversationState = {
-  step: 'info-gathering',
+  step: 'style-check',
   subStep: undefined,
   userName: null,
   hasExistingStyle: false,
@@ -98,7 +96,7 @@ export type SideEffect =
   | { type: 'blog-analysis'; url: string }
   | { type: 'place-search'; query: string }
   | { type: 'edit-review'; request: string }
-  | { type: 'skip-followup' }
+  | { type: 'parse-conversation'; userMessage: string }
   | { type: 'none' };
 
 export interface UserInput {

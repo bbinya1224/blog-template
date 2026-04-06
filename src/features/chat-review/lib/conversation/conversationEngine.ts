@@ -156,9 +156,12 @@ export function createInitialMessage(
         options: CHOICE_OPTIONS.topics,
       };
 
-    case 'info-gathering':
-      const subStep = determineInfoSubStep(state);
-      return createInfoGatheringMessage(subStep, state.collectedInfo.menu);
+    case 'conversation':
+      return {
+        ...baseMessage,
+        type: 'text',
+        content: MESSAGES.conversation.greeting,
+      };
 
     case 'smart-followup':
       return {

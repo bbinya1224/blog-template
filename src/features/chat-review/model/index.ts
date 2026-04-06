@@ -2,4 +2,7 @@ export * from './types';
 export { useChatStore } from './store';
 export { useChatHandlers } from './useChatHandlers';
 export { useConversationPersistence } from './useConversationPersistence';
+export { useConversation } from './useConversation';
 export { useSideEffects } from './useSideEffects';
+export { FLOW_GRAPH } from './flow';
+export type { FlowEnterContext, FlowInputContext } from './flow';

@@ -4,6 +4,18 @@ export { ChatErrorBoundary, WelcomeScreen } from './ui';
 // Model (Hooks & Store)
 export { useChatStore } from './model';
 export { useChatHandlers } from './model';
+export { FLOW_GRAPH } from './model';
+export type { FlowEnterContext, FlowInputContext } from './model';
+
+// Model - Types
+export type {
+  ConversationStep,
+  ConversationState,
+  ReviewTopic,
+  UserInput,
+  StepHandlerResult,
+  StyleSetupContext,
+} from './model';
 
 // Lib - Prompt Builder (used by API routes)
 export {
@@ -18,6 +30,7 @@ export { createInitialMessage } from './lib/conversation/conversationEngine';
 
 // Lib - Step Handlers
 export { createSummaryMessage } from './lib/step-handlers';
+export { handleConversation } from './lib/step-handlers';
 
 // Lib
 export { formatStyleForDisplay } from './lib/formatStyleForDisplay';
