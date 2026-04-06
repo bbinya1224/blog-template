@@ -26,7 +26,6 @@ export function useStepEntry({
   const addMessage = useChatStore((s) => s.addMessage);
   const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
 
-  // Reset guard when conversation is cleared
   useEffect(() => {
     if (messages.length === 0) {
       isInitializedRef.current = false;

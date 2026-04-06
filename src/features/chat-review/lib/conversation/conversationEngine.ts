@@ -69,19 +69,18 @@ export function determineInfoSubStep(
 }
 
 export type UserIntent =
-  | 'answer'           // 질문에 대한 답변
-  | 'modify_previous'  // 이전 답변 수정
-  | 'skip'             // 건너뛰기
-  | 'help'             // 도움 요청
-  | 'restart'          // 처음부터 다시
-  | 'confirm_yes'      // 확인 - 예
-  | 'confirm_no'       // 확인 - 아니오
-  | 'unclear';         // 불명확
+  | 'answer'
+  | 'modify_previous'
+  | 'skip'
+  | 'help'
+  | 'restart'
+  | 'confirm_yes'
+  | 'confirm_no'
+  | 'unclear';
 
 export function classifyIntent(input: string): UserIntent {
   const lowered = input.toLowerCase().trim();
 
-  // 확인 패턴
   if (/^(네|예|응|좋아|확인|맞아|그래|ㅇㅇ|ok|yes|완벽|됐어(?!요)|완성)/.test(lowered)) {
     return 'confirm_yes';
   }
@@ -89,27 +88,22 @@ export function classifyIntent(input: string): UserIntent {
     return 'confirm_no';
   }
 
-  // 건너뛰기
   if (/^(건너뛰|스킵|skip|패스|pass|없어|몰라|충분|됐어요|그만)/.test(lowered)) {
     return 'skip';
   }
 
-  // 도움 요청
   if (/^(도움|help|뭐|어떻게|모르겠)/.test(lowered)) {
     return 'help';
   }
 
-  // 처음부터
   if (/^(처음|시작|리셋|reset|다시 시작)/.test(lowered)) {
     return 'restart';
   }
 
-  // 수정 요청
   if (/수정|바꿔|변경|고쳐/.test(lowered)) {
     return 'modify_previous';
   }
 
-  // 기본: 답변으로 간주
   return 'answer';
 }
 
@@ -289,7 +283,6 @@ export function extractDateInfo(input: string): string {
     return '이번 주';
   }
 
-  // 날짜 패턴 매칭 (예: 2월 3일, 2/3, 02-03)
   const datePattern = /(\d{1,2})[월\/\-](\d{1,2})/;
   const match = input.match(datePattern);
   if (match) {
