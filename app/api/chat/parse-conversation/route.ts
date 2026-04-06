@@ -11,13 +11,16 @@ import { isGenerateIntent } from '@/features/chat-review/lib/conversation/isGene
 import type Anthropic from '@anthropic-ai/sdk';
 import type { ReviewPayload } from '@/shared/types/review';
 
+const MAX_CONVERSATION_TEXT_LENGTH = 2000;
+
 const conversationMessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
-  content: z.string(),
+  // Bound transcript size before forwarding it to the model.
+  content: z.string().trim().min(1).max(MAX_CONVERSATION_TEXT_LENGTH),
 });
 
 const parseConversationInputSchema = z.object({
-  userMessage: z.string().min(1),
+  userMessage: z.string().trim().min(1).max(MAX_CONVERSATION_TEXT_LENGTH),
   collectedInfo: reviewPayloadSchema.partial(),
   conversationHistory: z.array(conversationMessageSchema).max(30),
   selectedTopic: z.enum([
@@ -59,7 +62,7 @@ const SYSTEM_PROMPT = `당신은 맛집 리뷰 정보를 자연스럽게 수집�
 3. 부족한 정보가 있으면 자연스러운 대화체로 하나만 물어보세요
 4. 최소 "장소명(name) + 메뉴(menu) + 감상(pros 또는 extra)" 3가지가 모이면 isReady = true
 5. 친근한 존댓말로 응답하세요. 설문 느낌이 아니라 친구와 대화하는 느낌으로
-6. 사용자가 "생성해줘", "이제 만들어", "써줘", "리뷰 작성해", "시작해" 등을 말하면 무조건 isReady = true
+6. 사용자가 "생성해줘", "이제 만들어", "써줘", "리뷰 작성해" 등을 말하면 무조건 isReady = true
 7. 추출한 정보만 parsedInfo에 포함하세요 (이미 수집된 것은 제외)
 8. 사용자의 감정과 경험에 공감하며 반응하세요
 
@@ -68,6 +71,8 @@ const SYSTEM_PROMPT = `당신은 맛집 리뷰 정보를 자연스럽게 수집�
 {"parsedInfo": {}, "nextResponse": "", "isReady": false, "confidence": 0.0}`;
 
 export async function POST(req: NextRequest) {
+  const requestId = crypto.randomUUID();
+
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -152,8 +157,10 @@ ${conversationHistory.map((m) => `${m.role === 'user' ? '사용자' : '봇'}: ${
       parsedJson = JSON.parse(jsonText);
     } catch (parseError) {
       console.error('[Parse Conversation API] JSON 파싱 실패:', {
+        requestId,
         parseError,
-        jsonText,
+        responseLength: jsonText.length,
+        responsePreview: maskPreview(jsonText),
       });
       return Response.json({
         parsedInfo: {},
@@ -167,7 +174,12 @@ ${conversationHistory.map((m) => `${m.role === 'user' ? '사용자' : '봇'}: ${
     const aiResult = parseConversationOutputSchema.safeParse(parsedJson);
 
     if (!aiResult.success) {
-      console.error('[Parse Conversation API] AI 응답 파싱 실패:', jsonText);
+      console.error('[Parse Conversation API] AI 응답 스키마 파싱 실패:', {
+        requestId,
+        responseLength: jsonText.length,
+        responsePreview: maskPreview(jsonText),
+        issues: aiResult.error.issues,
+      });
       return Response.json({
         parsedInfo: {},
         nextResponse:
@@ -177,7 +189,13 @@ ${conversationHistory.map((m) => `${m.role === 'user' ? '사용자' : '봇'}: ${
       });
     }
 
-    return Response.json(aiResult.data);
+    return Response.json(
+      normalizeConversationResult(
+        aiResult.data,
+        userMessage,
+        collectedInfo as Partial<ReviewPayload>,
+      ),
+    );
   } catch (error) {
     console.error('[Parse Conversation API] 에러:', error);
     return ApiResponse.serverError();
@@ -186,7 +204,7 @@ ${conversationHistory.map((m) => `${m.role === 'user' ? '사용자' : '봇'}: ${
 
 function formatCollectedInfo(info: Partial<ReviewPayload>): string {
   const entries = Object.entries(info).filter(
-    ([, v]) => v !== undefined && v !== '',
+    ([, value]) => value !== undefined && value !== '',
   );
   if (entries.length === 0) return '';
 
@@ -283,7 +301,7 @@ function buildMockResponse(
   const hasFeedback = Boolean(merged.pros || merged.extra);
 
   const wantsGenerate = isGenerateIntent(msg);
-  const isReady = (hasName && hasMenu && hasFeedback) || wantsGenerate;
+  const isReady = computeIsReady(merged, wantsGenerate);
 
   let nextResponse: string;
   if (isReady) {
@@ -305,4 +323,29 @@ function buildMockResponse(
     isReady,
     confidence,
   };
+}
+
+function normalizeConversationResult(
+  result: z.infer<typeof parseConversationOutputSchema>,
+  userMessage: string,
+  collectedInfo: Partial<ReviewPayload>,
+) {
+  const mergedInfo = { ...collectedInfo, ...result.parsedInfo };
+  const isReady = computeIsReady(mergedInfo, isGenerateIntent(userMessage));
+
+  return {
+    ...result,
+    isReady,
+  };
+}
+
+function computeIsReady(
+  info: Partial<ReviewPayload>,
+  wantsGenerate: boolean,
+): boolean {
+  return reviewPayloadSchema.safeParse(info).success || wantsGenerate;
+}
+
+function maskPreview(text: string): string {
+  return text.length <= 120 ? text : `${text.slice(0, 120)}...`;
 }
