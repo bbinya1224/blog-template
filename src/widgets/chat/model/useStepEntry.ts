@@ -35,7 +35,11 @@ export function useStepEntry({
       return;
     }
 
-    if (!isInitializedRef.current) return;
+    if (!isInitializedRef.current) {
+      isInitializedRef.current = true;
+      onEnterTokenRef.current += 1;
+    }
+
     if (step === prevStepRef.current) return;
     prevStepRef.current = step;
 

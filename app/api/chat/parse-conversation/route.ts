@@ -7,6 +7,7 @@ import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import { shouldUseMock } from '@/shared/lib/mock/chatMock';
+import { isGenerateIntent } from '@/features/chat-review/lib/conversation/isGenerateIntent';
 import type Anthropic from '@anthropic-ai/sdk';
 import type { ReviewPayload } from '@/shared/types/review';
 
@@ -23,7 +24,7 @@ const parseConversationInputSchema = z.object({
 });
 
 const parseConversationOutputSchema = z.object({
-  parsedInfo: z.record(z.string(), z.unknown()).default({}),
+  parsedInfo: reviewPayloadSchema.partial().default({}),
   nextResponse: z.string(),
   isReady: z.boolean(),
   confidence: z.number().min(0).max(1),
@@ -133,9 +134,24 @@ ${conversationHistory.map((m) => `${m.role === 'user' ? '사용자' : '봇'}: ${
       .replace(/\n?```\s*$/, '')
       .trim();
 
-    const aiResult = parseConversationOutputSchema.safeParse(
-      JSON.parse(jsonText),
-    );
+    let parsedJson: unknown;
+    try {
+      parsedJson = JSON.parse(jsonText);
+    } catch (parseError) {
+      console.error('[Parse Conversation API] JSON 파싱 실패:', {
+        parseError,
+        jsonText,
+      });
+      return Response.json({
+        parsedInfo: {},
+        nextResponse:
+          '죄송해요, 답변을 이해하지 못했어요. 다시 한번 말씀해주세요!',
+        isReady: false,
+        confidence: 0,
+      });
+    }
+
+    const aiResult = parseConversationOutputSchema.safeParse(parsedJson);
 
     if (!aiResult.success) {
       console.error('[Parse Conversation API] AI 응답 파싱 실패:', jsonText);
@@ -221,7 +237,7 @@ function buildMockResponse(
   const hasMenu = Boolean(merged.menu);
   const hasFeedback = Boolean(merged.pros || merged.extra);
 
-  const wantsGenerate = /생성|만들어|써줘|작성해|시작해/.test(msg);
+  const wantsGenerate = isGenerateIntent(msg);
   const isReady = (hasName && hasMenu && hasFeedback) || wantsGenerate;
 
   let nextResponse: string;

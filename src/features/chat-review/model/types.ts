@@ -70,10 +70,8 @@ export const initialConversationState: ConversationState = {
 export const stepTransitions: Record<ConversationStep, ConversationStep[]> = {
   'style-check': ['style-setup', 'topic-select'],
   'style-setup': ['topic-select'],
-  'topic-select': ['info-gathering'],
-  'info-gathering': ['smart-followup', 'info-gathering'],
-  'smart-followup': ['confirmation', 'smart-followup'],
-  confirmation: ['generating', 'info-gathering'],
+  'topic-select': ['conversation'],
+  conversation: ['conversation', 'generating'],
   generating: ['review-edit'],
   'review-edit': ['review-edit', 'complete'],
   complete: [],

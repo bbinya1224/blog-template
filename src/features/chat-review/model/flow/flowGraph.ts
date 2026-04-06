@@ -23,12 +23,9 @@ function assistantMsg(
 
 export const FLOW_GRAPH: FlowGraph = {
   'style-check': {
-    onEnter: (ctx) => {
-      if (ctx.state.hasExistingStyle && ctx.state.styleProfile) {
-        return { messages: [createInitialMessage('style-check', ctx.state)] };
-      }
-      return { messages: [] };
-    },
+    onEnter: (ctx) => ({
+      messages: [createInitialMessage('style-check', ctx.state)],
+    }),
     onInput: (input, ctx) => handleStyleCheck(input, ctx.state),
   },
 
@@ -48,7 +45,7 @@ export const FLOW_GRAPH: FlowGraph = {
     onEnter: () => ({
       messages: [assistantMsg('text', MESSAGES.conversation.greeting)],
     }),
-    onInput: (input) => handleConversation(input),
+    onInput: (input, ctx) => handleConversation(input, ctx),
   },
 
   generating: {

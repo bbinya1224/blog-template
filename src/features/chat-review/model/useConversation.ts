@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { useChatStore } from './store';
 import { apiPost } from '@/shared/api/httpClient';
 import { MESSAGES } from '../constants/messages';
+import { isGenerateIntent } from '../lib/conversation/isGenerateIntent';
 import type { ReviewPayload } from '@/shared/types/review';
 
 interface ParseConversationResponse {
@@ -12,8 +13,6 @@ interface ParseConversationResponse {
   isReady: boolean;
   confidence: number;
 }
-
-const GENERATE_PATTERN = /생성|만들어|써줘|작성해|시작해/;
 
 export function useConversation() {
   const addMessage = useChatStore((s) => s.addMessage);
@@ -53,7 +52,7 @@ export function useConversation() {
           .reverse()
           .find((m) => m.type === 'loading');
 
-        const userWantsGenerate = GENERATE_PATTERN.test(userMessage);
+        const userWantsGenerate = isGenerateIntent(userMessage);
 
         if (response.isReady && userWantsGenerate) {
           if (loadingMsg) {

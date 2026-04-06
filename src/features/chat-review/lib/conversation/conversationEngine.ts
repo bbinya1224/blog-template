@@ -27,16 +27,10 @@ export function determineNextStep(state: ConversationState): ConversationStep {
       return state.styleProfile ? 'topic-select' : 'style-setup';
 
     case 'topic-select':
-      return state.selectedTopic ? 'info-gathering' : 'topic-select';
+      return state.selectedTopic ? 'conversation' : 'topic-select';
 
-    case 'info-gathering':
-      return isInfoGatheringComplete(state) ? 'smart-followup' : 'info-gathering';
-
-    case 'smart-followup':
-      return 'confirmation';
-
-    case 'confirmation':
-      return 'generating';
+    case 'conversation':
+      return isInfoGatheringComplete(state) ? 'generating' : 'conversation';
 
     case 'generating':
       return state.generatedReview ? 'review-edit' : 'generating';
@@ -161,22 +155,6 @@ export function createInitialMessage(
         ...baseMessage,
         type: 'text',
         content: MESSAGES.conversation.greeting,
-      };
-
-    case 'smart-followup':
-      return {
-        ...baseMessage,
-        type: 'loading',
-        content: MESSAGES.smartFollowup.loading,
-      };
-
-    case 'confirmation':
-      return {
-        ...baseMessage,
-        type: 'summary',
-        content: MESSAGES.confirmation.summary,
-        metadata: state.collectedInfo,
-        options: CHOICE_OPTIONS.confirmInfo,
       };
 
     case 'generating':

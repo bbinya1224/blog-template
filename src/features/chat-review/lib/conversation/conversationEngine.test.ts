@@ -251,9 +251,9 @@ describe('conversationEngine', () => {
       expect(determineNextStep(state)).toBe('style-setup');
     });
 
-    it('topic-select → info-gathering when topic selected', () => {
+    it('topic-select → conversation when topic selected', () => {
       const state = createState({ step: 'topic-select', selectedTopic: 'restaurant' });
-      expect(determineNextStep(state)).toBe('info-gathering');
+      expect(determineNextStep(state)).toBe('conversation');
     });
 
     it('topic-select → topic-select when no topic', () => {
@@ -261,9 +261,9 @@ describe('conversationEngine', () => {
       expect(determineNextStep(state)).toBe('topic-select');
     });
 
-    it('info-gathering → smart-followup when info complete', () => {
+    it('conversation → generating when info complete', () => {
       const state = createState({
-        step: 'info-gathering',
+        step: 'conversation',
         collectedInfo: {
           date: '2026-02-15',
           companion: '친구',
@@ -273,25 +273,15 @@ describe('conversationEngine', () => {
           pros: '맛있어요',
         },
       });
-      expect(determineNextStep(state)).toBe('smart-followup');
+      expect(determineNextStep(state)).toBe('generating');
     });
 
-    it('info-gathering → info-gathering when info incomplete', () => {
+    it('conversation → conversation when info incomplete', () => {
       const state = createState({
-        step: 'info-gathering',
+        step: 'conversation',
         collectedInfo: { date: '2026-02-15' },
       });
-      expect(determineNextStep(state)).toBe('info-gathering');
-    });
-
-    it('smart-followup → confirmation', () => {
-      const state = createState({ step: 'smart-followup' });
-      expect(determineNextStep(state)).toBe('confirmation');
-    });
-
-    it('confirmation → generating', () => {
-      const state = createState({ step: 'confirmation' });
-      expect(determineNextStep(state)).toBe('generating');
+      expect(determineNextStep(state)).toBe('conversation');
     });
 
     it('generating → review-edit when review exists', () => {
@@ -324,7 +314,8 @@ describe('conversationEngine', () => {
     it('should allow valid transitions', () => {
       expect(canTransition('style-check', 'topic-select', stepTransitions)).toBe(true);
       expect(canTransition('style-check', 'style-setup', stepTransitions)).toBe(true);
-      expect(canTransition('info-gathering', 'smart-followup', stepTransitions)).toBe(true);
+      expect(canTransition('topic-select', 'conversation', stepTransitions)).toBe(true);
+      expect(canTransition('conversation', 'generating', stepTransitions)).toBe(true);
       expect(canTransition('generating', 'review-edit', stepTransitions)).toBe(true);
     });
 

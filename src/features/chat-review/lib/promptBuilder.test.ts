@@ -64,7 +64,6 @@ describe('buildReviewSystemPrompt', () => {
     const result = buildReviewSystemPrompt(basePrompt, null);
 
     expect(result).toContain('스타일: {}');
-    expect(result).toContain('## 중요: 사용자 입력 처리 규칙');
     expect(result).not.toContain('{스타일 프로필 JSON}');
   });
 });

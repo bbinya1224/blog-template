@@ -29,7 +29,6 @@ export {
 export { createInitialMessage } from './lib/conversation/conversationEngine';
 
 // Lib - Step Handlers
-export { createSummaryMessage } from './lib/step-handlers';
 export { handleConversation } from './lib/step-handlers';
 
 // Lib

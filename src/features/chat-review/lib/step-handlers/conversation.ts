@@ -1,7 +1,11 @@
 import type { StepHandlerResult, UserInput } from '../../model/types';
+import type { FlowInputContext } from '../../model/flow';
 import { MESSAGES } from '../../constants/messages';
 
-export function handleConversation(input: UserInput): StepHandlerResult {
+export function handleConversation(
+  input: UserInput,
+  _ctx: FlowInputContext,
+): StepHandlerResult {
   if (input.optionId === 'generate') {
     return {
       messages: [
