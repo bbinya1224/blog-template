@@ -20,7 +20,14 @@ const parseConversationInputSchema = z.object({
   userMessage: z.string().min(1),
   collectedInfo: reviewPayloadSchema.partial(),
   conversationHistory: z.array(conversationMessageSchema).max(30),
-  selectedTopic: z.enum(['restaurant', 'beauty', 'product']),
+  selectedTopic: z.enum([
+    'restaurant',
+    'beauty',
+    'product',
+    'movie',
+    'book',
+    'travel',
+  ]),
 });
 
 const parseConversationOutputSchema = z.object({
@@ -79,6 +86,12 @@ export async function POST(req: NextRequest) {
 
     const { userMessage, collectedInfo, conversationHistory, selectedTopic } =
       parsed.data;
+
+    if (selectedTopic !== 'restaurant') {
+      return ApiResponse.validationError(
+        '현재 대화형 리뷰 작성은 맛집 주제만 지원합니다.',
+      );
+    }
 
     if (shouldUseMock()) {
       console.log('[Parse Conversation API] 🎭 MOCK MODE');
@@ -210,6 +223,38 @@ function buildMockResponse(
   if (msg.includes('친구')) mockParsedInfo.companion = '친구';
   if (msg.includes('가족')) mockParsedInfo.companion = '가족';
   if (msg.includes('혼자')) mockParsedInfo.companion = '혼자';
+
+  const menuPatterns = [
+    /(?:먹었|주문했|시켰)(?:던)?\s*([가-힣a-zA-Z0-9\s]+?)(?:이|가|을|를|도|랑|하고|,|\.|!|\?|$)/,
+    /([가-힣a-zA-Z0-9\s]+?)(?:을|를)\s*(?:먹었|주문했|시켰)/,
+  ];
+  for (const pattern of menuPatterns) {
+    const match = userMessage.match(pattern);
+    const candidate = match?.[1]?.trim();
+    if (candidate && !collectedInfo.menu) {
+      mockParsedInfo.menu = candidate;
+      break;
+    }
+  }
+
+  if (!mockParsedInfo.menu && !collectedInfo.menu) {
+    const knownMenus = [
+      '파스타',
+      '피자',
+      '라멘',
+      '초밥',
+      '스테이크',
+      '햄버거',
+      '커피',
+      '아메리카노',
+      '라떼',
+      '케이크',
+    ];
+    const detectedMenu = knownMenus.find((menu) => msg.includes(menu));
+    if (detectedMenu) {
+      mockParsedInfo.menu = detectedMenu;
+    }
+  }
 
   const placePatterns = [
     /(.+?)(에서|다녀|갔는데|갔어|방문)/,

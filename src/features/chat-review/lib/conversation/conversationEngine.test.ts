@@ -261,7 +261,7 @@ describe('conversationEngine', () => {
       expect(determineNextStep(state)).toBe('topic-select');
     });
 
-    it('conversation → generating when info complete', () => {
+    it('conversation → conversation when info complete', () => {
       const state = createState({
         step: 'conversation',
         collectedInfo: {
@@ -273,7 +273,7 @@ describe('conversationEngine', () => {
           pros: '맛있어요',
         },
       });
-      expect(determineNextStep(state)).toBe('generating');
+      expect(determineNextStep(state)).toBe('conversation');
     });
 
     it('conversation → conversation when info incomplete', () => {

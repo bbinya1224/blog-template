@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 import { useChatStore } from './store';
 import { apiPost } from '@/shared/api/httpClient';
+import { HttpError } from '@/shared/lib/errors';
 import { MESSAGES } from '../constants/messages';
 import { isGenerateIntent } from '../lib/conversation/isGenerateIntent';
 import type { ReviewPayload } from '@/shared/types/review';
@@ -89,10 +90,14 @@ export function useConversation() {
         const loadingMsg = [...currentMessages]
           .reverse()
           .find((m) => m.type === 'loading');
+        const errorMessage =
+          error instanceof HttpError && error.message
+            ? error.message
+            : MESSAGES.conversation.error;
         if (loadingMsg) {
           updateMessage(loadingMsg.id, {
             type: 'text',
-            content: MESSAGES.conversation.error,
+            content: errorMessage,
           });
         }
       }

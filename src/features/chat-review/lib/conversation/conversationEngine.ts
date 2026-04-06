@@ -30,7 +30,7 @@ export function determineNextStep(state: ConversationState): ConversationStep {
       return state.selectedTopic ? 'conversation' : 'topic-select';
 
     case 'conversation':
-      return isInfoGatheringComplete(state) ? 'generating' : 'conversation';
+      return 'conversation';
 
     case 'generating':
       return state.generatedReview ? 'review-edit' : 'generating';
