@@ -105,14 +105,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: reserved, error: rpcError } = await supabaseAdmin.rpc(
-      'try_reserve_usage',
-      { p_email: session.user.email },
-    );
-    if (rpcError || !reserved) {
-      return ApiResponse.quotaExceeded();
-    }
-
     const infoSummary = formatCollectedInfo(collectedInfo as Partial<ReviewPayload>);
 
     const userPrompt = `카테고리: ${selectedTopic}
@@ -189,13 +181,21 @@ ${conversationHistory.map((m) => `${m.role === 'user' ? '사용자' : '봇'}: ${
       });
     }
 
-    return Response.json(
-      normalizeConversationResult(
-        aiResult.data,
-        userMessage,
-        collectedInfo as Partial<ReviewPayload>,
-      ),
+    const normalizedResult = normalizeConversationResult(
+      aiResult.data,
+      userMessage,
+      collectedInfo as Partial<ReviewPayload>,
     );
+
+    const { data: reserved, error: rpcError } = await supabaseAdmin.rpc(
+      'try_reserve_usage',
+      { p_email: session.user.email },
+    );
+    if (rpcError || !reserved) {
+      return ApiResponse.quotaExceeded();
+    }
+
+    return Response.json(normalizedResult);
   } catch (error) {
     console.error('[Parse Conversation API] 에러:', error);
     return ApiResponse.serverError();
