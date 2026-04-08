@@ -2,11 +2,57 @@ import type {
   ConversationStep,
   ConversationState,
   RestaurantInfoStep,
+  stepTransitions,
 } from '../../model/types';
 import type { ChatMessage } from '@/entities/chat-message';
 import type { StyleProfile } from '@/entities/style-profile';
 import { MESSAGES } from '../../constants/messages';
 import { CHOICE_OPTIONS } from '../../constants/choiceOptions';
+
+export function canTransition(
+  currentStep: ConversationStep,
+  targetStep: ConversationStep,
+  transitions: typeof stepTransitions
+): boolean {
+  const allowed = transitions[currentStep];
+  return allowed?.includes(targetStep) ?? false;
+}
+
+export function determineNextStep(state: ConversationState): ConversationStep {
+  switch (state.step) {
+    case 'style-check':
+      return state.hasExistingStyle ? 'topic-select' : 'style-setup';
+
+    case 'style-setup':
+      return state.styleProfile ? 'topic-select' : 'style-setup';
+
+    case 'topic-select':
+      return state.selectedTopic ? 'conversation' : 'topic-select';
+
+    case 'conversation':
+      return 'conversation';
+
+    case 'generating':
+      return state.generatedReview ? 'review-edit' : 'generating';
+
+    case 'review-edit':
+      return 'complete';
+
+    default:
+      return state.step;
+  }
+}
+
+export function isInfoGatheringComplete(state: ConversationState): boolean {
+  const info = state.collectedInfo;
+  return !!(
+    info.date &&
+    info.companion &&
+    info.location &&
+    info.menu &&
+    info.pros
+  );
+}
 
 export function determineInfoSubStep(
   state: ConversationState
@@ -23,19 +69,18 @@ export function determineInfoSubStep(
 }
 
 export type UserIntent =
-  | 'answer'           // 질문에 대한 답변
-  | 'modify_previous'  // 이전 답변 수정
-  | 'skip'             // 건너뛰기
-  | 'help'             // 도움 요청
-  | 'restart'          // 처음부터 다시
-  | 'confirm_yes'      // 확인 - 예
-  | 'confirm_no'       // 확인 - 아니오
-  | 'unclear';         // 불명확
+  | 'answer'
+  | 'modify_previous'
+  | 'skip'
+  | 'help'
+  | 'restart'
+  | 'confirm_yes'
+  | 'confirm_no'
+  | 'unclear';
 
 export function classifyIntent(input: string): UserIntent {
   const lowered = input.toLowerCase().trim();
 
-  // 확인 패턴
   if (/^(네|예|응|좋아|확인|맞아|그래|ㅇㅇ|ok|yes|완벽|됐어(?!요)|완성)/.test(lowered)) {
     return 'confirm_yes';
   }
@@ -43,27 +88,22 @@ export function classifyIntent(input: string): UserIntent {
     return 'confirm_no';
   }
 
-  // 건너뛰기
   if (/^(건너뛰|스킵|skip|패스|pass|없어|몰라|충분|됐어요|그만)/.test(lowered)) {
     return 'skip';
   }
 
-  // 도움 요청
   if (/^(도움|help|뭐|어떻게|모르겠)/.test(lowered)) {
     return 'help';
   }
 
-  // 처음부터
   if (/^(처음|시작|리셋|reset|다시 시작)/.test(lowered)) {
     return 'restart';
   }
 
-  // 수정 요청
   if (/수정|바꿔|변경|고쳐/.test(lowered)) {
     return 'modify_previous';
   }
 
-  // 기본: 답변으로 간주
   return 'answer';
 }
 
@@ -104,9 +144,37 @@ export function createInitialMessage(
         options: CHOICE_OPTIONS.topics,
       };
 
-    case 'info-gathering':
-      const subStep = determineInfoSubStep(state);
-      return createInfoGatheringMessage(subStep, state.collectedInfo.menu);
+    case 'conversation':
+      return {
+        ...baseMessage,
+        type: 'text',
+        content: MESSAGES.conversation.greeting,
+      };
+
+    case 'generating':
+      return {
+        ...baseMessage,
+        type: 'loading',
+        content: MESSAGES.generating.working,
+      };
+
+    case 'review-edit':
+      return {
+        ...baseMessage,
+        type: 'review-preview',
+        content: MESSAGES.reviewEdit.complete,
+        metadata: {
+          review: state.generatedReview || '',
+          characterCount: state.generatedReview?.length || 0,
+        },
+      };
+
+    case 'complete':
+      return {
+        ...baseMessage,
+        type: 'text',
+        content: MESSAGES.complete.thanks(state.userName || ''),
+      };
 
     default:
       return {
@@ -215,7 +283,6 @@ export function extractDateInfo(input: string): string {
     return '이번 주';
   }
 
-  // 날짜 패턴 매칭 (예: 2월 3일, 2/3, 02-03)
   const datePattern = /(\d{1,2})[월\/\-](\d{1,2})/;
   const match = input.match(datePattern);
   if (match) {

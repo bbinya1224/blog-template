@@ -12,11 +12,10 @@ describe('handleTopicSelect', () => {
   const state = createState({ step: 'topic-select' });
 
   describe('optionId routing', () => {
-    it('restaurant → sets topic and transitions to info-gathering', () => {
+    it('restaurant → sets topic and transitions to conversation', () => {
       const result = handleTopicSelect({ text: '맛집', optionId: 'restaurant' }, state);
       expect(result.actions).toContainEqual({ type: 'SET_TOPIC', payload: 'restaurant' });
-      expect(result.actions).toContainEqual({ type: 'GO_TO_STEP', payload: 'info-gathering' });
-      expect(result.actions).toContainEqual({ type: 'SET_SUB_STEP', payload: 'date' });
+      expect(result.actions).toContainEqual({ type: 'GO_TO_STEP', payload: 'conversation' });
       expect(result.messages[0].content).toBe(MESSAGES.topicSelect.selected('맛집'));
     });
 

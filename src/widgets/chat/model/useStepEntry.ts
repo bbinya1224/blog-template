@@ -10,17 +10,10 @@ import type { FlowEnterContext } from '@/features/chat-review';
 import type { ConversationStep } from '@/features/chat-review';
 
 interface UseStepEntryParams {
-  fetchSmartQuestions: (
-    collectedInfo: Record<string, unknown>,
-    selectedTopic: string,
-  ) => Promise<string[]>;
-  consumeNextQuestion: () => string | null;
   generateReview: () => Promise<void>;
 }
 
 export function useStepEntry({
-  fetchSmartQuestions,
-  consumeNextQuestion,
   generateReview,
 }: UseStepEntryParams) {
   const isInitializedRef = useRef(false);
@@ -33,7 +26,6 @@ export function useStepEntry({
   const addMessage = useChatStore((s) => s.addMessage);
   const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
 
-  // Reset guard when conversation is cleared
   useEffect(() => {
     if (messages.length === 0) {
       isInitializedRef.current = false;
@@ -42,7 +34,11 @@ export function useStepEntry({
       return;
     }
 
-    if (!isInitializedRef.current) return;
+    if (!isInitializedRef.current) {
+      isInitializedRef.current = true;
+      onEnterTokenRef.current += 1;
+    }
+
     if (step === prevStepRef.current) return;
     prevStepRef.current = step;
 
@@ -58,15 +54,6 @@ export function useStepEntry({
 
     const ctx: FlowEnterContext = {
       state: orchestrationState,
-      fetchSmartQuestions: async (...args) => {
-        const result = await fetchSmartQuestions(...args);
-        if (isStale()) return [];
-        return result;
-      },
-      consumeNextQuestion: () => {
-        if (isStale()) return null;
-        return consumeNextQuestion();
-      },
       generateReview: async () => {
         if (isStale()) return;
         await generateReview();
@@ -102,8 +89,6 @@ export function useStepEntry({
     orchestrationState,
     addMessage,
     addAssistantMessage,
-    fetchSmartQuestions,
-    consumeNextQuestion,
     generateReview,
   ]);
 

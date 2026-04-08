@@ -5,7 +5,6 @@ import { useShallow } from 'zustand/shallow';
 import { useChatStore } from './store';
 import { useConversationPersistence } from './useConversationPersistence';
 import { useSideEffects } from './useSideEffects';
-import { useSmartFollowup } from './useSmartFollowup';
 import { handlePlaceConfirmed } from '../lib/step-handlers';
 import { FLOW_GRAPH } from './flow';
 import { MESSAGES } from '../constants/messages';
@@ -56,8 +55,6 @@ export function useChatHandlers({
   );
 
   const { executeSideEffect, generateReview } = useSideEffects(state.userName);
-  const { fetchSmartQuestions, consumeNextQuestion, getRemainingQuestions } =
-    useSmartFollowup();
   const persistConversation = useConversationPersistence();
 
   const processMessage = useCallback(
@@ -70,8 +67,6 @@ export function useChatHandlers({
       const ctx: FlowInputContext = {
         state,
         styleSetupContext,
-        getRemainingQuestions,
-        consumeNextQuestion,
       };
       const result = node.onInput(input, ctx);
 
@@ -91,8 +86,6 @@ export function useChatHandlers({
       addMessage,
       dispatchActions,
       executeSideEffect,
-      getRemainingQuestions,
-      consumeNextQuestion,
     ],
   );
 
@@ -183,8 +176,6 @@ export function useChatHandlers({
     handleChoiceSelect,
     handlePlaceConfirmation,
     handleReviewAction,
-    fetchSmartQuestions,
-    consumeNextQuestion,
     generateReview,
     isProcessing,
   };

@@ -36,7 +36,6 @@ export function useChatOrchestration({
     setHasExistingStyle,
     setSelectedTopic,
     setStep,
-    setSubStep,
     addAssistantMessage,
   } = useChatStore(
     useShallow((s) => ({
@@ -45,12 +44,10 @@ export function useChatOrchestration({
       setHasExistingStyle: s.setHasExistingStyle,
       setSelectedTopic: s.setSelectedTopic,
       setStep: s.setStep,
-      setSubStep: s.setSubStep,
       addAssistantMessage: s.addAssistantMessage,
     })),
   );
 
-  // Prop → store 동기화 (prop 변경/삭제도 반영)
   useEffect(() => {
     setStyleProfile(existingStyleProfile);
     setHasExistingStyle(Boolean(existingStyleProfile));
@@ -62,15 +59,11 @@ export function useChatOrchestration({
     handleChoiceSelect,
     handlePlaceConfirmation,
     handleReviewAction,
-    fetchSmartQuestions,
-    consumeNextQuestion,
     generateReview,
     isProcessing,
   } = useChatHandlers({ userEmail });
 
   const { isInitializedRef } = useStepEntry({
-    fetchSmartQuestions,
-    consumeNextQuestion,
     generateReview,
   });
 
@@ -88,12 +81,11 @@ export function useChatOrchestration({
       if (message) {
         isInitializedRef.current = true;
         setSelectedTopic(categoryId as ReviewTopic);
-        setStep('info-gathering');
-        setSubStep('place');
+        setStep('conversation');
         addAssistantMessage(message, 'text');
       }
     },
-    [setSelectedTopic, setStep, setSubStep, addAssistantMessage],
+    [setSelectedTopic, setStep, addAssistantMessage],
   );
 
   const state = {
@@ -128,7 +120,7 @@ function getInputPlaceholder(step: string, isInitial: boolean): string {
   }
   const placeholders: Record<string, string> = {
     'style-setup': '블로그 URL 또는 내용을 입력해주세요',
-    'smart-followup': '자유롭게 답변해주세요',
+    conversation: '편하게 얘기해주세요~',
     'review-edit': '수정할 내용을 입력해주세요',
   };
   return placeholders[step] || '메시지를 입력해주세요';

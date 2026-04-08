@@ -88,8 +88,7 @@ function buildTopicResult(topic: ReviewTopic): StepHandlerResult {
     ],
     actions: [
       { type: 'SET_TOPIC', payload: 'restaurant' },
-      { type: 'GO_TO_STEP', payload: 'info-gathering' },
-      { type: 'SET_SUB_STEP', payload: 'date' },
+      { type: 'GO_TO_STEP', payload: 'conversation' },
     ],
     sideEffect: { type: 'none' },
   };

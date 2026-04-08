@@ -6,14 +6,10 @@ import {
   handleStyleCheck,
   handleStyleSetup,
   handleTopicSelect,
-  handleInfoGathering,
-  handleSmartFollowup,
-  handleConfirmation,
+  handleConversation,
   handleReviewEdit,
-  createSummaryMessage,
 } from '../../lib/step-handlers';
 import { MESSAGES } from '../../constants/messages';
-import { CHOICE_OPTIONS } from '../../constants/choiceOptions';
 
 type PartialMessage = Omit<ChatMessage, 'id' | 'timestamp'>;
 
@@ -27,12 +23,9 @@ function assistantMsg(
 
 export const FLOW_GRAPH: FlowGraph = {
   'style-check': {
-    onEnter: (ctx) => {
-      if (ctx.state.hasExistingStyle && ctx.state.styleProfile) {
-        return { messages: [createInitialMessage('style-check', ctx.state)] };
-      }
-      return { messages: [] };
-    },
+    onEnter: (ctx) => ({
+      messages: [createInitialMessage('style-check', ctx.state)],
+    }),
     onInput: (input, ctx) => handleStyleCheck(input, ctx.state),
   },
 
@@ -48,60 +41,11 @@ export const FLOW_GRAPH: FlowGraph = {
     onInput: (input, ctx) => handleTopicSelect(input, ctx.state),
   },
 
-  'info-gathering': {
-    onEnter: (ctx) => {
-      if (!ctx.state.subStep) {
-        return {
-          messages: [createInitialMessage('info-gathering', ctx.state)],
-        };
-      }
-      return { messages: [] };
-    },
-    onInput: (input, ctx) => handleInfoGathering(input, ctx.state),
-  },
-
-  'smart-followup': {
-    onEnter: async (ctx) => {
-      const questions = await ctx.fetchSmartQuestions(
-        ctx.state.collectedInfo,
-        ctx.state.selectedTopic || 'restaurant',
-      );
-      if (questions.length > 0) {
-        ctx.consumeNextQuestion();
-        return {
-          messages: [
-            assistantMsg(
-              'choice',
-              `${MESSAGES.smartFollowup.intro}\n\n${questions[0]}`,
-              [...CHOICE_OPTIONS.smartFollowupSkip],
-            ),
-          ],
-        };
-      }
-      return {
-        messages: [assistantMsg('text', MESSAGES.smartFollowup.error)],
-      };
-    },
-    onInput: (input, ctx) => {
-      const remaining = ctx.getRemainingQuestions();
-      const result = handleSmartFollowup(input, ctx.state, remaining);
-      if (result.sideEffect.type !== 'skip-followup' && remaining.length > 0) {
-        ctx.consumeNextQuestion();
-      }
-      return result;
-    },
-  },
-
-  confirmation: {
-    onEnter: (ctx) => ({
-      messages: [
-        createSummaryMessage(ctx.state),
-        assistantMsg('choice', MESSAGES.confirmation.ask, [
-          ...CHOICE_OPTIONS.confirmInfo,
-        ]),
-      ],
+  conversation: {
+    onEnter: () => ({
+      messages: [assistantMsg('text', MESSAGES.conversation.greeting)],
     }),
-    onInput: (input, ctx) => handleConfirmation(input, ctx.state),
+    onInput: (input, ctx) => handleConversation(input, ctx),
   },
 
   generating: {

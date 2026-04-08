@@ -4,12 +4,14 @@ import { useCallback } from 'react';
 import { useBlogAnalysis } from './useBlogAnalysis';
 import { usePlaceSearch } from './usePlaceSearch';
 import { useReviewGeneration } from './useReviewGeneration';
+import { useConversation } from './useConversation';
 import type { SideEffect } from './types';
 
 export function useSideEffects(userName: string | null) {
   const { analyzeBlogUrl } = useBlogAnalysis(userName);
   const { searchPlace } = usePlaceSearch();
   const { editReview, generateReview } = useReviewGeneration();
+  const { parseConversation } = useConversation();
 
   const executeSideEffect = useCallback(
     async (sideEffect: SideEffect): Promise<boolean> => {
@@ -23,12 +25,14 @@ export function useSideEffects(userName: string | null) {
         case 'edit-review':
           await editReview(sideEffect.request);
           return true;
-        case 'skip-followup':
+        case 'parse-conversation':
+          await parseConversation(sideEffect.userMessage);
+          return true;
         case 'none':
           return false;
       }
     },
-    [analyzeBlogUrl, searchPlace, editReview],
+    [analyzeBlogUrl, searchPlace, editReview, parseConversation],
   );
 
   return { executeSideEffect, generateReview };
