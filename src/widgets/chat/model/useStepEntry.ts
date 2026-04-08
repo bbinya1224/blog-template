@@ -27,7 +27,9 @@ export function useStepEntry({
   const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
 
   useEffect(() => {
-    if (messages.length === 0) {
+    const isWelcomeState = messages.length === 0 && step === 'style-check';
+
+    if (isWelcomeState) {
       isInitializedRef.current = false;
       prevStepRef.current = null;
       onEnterTokenRef.current += 1;

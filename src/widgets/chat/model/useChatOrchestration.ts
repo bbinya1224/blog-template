@@ -5,7 +5,6 @@ import { useShallow } from 'zustand/shallow';
 import {
   useChatStore,
   useChatHandlers,
-  MESSAGES,
 } from '@/features/chat-review';
 import { useRecentReviews } from '@/entities/review';
 import { useStepEntry } from './useStepEntry';
@@ -36,7 +35,6 @@ export function useChatOrchestration({
     setHasExistingStyle,
     setSelectedTopic,
     setStep,
-    addAssistantMessage,
   } = useChatStore(
     useShallow((s) => ({
       messages: s.messages,
@@ -44,7 +42,6 @@ export function useChatOrchestration({
       setHasExistingStyle: s.setHasExistingStyle,
       setSelectedTopic: s.setSelectedTopic,
       setStep: s.setStep,
-      addAssistantMessage: s.addAssistantMessage,
     })),
   );
 
@@ -71,21 +68,11 @@ export function useChatOrchestration({
     (categoryId: string) => {
       if (isInitializedRef.current) return;
 
-      const categoryMessages: Record<string, string> = {
-        restaurant: MESSAGES.categoryStart.restaurant,
-        beauty: MESSAGES.categoryStart.beauty,
-        book: MESSAGES.categoryStart.book,
-      };
-
-      const message = categoryMessages[categoryId];
-      if (message) {
-        isInitializedRef.current = true;
-        setSelectedTopic(categoryId as ReviewTopic);
-        setStep('conversation');
-        addAssistantMessage(message, 'text');
-      }
+      isInitializedRef.current = true;
+      setSelectedTopic(categoryId as ReviewTopic);
+      setStep('conversation');
     },
-    [setSelectedTopic, setStep, addAssistantMessage],
+    [setSelectedTopic, setStep],
   );
 
   const state = {
