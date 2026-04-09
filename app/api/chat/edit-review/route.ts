@@ -58,13 +58,17 @@ function chunkText(text: string): string[] {
 async function generateEditedReview(params: {
   systemPrompt: string;
   userPrompt: string;
+  signal?: AbortSignal;
 }): Promise<string> {
-  const response = await getAnthropicClient().messages.create({
-    model: CLAUDE_HAIKU,
-    max_tokens: 4096,
-    system: [{ type: 'text', text: params.systemPrompt, cache_control: { type: 'ephemeral' } }],
-    messages: [{ role: 'user', content: params.userPrompt }],
-  });
+  const response = await getAnthropicClient().messages.create(
+    {
+      model: CLAUDE_HAIKU,
+      max_tokens: 4096,
+      system: [{ type: 'text', text: params.systemPrompt, cache_control: { type: 'ephemeral' } }],
+      messages: [{ role: 'user', content: params.userPrompt }],
+    },
+    { signal: params.signal },
+  );
 
   return response.content
     .filter((block): block is Anthropic.TextBlock => block.type === 'text')
@@ -76,15 +80,17 @@ async function validateWithClaude(params: {
   originalReview: string;
   editedReview: string;
   editRequest: string;
+  signal?: AbortSignal;
 }): Promise<z.infer<typeof editValidationSchema>> {
-  const response = await getAnthropicClient().messages.create({
-    model: CLAUDE_HAIKU,
-    max_tokens: 400,
-    system: [{ type: 'text', text: EDIT_VALIDATION_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-    messages: [
-      {
-        role: 'user',
-        content: `[원본 리뷰]
+  const response = await getAnthropicClient().messages.create(
+    {
+      model: CLAUDE_HAIKU,
+      max_tokens: 400,
+      system: [{ type: 'text', text: EDIT_VALIDATION_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+      messages: [
+        {
+          role: 'user',
+          content: `[원본 리뷰]
 ${params.originalReview}
 
 [수정 요청]
@@ -92,20 +98,31 @@ ${params.editRequest}
 
 [수정 결과]
 ${params.editedReview}`,
-      },
-    ],
-  });
+        },
+      ],
+    },
+    { signal: params.signal },
+  );
 
-  const text = response.content
-    .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-    .map((block) => block.text)
-    .join('')
-    .replace(/^```(?:json)?\s*\n?/, '')
-    .replace(/\n?```\s*$/, '')
-    .trim();
+  try {
+    const text = response.content
+      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+      .map((block) => block.text)
+      .join('')
+      .replace(/^```(?:json)?\s*\n?/, '')
+      .replace(/\n?```\s*$/, '')
+      .trim();
 
-  const parsed = JSON.parse(text);
-  return editValidationSchema.parse(parsed);
+    const parsed = JSON.parse(text);
+    return editValidationSchema.parse(parsed);
+  } catch (error) {
+    return {
+      valid: false,
+      issues: [
+        `LLM 검수 응답 파싱 실패: ${error instanceof Error ? error.message : 'unknown error'}`,
+      ],
+    };
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -162,6 +179,7 @@ export async function POST(req: NextRequest) {
         editedText = await generateEditedReview({
           systemPrompt,
           userPrompt: attemptUserPrompt,
+          signal,
         });
 
         const deterministicValidation = validateEditedReview({
@@ -177,9 +195,14 @@ export async function POST(req: NextRequest) {
               originalReview,
               editedReview: editedText,
               editRequest,
+              signal,
             });
           } catch (error) {
             console.warn('[Review Edit API] Claude 검수 실패, 규칙 검증만 사용:', error);
+            llmValidation = {
+              valid: false,
+              issues: ['LLM 검수 실패로 인한 재시도 필요'],
+            };
           }
         }
 

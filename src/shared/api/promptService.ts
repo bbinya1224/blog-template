@@ -149,15 +149,18 @@ export const getReviewEditPrompts = async (
       category
     );
 
-    if (prompts.review_edit_system && prompts.review_edit_user) {
+    if (prompts.review_edit_user) {
       return {
-        systemPrompt: prompts.review_edit_system,
+        systemPrompt: prompts.review_edit_system ?? null,
         userPrompt: prompts.review_edit_user,
-        isLegacy: false,
+        isLegacy: !prompts.review_edit_system,
       };
     }
-  } catch {
-    // Fallback to legacy single-template mode below.
+  } catch (error) {
+    console.warn(
+      '[promptService] review edit split prompt 조회 실패, legacy 폴백 사용:',
+      error,
+    );
   }
 
   return {

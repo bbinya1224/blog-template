@@ -26,6 +26,7 @@ export function useConversation() {
     async (userMessage: string) => {
       const { collectedInfo, selectedTopic, messages } =
         useChatStore.getState();
+      const effectiveTopic = selectedTopic || 'restaurant';
 
       const conversationHistory = messages
         .filter((m) => m.type !== 'loading' && m.type !== 'summary')
@@ -39,7 +40,7 @@ export function useConversation() {
             userMessage,
             collectedInfo,
             conversationHistory,
-            selectedTopic: selectedTopic || 'restaurant',
+            selectedTopic: effectiveTopic,
           },
         );
 
@@ -62,7 +63,7 @@ export function useConversation() {
 
         const userWantsGenerate = isGenerateIntent(userMessage);
         const shouldConfirmPlace =
-          selectedTopic === 'restaurant' &&
+          effectiveTopic === 'restaurant' &&
           Boolean(response.parsedInfo?.name) &&
           !mergedInfo.location;
 
