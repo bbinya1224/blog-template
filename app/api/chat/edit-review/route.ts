@@ -10,6 +10,7 @@ import { createSSEStream, createSSEResponse } from '@/shared/api/sse';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import { withPromptDefense } from '@/shared/lib/promptDefense';
 import { styleProfileSchema } from '@/shared/types/styleProfile';
+import { validateEditedReview } from '@/features/review-edit/lib/validateEditedReview';
 
 const editReviewInputSchema = z.object({
   originalReview: z.string().min(1, '원본 리뷰가 필요합니다'),
@@ -19,6 +20,93 @@ const editReviewInputSchema = z.object({
 
 const DEFAULT_EDIT_SYSTEM_PROMPT =
   '당신은 블로그 리뷰 수정 전문가입니다. 사용자의 글쓰기 스타일을 유지하면서 요청된 부분만 정확하게 수정합니다. 전체 리뷰의 흐름과 톤을 해치지 않으면서 자연스럽게 수정해주세요.';
+const EDIT_VALIDATION_SYSTEM_PROMPT = `너는 블로그 리뷰 수정 결과를 검수하는 엄격한 검사기다.
+
+반드시 JSON만 출력하라.
+형식:
+{"valid": true, "issues": []}
+
+검사 기준:
+- 수정 요청 범위만 반영되었는가
+- 원본의 사실(매장명/위치/메뉴명/가격/방문일/실제 경험)이 불필요하게 바뀌지 않았는가
+- 원본 문체와 흐름이 과도하게 훼손되지 않았는가
+- 설명문, 마크다운, 메타 코멘트 없이 본문만 출력되었는가`;
+const editValidationSchema = z.object({
+  valid: z.boolean(),
+  issues: z.array(z.string()).max(8).default([]),
+});
+
+function buildRetryUserPrompt(basePrompt: string, issues: string[]): string {
+  if (issues.length === 0) return basePrompt;
+
+  return `${basePrompt}
+
+[이전 시도에서 발견된 문제]
+${issues.map((issue, index) => `${index + 1}. ${issue}`).join('\n')}
+
+[재수정 지침]
+- 위 문제를 모두 해결해서 다시 수정하라.
+- 수정 규칙을 더 보수적으로 적용하라.
+- 원본 리뷰를 해치지 않는 방향을 우선하라.`;
+}
+
+function chunkText(text: string): string[] {
+  const chunks = text.match(/.{1,24}(\s|$)|\S+/g);
+  return chunks?.map((chunk) => chunk) ?? [text];
+}
+
+async function generateEditedReview(params: {
+  systemPrompt: string;
+  userPrompt: string;
+}): Promise<string> {
+  const response = await getAnthropicClient().messages.create({
+    model: CLAUDE_HAIKU,
+    max_tokens: 4096,
+    system: [{ type: 'text', text: params.systemPrompt, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: params.userPrompt }],
+  });
+
+  return response.content
+    .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+    .map((block) => block.text)
+    .join('');
+}
+
+async function validateWithClaude(params: {
+  originalReview: string;
+  editedReview: string;
+  editRequest: string;
+}): Promise<z.infer<typeof editValidationSchema>> {
+  const response = await getAnthropicClient().messages.create({
+    model: CLAUDE_HAIKU,
+    max_tokens: 400,
+    system: [{ type: 'text', text: EDIT_VALIDATION_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+    messages: [
+      {
+        role: 'user',
+        content: `[원본 리뷰]
+${params.originalReview}
+
+[수정 요청]
+${params.editRequest}
+
+[수정 결과]
+${params.editedReview}`,
+      },
+    ],
+  });
+
+  const text = response.content
+    .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+    .map((block) => block.text)
+    .join('')
+    .replace(/^```(?:json)?\s*\n?/, '')
+    .replace(/\n?```\s*$/, '')
+    .trim();
+
+  const parsed = JSON.parse(text);
+  return editValidationSchema.parse(parsed);
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -65,30 +153,54 @@ export async function POST(req: NextRequest) {
     );
 
     const stream = createSSEStream(async (emit, signal) => {
-      console.log('\n[Review Edit API] Claude API 스트리밍 시작...');
-      const response = await getAnthropicClient().messages.stream({
-        model: CLAUDE_HAIKU,
-        max_tokens: 4096,
-        system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
-        messages: [{ role: 'user', content: userPrompt }],
-      });
+      console.log('\n[Review Edit API] Claude API 수정/검증 시작...');
+      let editedText = '';
+      let lastIssues: string[] = [];
 
-      signal.addEventListener('abort', () => response.abort(), { once: true });
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        const attemptUserPrompt = buildRetryUserPrompt(userPrompt, lastIssues);
+        editedText = await generateEditedReview({
+          systemPrompt,
+          userPrompt: attemptUserPrompt,
+        });
 
-      let fullText = '';
-      for await (const event of response) {
-        if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-          fullText += event.delta.text;
-          emit(event.delta.text);
+        const deterministicValidation = validateEditedReview({
+          originalReview,
+          editedReview: editedText,
+          editRequest,
+        });
+
+        let llmValidation = { valid: true, issues: [] as string[] };
+        try {
+          llmValidation = await validateWithClaude({
+            originalReview,
+            editedReview: editedText,
+            editRequest,
+          });
+        } catch (error) {
+          console.warn('[Review Edit API] Claude 검수 실패, 규칙 검증만 사용:', error);
+        }
+
+        lastIssues = Array.from(
+          new Set([
+            ...deterministicValidation.issues,
+            ...llmValidation.issues,
+          ]),
+        );
+
+        if (deterministicValidation.isValid && llmValidation.valid) {
+          break;
+        }
+
+        if (attempt === 2) {
+          console.error('[Review Edit API] 수정 결과 검증 실패:', lastIssues);
+          throw new Error('수정 결과가 검증 기준을 통과하지 못했습니다.');
         }
       }
 
-      const finalMessage = await response.finalMessage();
-      const finalText = finalMessage.content
-        .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-        .map((block) => block.text)
-        .join('');
-      const editedText = finalText || fullText;
+      for (const chunk of chunkText(editedText)) {
+        emit(chunk);
+      }
 
       console.log(`\n✅ [Review Edit API] 리뷰 수정 완료: ${editedText.length}자`);
 
