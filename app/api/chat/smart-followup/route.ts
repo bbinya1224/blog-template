@@ -11,7 +11,6 @@ import {
   formatCollectedInfo,
   parseQuestions,
 } from '@/features/chat-review';
-import { shouldUseMock } from '@/shared/lib/mock/chatMock';
 
 const reviewTopicSchema = z.enum(['restaurant', 'beauty', 'product']);
 
@@ -45,17 +44,6 @@ export async function POST(req: NextRequest) {
     }
 
     const { collectedInfo, selectedTopic } = parsed.data;
-
-    if (shouldUseMock()) {
-      console.log('[Smart Followup API] 🎭 MOCK MODE');
-      return Response.json({
-        questions: [
-          '음식이 나왔을 때 비주얼은 어떠셨어요? 플레이팅이 예뻤나요?',
-          '같이 간 분이랑 어떤 대화를 나누셨어요? 특별한 에피소드가 있었나요?',
-          '다음에 또 가고 싶으세요? 다른 메뉴도 도전해보고 싶은 게 있나요?',
-        ],
-      });
-    }
 
     const { data: reserved, error: rpcError } = await supabaseAdmin.rpc('try_reserve_usage', {
       p_email: session.user.email,
@@ -102,4 +90,3 @@ export async function POST(req: NextRequest) {
     return ApiResponse.serverError();
   }
 }
-

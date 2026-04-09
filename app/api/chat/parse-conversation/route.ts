@@ -6,7 +6,6 @@ import { reviewPayloadSchema } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import { supabaseAdmin } from '@/shared/lib/supabase';
-import { shouldUseMock } from '@/shared/lib/mock/chatMock';
 import { isGenerateIntent } from '@/features/chat-review/lib/conversation/isGenerateIntent';
 import type Anthropic from '@anthropic-ai/sdk';
 import type { ReviewPayload } from '@/shared/types/review';
@@ -95,13 +94,6 @@ export async function POST(req: NextRequest) {
     if (selectedTopic !== 'restaurant') {
       return ApiResponse.validationError(
         '현재 대화형 리뷰 작성은 맛집 주제만 지원합니다.',
-      );
-    }
-
-    if (shouldUseMock()) {
-      console.log('[Parse Conversation API] 🎭 MOCK MODE');
-      return Response.json(
-        buildMockResponse(userMessage, collectedInfo as Partial<ReviewPayload>),
       );
     }
 
@@ -222,107 +214,6 @@ function formatCollectedInfo(info: Partial<ReviewPayload>): string {
   return entries
     .map(([key, value]) => `- ${labels[key] || key}: ${value}`)
     .join('\n');
-}
-
-function buildMockResponse(
-  userMessage: string,
-  collectedInfo: Partial<ReviewPayload>,
-): {
-  parsedInfo: Partial<ReviewPayload>;
-  nextResponse: string;
-  isReady: boolean;
-  confidence: number;
-} {
-  const mockParsedInfo: Partial<ReviewPayload> = {};
-  const msg = userMessage.toLowerCase();
-
-  if (msg.includes('어제')) mockParsedInfo.date = '어제';
-  if (msg.includes('오늘')) mockParsedInfo.date = '오늘';
-  if (msg.includes('친구')) mockParsedInfo.companion = '친구';
-  if (msg.includes('가족')) mockParsedInfo.companion = '가족';
-  if (msg.includes('혼자')) mockParsedInfo.companion = '혼자';
-
-  const menuPatterns = [
-    /(?:먹었|주문했|시켰)(?:던)?\s*([가-힣a-zA-Z0-9\s]+?)(?:이|가|을|를|도|랑|하고|,|\.|!|\?|$)/,
-    /([가-힣a-zA-Z0-9\s]+?)(?:을|를)\s*(?:먹었|주문했|시켰)/,
-  ];
-  for (const pattern of menuPatterns) {
-    const match = userMessage.match(pattern);
-    const candidate = match?.[1]?.trim();
-    if (candidate && !collectedInfo.menu) {
-      mockParsedInfo.menu = candidate;
-      break;
-    }
-  }
-
-  if (!mockParsedInfo.menu && !collectedInfo.menu) {
-    const knownMenus = [
-      '파스타',
-      '피자',
-      '라멘',
-      '초밥',
-      '스테이크',
-      '햄버거',
-      '커피',
-      '아메리카노',
-      '라떼',
-      '케이크',
-    ];
-    const detectedMenu = knownMenus.find((menu) => msg.includes(menu));
-    if (detectedMenu) {
-      mockParsedInfo.menu = detectedMenu;
-    }
-  }
-
-  const placePatterns = [
-    /(.+?)(에서|다녀|갔는데|갔어|방문)/,
-    /(.+?)(맛집|식당|카페|레스토랑)/,
-  ];
-  for (const pattern of placePatterns) {
-    const match = userMessage.match(pattern);
-    if (match && !collectedInfo.name) {
-      mockParsedInfo.name = match[1].trim();
-      break;
-    }
-  }
-
-  if (
-    msg.includes('대박') ||
-    msg.includes('맛있') ||
-    msg.includes('좋았') ||
-    msg.includes('최고')
-  ) {
-    mockParsedInfo.pros = userMessage;
-  }
-
-  const merged = { ...collectedInfo, ...mockParsedInfo };
-  const hasName = Boolean(merged.name);
-  const hasMenu = Boolean(merged.menu);
-  const hasFeedback = Boolean(merged.pros || merged.extra);
-
-  const wantsGenerate = isGenerateIntent(msg);
-  const isReady = computeIsReady(merged, wantsGenerate);
-
-  let nextResponse: string;
-  if (isReady) {
-    nextResponse = '리뷰 쓸 재료가 충분해요! 생성할까요?';
-  } else if (!hasName) {
-    nextResponse = '오 좋았나봐요! 어떤 가게에 다녀오셨어요?';
-  } else if (!hasMenu) {
-    nextResponse = `${merged.name}! 거기서 어떤 메뉴를 드셨어요?`;
-  } else {
-    nextResponse = '맛은 어땠어요? 어떤 점이 좋았는지 알려주세요!';
-  }
-
-  const confidence =
-    (hasName ? 0.3 : 0) + (hasMenu ? 0.3 : 0) + (hasFeedback ? 0.4 : 0);
-
-  return {
-    parsedInfo: mockParsedInfo,
-    nextResponse,
-    isReady,
-    confidence,
-  };
 }
 
 function normalizeConversationResult(

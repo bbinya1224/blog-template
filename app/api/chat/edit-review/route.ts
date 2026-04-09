@@ -8,10 +8,6 @@ import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import { createSSEStream, createSSEResponse } from '@/shared/api/sse';
 import { supabaseAdmin } from '@/shared/lib/supabase';
-import {
-  shouldUseMock,
-  generateMockEditReview,
-} from '@/shared/lib/mock/chatMock';
 import { styleProfileSchema } from '@/shared/types/styleProfile';
 
 const editReviewInputSchema = z.object({
@@ -45,12 +41,6 @@ export async function POST(req: NextRequest) {
     }
 
     const { originalReview, editRequest, styleProfile } = validation.data;
-
-    // 개발 환경에서 Mock 사용
-    if (shouldUseMock()) {
-      console.log('[Review Edit API] 🎭 MOCK MODE');
-      return createMockEditResponse(originalReview, editRequest);
-    }
 
     console.log(`\n[Review Edit API] 리뷰 수정 요청 수신`);
 
@@ -106,20 +96,4 @@ export async function POST(req: NextRequest) {
     console.error('Review edit error:', error);
     return ApiResponse.serverError();
   }
-}
-
-function createMockEditResponse(originalReview: string, editRequest: string): Response {
-  const stream = createSSEStream(async (emit, _signal) => {
-    let fullText = '';
-    for await (const word of generateMockEditReview(originalReview, editRequest)) {
-      fullText += word;
-      emit(word);
-    }
-    console.log(`\n✅ [Review Edit API] MOCK 리뷰 수정 완료: ${fullText.length}자`);
-    return {
-      fullText,
-      done: { characterCount: fullText.length },
-    };
-  });
-  return createSSEResponse(stream);
 }
