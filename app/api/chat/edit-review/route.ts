@@ -171,24 +171,38 @@ export async function POST(req: NextRequest) {
         });
 
         let llmValidation = { valid: true, issues: [] as string[] };
-        try {
-          llmValidation = await validateWithClaude({
-            originalReview,
-            editedReview: editedText,
-            editRequest,
-          });
-        } catch (error) {
-          console.warn('[Review Edit API] Claude 검수 실패, 규칙 검증만 사용:', error);
+        if (deterministicValidation.softIssues.length > 0) {
+          try {
+            llmValidation = await validateWithClaude({
+              originalReview,
+              editedReview: editedText,
+              editRequest,
+            });
+          } catch (error) {
+            console.warn('[Review Edit API] Claude 검수 실패, 규칙 검증만 사용:', error);
+          }
         }
 
         lastIssues = Array.from(
           new Set([
-            ...deterministicValidation.issues,
+            ...deterministicValidation.hardIssues,
+            ...deterministicValidation.softIssues,
             ...llmValidation.issues,
           ]),
         );
 
-        if (deterministicValidation.isValid && llmValidation.valid) {
+        if (
+          deterministicValidation.hardIssues.length === 0 &&
+          deterministicValidation.softIssues.length === 0
+        ) {
+          break;
+        }
+
+        if (
+          deterministicValidation.hardIssues.length === 0 &&
+          deterministicValidation.softIssues.length > 0 &&
+          llmValidation.valid
+        ) {
           break;
         }
 

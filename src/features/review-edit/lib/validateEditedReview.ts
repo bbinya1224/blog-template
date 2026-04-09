@@ -21,6 +21,8 @@ const PROTECTED_FACT_PATTERNS = [
 
 export interface EditValidationResult {
   isValid: boolean;
+  hardIssues: string[];
+  softIssues: string[];
   issues: string[];
 }
 
@@ -54,20 +56,21 @@ export function validateEditedReview(params: {
   editRequest: string;
 }): EditValidationResult {
   const { originalReview, editedReview, editRequest } = params;
-  const issues: string[] = [];
+  const hardIssues: string[] = [];
+  const softIssues: string[] = [];
   const normalizedEdited = editedReview.trim();
 
   if (!normalizedEdited) {
-    issues.push('수정 결과가 비어 있습니다.');
-    return { isValid: false, issues };
+    hardIssues.push('수정 결과가 비어 있습니다.');
+    return { isValid: false, hardIssues, softIssues, issues: hardIssues };
   }
 
   if (EXPLANATION_PATTERN.test(normalizedEdited)) {
-    issues.push('수정 결과에 설명문이나 메타 코멘트가 포함되어 있습니다.');
+    hardIssues.push('수정 결과에 설명문이나 메타 코멘트가 포함되어 있습니다.');
   }
 
   if (MARKDOWN_PATTERN.test(normalizedEdited)) {
-    issues.push('수정 결과에 마크다운 또는 리스트 문법이 포함되어 있습니다.');
+    hardIssues.push('수정 결과에 마크다운 또는 리스트 문법이 포함되어 있습니다.');
   }
 
   if (!allowsLengthChange(editRequest)) {
@@ -77,7 +80,7 @@ export function validateEditedReview(params: {
     const maxLength = Math.ceil(originalLength * 1.1);
 
     if (editedLength < minLength || editedLength > maxLength) {
-      issues.push('수정 결과 길이가 원본 대비 허용 범위(±10%)를 벗어났습니다.');
+      hardIssues.push('수정 결과 길이가 원본 대비 허용 범위(±10%)를 벗어났습니다.');
     }
   }
 
@@ -88,14 +91,40 @@ export function validateEditedReview(params: {
     );
 
     if (missingFacts.length > 0) {
-      issues.push(
+      hardIssues.push(
         `원본의 핵심 사실 표현이 누락되었습니다: ${missingFacts.slice(0, 5).join(', ')}`,
       );
     }
   }
 
+  const originalParagraphs = originalReview
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean).length;
+  const editedParagraphs = editedReview
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean).length;
+
+  if (editedParagraphs > 0 && originalParagraphs > 0) {
+    const paragraphDelta = Math.abs(editedParagraphs - originalParagraphs);
+    if (paragraphDelta >= 3) {
+      softIssues.push('문단 구조가 원본 대비 크게 달라졌습니다.');
+    }
+  }
+
+  const originalEmojiCount = (originalReview.match(/[\u{1F300}-\u{1FAFF}]/gu) ?? []).length;
+  const editedEmojiCount = (editedReview.match(/[\u{1F300}-\u{1FAFF}]/gu) ?? []).length;
+  if (Math.abs(originalEmojiCount - editedEmojiCount) >= 3) {
+    softIssues.push('이모지 사용 패턴이 원본과 다르게 변했습니다.');
+  }
+
+  const issues = [...hardIssues, ...softIssues];
+
   return {
     isValid: issues.length === 0,
+    hardIssues,
+    softIssues,
     issues,
   };
 }

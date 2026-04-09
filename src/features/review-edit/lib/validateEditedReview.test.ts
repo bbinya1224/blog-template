@@ -24,7 +24,7 @@ describe('validateEditedReview', () => {
     });
 
     expect(result.isValid).toBe(false);
-    expect(result.issues.join(' ')).toContain('핵심 사실');
+    expect(result.hardIssues.join(' ')).toContain('핵심 사실');
   });
 
   it('fails when the result includes explanation text', () => {
@@ -36,7 +36,7 @@ describe('validateEditedReview', () => {
     });
 
     expect(result.isValid).toBe(false);
-    expect(result.issues.join(' ')).toContain('설명문');
+    expect(result.hardIssues.join(' ')).toContain('설명문');
   });
 
   it('allows larger length changes when explicitly requested', () => {
@@ -48,5 +48,17 @@ describe('validateEditedReview', () => {
     });
 
     expect(result.isValid).toBe(true);
+  });
+
+  it('marks style drift as a soft issue', () => {
+    const result = validateEditedReview({
+      originalReview: '하이디라오에 다녀왔어요! 😊😊😊😊\n\n국물이 진했고 분위기도 좋았어요.',
+      editedReview:
+        '하이디라오에 다녀왔어요.\n\n국물이 진했어요.\n\n서비스도 괜찮았고요.\n\n전반적으로 무난했습니다.',
+      editRequest: '조금만 자연스럽게 다듬어줘',
+    });
+
+    expect(result.isValid).toBe(false);
+    expect(result.softIssues.length).toBeGreaterThan(0);
   });
 });
