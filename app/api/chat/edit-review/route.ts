@@ -173,6 +173,7 @@ export async function POST(req: NextRequest) {
       console.log('\n[Review Edit API] Claude API 수정/검증 시작...');
       let editedText = '';
       let lastIssues: string[] = [];
+      let finalIssues: string[] = [];
 
       for (let attempt = 1; attempt <= 2; attempt++) {
         const attemptUserPrompt = buildRetryUserPrompt(userPrompt, lastIssues);
@@ -206,13 +207,16 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        lastIssues = Array.from(
+        const retryIssues = Array.from(
           new Set([
             ...deterministicValidation.hardIssues,
             ...deterministicValidation.softIssues,
-            ...llmValidation.issues,
           ]),
         );
+        finalIssues = Array.from(
+          new Set([...retryIssues, ...llmValidation.issues]),
+        );
+        lastIssues = retryIssues;
 
         if (
           deterministicValidation.hardIssues.length === 0 &&
@@ -230,7 +234,7 @@ export async function POST(req: NextRequest) {
         }
 
         if (attempt === 2) {
-          console.error('[Review Edit API] 수정 결과 검증 실패:', lastIssues);
+          console.error('[Review Edit API] 수정 결과 검증 실패:', finalIssues);
           throw new Error('수정 결과가 검증 기준을 통과하지 못했습니다.');
         }
       }
