@@ -6,6 +6,7 @@ import { authOptions } from '@/auth';
 import { reviewPayloadSchema } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
+import { getSmartFollowupPrompt } from '@/shared/api/promptService';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import {
   formatCollectedInfo,
@@ -18,16 +19,6 @@ const smartFollowupInputSchema = z.object({
   collectedInfo: reviewPayloadSchema.partial(),
   selectedTopic: reviewTopicSchema,
 });
-
-const SYSTEM_PROMPT = `당신은 맛집 리뷰 작성을 돕는 어시스턴트입니다.
-사용자가 수집한 리뷰 정보를 보고, 리뷰를 더 생생하고 풍부하게 만들어줄 후속 질문 2~3개를 생성하세요.
-
-규칙:
-- 이미 수집된 정보를 반복하는 질문은 하지 마세요
-- 감각적(맛, 식감, 향, 비주얼)이거나 감정적(기분, 느낌, 에피소드) 디테일을 유도하세요
-- 질문은 한국어로, 친근한 존댓말 톤으로 작성하세요
-- 각 질문은 1~2문장으로 짧게 작성하세요
-- 반드시 JSON 형식으로만 응답하세요: {"questions": ["질문1", "질문2", "질문3"]}`;
 
 export async function POST(req: NextRequest) {
   try {
@@ -53,6 +44,7 @@ export async function POST(req: NextRequest) {
     }
 
     const infoSummary = formatCollectedInfo(collectedInfo);
+    const systemPrompt = await getSmartFollowupPrompt();
 
     console.log(
       `\n[Smart Followup API] 후속 질문 생성 시작 (${selectedTopic})`,
@@ -61,7 +53,7 @@ export async function POST(req: NextRequest) {
     const response = await getAnthropicClient().messages.create({
       model: CLAUDE_HAIKU,
       max_tokens: 512,
-      system: SYSTEM_PROMPT,
+      system: systemPrompt,
       messages: [
         {
           role: 'user',

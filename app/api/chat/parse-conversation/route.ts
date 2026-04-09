@@ -5,6 +5,7 @@ import { authOptions } from '@/auth';
 import { reviewPayloadSchema } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
+import { getParseConversationPrompt } from '@/shared/api/promptService';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import { isGenerateIntent } from '@/features/chat-review/lib/conversation/isGenerateIntent';
 import type Anthropic from '@anthropic-ai/sdk';
@@ -39,36 +40,6 @@ const parseConversationOutputSchema = z.object({
   confidence: z.number().min(0).max(1),
 });
 
-const SYSTEM_PROMPT = `당신은 맛집 리뷰 정보를 자연스럽게 수집하는 대화 어시스턴트입니다.
-
-## 역할
-사용자가 자유롭게 이야기하면, 그 안에서 리뷰에 필요한 정보를 추출하고,
-부족한 부분만 자연스럽게 물어보세요.
-
-## 추출할 정보 (JSON 필드명)
-- name: 매장/식당 이름
-- location: 위치/주소/지역
-- date: 방문 날짜 (오늘, 어제, 이번 주 등도 OK)
-- menu: 주문한 메뉴
-- companion: 동행인 (혼자, 친구, 가족 등)
-- pros: 좋았던 점 (맛, 서비스, 분위기 등)
-- cons: 아쉬웠던 점
-- extra: 기타 특별한 경험, 에피소드
-
-## 규칙
-1. 사용자 메시지에서 위 정보를 최대한 추출하세요
-2. 이미 수집된 정보(collectedInfo)는 다시 묻지 마세요
-3. 부족한 정보가 있으면 자연스러운 대화체로 하나만 물어보세요
-4. 최소 "장소명(name) + 메뉴(menu) + 감상(pros 또는 extra)" 3가지가 모이면 isReady = true
-5. 친근한 존댓말로 응답하세요. 설문 느낌이 아니라 친구와 대화하는 느낌으로
-6. 사용자가 "생성해줘", "이제 만들어", "써줘", "리뷰 작성해" 등을 말하면 무조건 isReady = true
-7. 추출한 정보만 parsedInfo에 포함하세요 (이미 수집된 것은 제외)
-8. 사용자의 감정과 경험에 공감하며 반응하세요
-
-## 응답 형식
-반드시 아래 JSON만 응답하세요 (다른 텍스트 없이):
-{"parsedInfo": {}, "nextResponse": "", "isReady": false, "confidence": 0.0}`;
-
 export async function POST(req: NextRequest) {
   const requestId = crypto.randomUUID();
 
@@ -98,6 +69,7 @@ export async function POST(req: NextRequest) {
     }
 
     const infoSummary = formatCollectedInfo(collectedInfo as Partial<ReviewPayload>);
+    const systemPrompt = await getParseConversationPrompt();
 
     const userPrompt = `카테고리: ${selectedTopic}
 
@@ -118,7 +90,7 @@ ${conversationHistory.map((m) => `${m.role === 'user' ? '사용자' : '봇'}: ${
     const response = await getAnthropicClient().messages.create({
       model: CLAUDE_HAIKU,
       max_tokens: 512,
-      system: SYSTEM_PROMPT,
+      system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     });
 
