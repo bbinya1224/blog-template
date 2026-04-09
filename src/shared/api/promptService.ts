@@ -5,7 +5,10 @@ type PromptKey =
   | 'style_analysis_user'
   | 'review_generation_system'
   | 'review_generation_user'
-  | 'review_edit_system';
+  | 'review_edit_system'
+  | 'review_edit_user'
+  | 'parse_conversation_system'
+  | 'smart_followup_system';
 
 type CategorySlug = 'restaurant' | 'product' | 'tech_blog';
 
@@ -137,6 +140,48 @@ export const getReviewEditPrompt = async (
   category: CategorySlug = 'restaurant'
 ) => {
   return getPrompt('review_edit_system', category);
+};
+
+export const getParseConversationPrompt = async (
+  category: CategorySlug = 'restaurant'
+) => {
+  return getPrompt('parse_conversation_system', category);
+};
+
+export const getSmartFollowupPrompt = async (
+  category: CategorySlug = 'restaurant'
+) => {
+  return getPrompt('smart_followup_system', category);
+};
+
+export const getReviewEditPrompts = async (
+  category: CategorySlug = 'restaurant'
+) => {
+  try {
+    const prompts = await getPrompts(
+      ['review_edit_system', 'review_edit_user'],
+      category
+    );
+
+    if (prompts.review_edit_user) {
+      return {
+        systemPrompt: prompts.review_edit_system ?? null,
+        userPrompt: prompts.review_edit_user,
+        isLegacy: !prompts.review_edit_system,
+      };
+    }
+  } catch (error) {
+    console.warn(
+      '[promptService] review edit split prompt 조회 실패, legacy 폴백 사용:',
+      error,
+    );
+  }
+
+  return {
+    systemPrompt: null,
+    userPrompt: await getReviewEditPrompt(category),
+    isLegacy: true,
+  };
 };
 
 // Call this when admin updates prompts to invalidate cache

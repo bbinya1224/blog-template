@@ -6,6 +6,7 @@ import { apiPost } from '@/shared/api/httpClient';
 import { HttpError } from '@/shared/lib/errors';
 import { MESSAGES } from '../constants/messages';
 import { isGenerateIntent } from '../lib/conversation/isGenerateIntent';
+import { usePlaceSearch } from './usePlaceSearch';
 import type { ReviewPayload } from '@/shared/types/review';
 
 interface ParseConversationResponse {
@@ -19,11 +20,13 @@ export function useConversation() {
   const addMessage = useChatStore((s) => s.addMessage);
   const updateMessage = useChatStore((s) => s.updateMessage);
   const updateCollectedInfo = useChatStore((s) => s.updateCollectedInfo);
+  const { searchPlace } = usePlaceSearch();
 
   const parseConversation = useCallback(
     async (userMessage: string) => {
       const { collectedInfo, selectedTopic, messages } =
         useChatStore.getState();
+      const effectiveTopic = selectedTopic || 'restaurant';
 
       const conversationHistory = messages
         .filter((m) => m.type !== 'loading' && m.type !== 'summary')
@@ -37,7 +40,7 @@ export function useConversation() {
             userMessage,
             collectedInfo,
             conversationHistory,
-            selectedTopic: selectedTopic || 'restaurant',
+            selectedTopic: effectiveTopic,
           },
         );
 
@@ -48,12 +51,32 @@ export function useConversation() {
           updateCollectedInfo(response.parsedInfo);
         }
 
+        const mergedInfo = {
+          ...collectedInfo,
+          ...response.parsedInfo,
+        };
+
         const currentMessages = useChatStore.getState().messages;
         const loadingMsg = [...currentMessages]
           .reverse()
           .find((m) => m.type === 'loading');
 
         const userWantsGenerate = isGenerateIntent(userMessage);
+        const shouldConfirmPlace =
+          effectiveTopic === 'restaurant' &&
+          Boolean(response.parsedInfo?.name) &&
+          !mergedInfo.location;
+
+        if (shouldConfirmPlace) {
+          if (loadingMsg) {
+            updateMessage(loadingMsg.id, {
+              type: 'text',
+              content: `${response.parsedInfo.name} 확인해볼게요! 잠시만요.`,
+            });
+          }
+          await searchPlace(response.parsedInfo.name as string);
+          return;
+        }
 
         if (response.isReady && userWantsGenerate) {
           if (loadingMsg) {
@@ -102,7 +125,7 @@ export function useConversation() {
         }
       }
     },
-    [addMessage, updateMessage, updateCollectedInfo],
+    [addMessage, updateMessage, updateCollectedInfo, searchPlace],
   );
 
   return { parseConversation };

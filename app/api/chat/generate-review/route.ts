@@ -16,10 +16,6 @@ import {
   buildReviewSystemPrompt,
   buildReviewUserPrompt,
 } from '@/features/chat-review';
-import {
-  shouldUseMock,
-  generateMockReview,
-} from '@/shared/lib/mock/chatMock';
 
 import { reviewPayloadSchema } from '@/shared/types/review';
 import { styleProfileSchema } from '@/shared/types/styleProfile';
@@ -76,12 +72,6 @@ export async function POST(req: NextRequest) {
     }
 
     const { payload, styleProfile } = parsed.data;
-
-    // 개발 환경에서 Mock 사용
-    if (shouldUseMock()) {
-      console.log('[Review Gen API] 🎭 MOCK MODE');
-      return createMockReviewResponse(authenticatedEmail, payload);
-    }
 
     // 검색 및 프롬프트 로드
     const searchQuery = `${payload.location} ${payload.name}`;
@@ -182,41 +172,3 @@ export async function POST(req: NextRequest) {
     return ApiResponse.serverError();
   }
 }
-
-function createMockReviewResponse(userEmail: string, payload: ReviewPayload): Response {
-  const stream = createSSEStream(async (emit, _signal) => {
-    let fullText = '';
-    for await (const word of generateMockReview()) {
-      fullText += word;
-      emit(word);
-    }
-
-    const { data: insertedReview, error: insertError } = await supabaseAdmin
-      .from('user_reviews')
-      .insert({
-        user_email: userEmail,
-        restaurant_name: payload.name,
-        visit_date: payload.date || new Date().toISOString().split('T')[0],
-        review_content: fullText,
-        metadata: payload,
-        character_count: fullText.length,
-        created_at: new Date().toISOString(),
-      })
-      .select('id')
-      .single();
-
-    if (insertError) {
-      throw new Error(`MOCK 리뷰 저장 실패: ${insertError.message}`);
-    }
-
-    const reviewId = insertedReview?.id ?? null;
-    console.log(`\n✅ [Review Gen API] MOCK 리뷰 저장 완료: ${fullText.length}자`);
-
-    return {
-      fullText,
-      done: { characterCount: fullText.length, reviewId },
-    };
-  });
-  return createSSEResponse(stream);
-}
-

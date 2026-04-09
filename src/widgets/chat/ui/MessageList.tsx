@@ -26,6 +26,10 @@ export function MessageList({
   onReviewAction,
   className,
 }: MessageListProps) {
+  const hasInlineLoadingMessage = messages.some(
+    (message) => message.role === 'assistant' && message.type === 'loading',
+  );
+
   return (
     <div className={cn('px-5 sm:px-6', 'pt-4 pb-2', className)}>
       <div className='flex w-full flex-col'>
@@ -60,7 +64,7 @@ export function MessageList({
             </MessageBubble>
           ))}
 
-          {isTyping && <TypingIndicator />}
+          {isTyping && !hasInlineLoadingMessage && <TypingIndicator />}
         </div>
       </div>
     </div>
