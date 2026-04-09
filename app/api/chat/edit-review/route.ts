@@ -3,11 +3,12 @@ import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 import { authOptions } from '@/auth';
-import { getReviewEditPrompt } from '@/shared/api/promptService';
+import { getReviewEditPrompts } from '@/shared/api/promptService';
 import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import { createSSEStream, createSSEResponse } from '@/shared/api/sse';
 import { supabaseAdmin } from '@/shared/lib/supabase';
+import { withPromptDefense } from '@/shared/lib/promptDefense';
 import { styleProfileSchema } from '@/shared/types/styleProfile';
 
 const editReviewInputSchema = z.object({
@@ -15,6 +16,9 @@ const editReviewInputSchema = z.object({
   editRequest: z.string().min(1, '수정 요청을 입력해주세요'),
   styleProfile: styleProfileSchema.optional().nullable(),
 });
+
+const DEFAULT_EDIT_SYSTEM_PROMPT =
+  '당신은 블로그 리뷰 수정 전문가입니다. 사용자의 글쓰기 스타일을 유지하면서 요청된 부분만 정확하게 수정합니다. 전체 리뷰의 흐름과 톤을 해치지 않으면서 자연스럽게 수정해주세요.';
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,24 +49,27 @@ export async function POST(req: NextRequest) {
     console.log(`\n[Review Edit API] 리뷰 수정 요청 수신`);
 
     // 프롬프트 로드
-    const editPromptTemplate = await getReviewEditPrompt();
+    const editPrompts = await getReviewEditPrompts();
 
     // 프롬프트 구성
     const styleProfileJson = styleProfile
       ? JSON.stringify(styleProfile, null, 2)
       : '{}';
 
-    const userPrompt = editPromptTemplate
+    const userPrompt = editPrompts.userPrompt
       .replace('{기존 리뷰 텍스트}', originalReview)
       .replace('{수정 요청 텍스트}', editRequest)
       .replace('{스타일 JSON}', styleProfileJson);
+    const systemPrompt = withPromptDefense(
+      editPrompts.systemPrompt ?? DEFAULT_EDIT_SYSTEM_PROMPT,
+    );
 
     const stream = createSSEStream(async (emit, signal) => {
       console.log('\n[Review Edit API] Claude API 스트리밍 시작...');
       const response = await getAnthropicClient().messages.stream({
         model: CLAUDE_HAIKU,
         max_tokens: 4096,
-        system: [{ type: 'text', text: '당신은 블로그 리뷰 수정 전문가입니다. 사용자의 글쓰기 스타일을 유지하면서 요청된 부분만 정확하게 수정합니다. 전체 리뷰의 흐름과 톤을 해치지 않으면서 자연스럽게 수정해주세요.', cache_control: { type: 'ephemeral' } }],
+        system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: userPrompt }],
       });
 

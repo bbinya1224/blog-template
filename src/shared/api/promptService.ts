@@ -5,7 +5,8 @@ type PromptKey =
   | 'style_analysis_user'
   | 'review_generation_system'
   | 'review_generation_user'
-  | 'review_edit_system';
+  | 'review_edit_system'
+  | 'review_edit_user';
 
 type CategorySlug = 'restaurant' | 'product' | 'tech_blog';
 
@@ -137,6 +138,33 @@ export const getReviewEditPrompt = async (
   category: CategorySlug = 'restaurant'
 ) => {
   return getPrompt('review_edit_system', category);
+};
+
+export const getReviewEditPrompts = async (
+  category: CategorySlug = 'restaurant'
+) => {
+  try {
+    const prompts = await getPrompts(
+      ['review_edit_system', 'review_edit_user'],
+      category
+    );
+
+    if (prompts.review_edit_system && prompts.review_edit_user) {
+      return {
+        systemPrompt: prompts.review_edit_system,
+        userPrompt: prompts.review_edit_user,
+        isLegacy: false,
+      };
+    }
+  } catch {
+    // Fallback to legacy single-template mode below.
+  }
+
+  return {
+    systemPrompt: null,
+    userPrompt: await getReviewEditPrompt(category),
+    isLegacy: true,
+  };
 };
 
 // Call this when admin updates prompts to invalidate cache
