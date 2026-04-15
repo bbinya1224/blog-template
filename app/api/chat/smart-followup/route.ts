@@ -6,7 +6,7 @@ import { authOptions } from '@/auth';
 import { reviewPayloadSchema } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
-import { getSmartFollowupPrompt } from '@/shared/api/promptService';
+import { getSmartFollowupPrompts } from '@/shared/api/promptService';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import {
   formatCollectedInfo,
@@ -44,7 +44,11 @@ export async function POST(req: NextRequest) {
     }
 
     const infoSummary = formatCollectedInfo(collectedInfo);
-    const systemPrompt = await getSmartFollowupPrompt();
+    const { systemPrompt, userPrompt: userPromptTemplate } =
+      await getSmartFollowupPrompts();
+    const userPrompt = userPromptTemplate
+      .replace('{selectedTopic}', selectedTopic)
+      .replace('{infoSummary}', infoSummary || '(아직 없음)');
 
     console.log(
       `\n[Smart Followup API] 후속 질문 생성 시작 (${selectedTopic})`,
@@ -54,12 +58,7 @@ export async function POST(req: NextRequest) {
       model: CLAUDE_HAIKU,
       max_tokens: 512,
       system: systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: `리뷰 카테고리: ${selectedTopic}\n\n수집된 리뷰 정보:\n${infoSummary}\n\n이 정보를 바탕으로 사용자가 놓쳤을만한 감각적/감정적 디테일을 유도하는 후속 질문 2~3개를 생성해주세요.`,
-        },
-      ],
+      messages: [{ role: 'user', content: userPrompt }],
     });
 
     const text = response.content

@@ -5,7 +5,7 @@ import { authOptions } from '@/auth';
 import { reviewPayloadSchema } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
-import { getParseConversationPrompt } from '@/shared/api/promptService';
+import { getParseConversationPrompts } from '@/shared/api/promptService';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import { isGenerateIntent } from '@/features/chat-review/lib/conversation/isGenerateIntent';
 import type Anthropic from '@anthropic-ai/sdk';
@@ -68,20 +68,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const infoSummary = formatCollectedInfo(collectedInfo as Partial<ReviewPayload>);
-    const systemPrompt = await getParseConversationPrompt();
+    const infoSummary = formatCollectedInfo(
+      collectedInfo as Partial<ReviewPayload>,
+    );
+    const conversationSummary = conversationHistory
+      .map((m) => `${m.role === 'user' ? '사용자' : '봇'}: ${m.content}`)
+      .join('\n');
+    const { systemPrompt, userPrompt: userPromptTemplate } =
+      await getParseConversationPrompts();
 
-    const userPrompt = `카테고리: ${selectedTopic}
-
-이미 수집된 정보:
-${infoSummary || '(아직 없음)'}
-
-대화 기록:
-${conversationHistory.map((m) => `${m.role === 'user' ? '사용자' : '봇'}: ${m.content}`).join('\n')}
-
-사용자의 새 메시지: "${userMessage}"
-
-위 메시지에서 리뷰 정보를 추출하고 자연스러운 응답을 생성하세요.`;
+    const userPrompt = userPromptTemplate
+      .replace('{selectedTopic}', selectedTopic)
+      .replace('{infoSummary}', infoSummary || '(아직 없음)')
+      .replace('{conversationHistory}', conversationSummary || '(아직 없음)')
+      .replace('{userMessage}', userMessage);
 
     console.log(
       `\n[Parse Conversation API] 대화 파싱 시작 (${selectedTopic})`,
