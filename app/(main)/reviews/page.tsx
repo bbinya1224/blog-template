@@ -1,10 +1,12 @@
+import { requireAuth } from '@/shared/lib/authUtils';
 import { getReviews } from '@/entities/review/api';
 import { ReviewList } from '@/widgets/review-list/ui/ReviewList';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ReviewsPage() {
-  const reviews = await getReviews();
+  const { user } = await requireAuth();
+  const reviews = await getReviews(user.email);
 
   return (
     <div className="space-y-10">

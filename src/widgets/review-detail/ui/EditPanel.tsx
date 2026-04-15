@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useState, useRef } from 'react';
 import { InlineDiffView } from '@/features/review-edit';
-import { apiPost } from '@/shared/api/httpClient';
+import { apiSSE } from '@/shared/api/sseClient';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { REVIEW_MESSAGES } from '../constants/messages';
 
-interface EditPanelProps {
+interface Props {
   isOpen: boolean;
   onClose: () => void;
   onExitComplete?: () => void;
@@ -15,23 +14,48 @@ interface EditPanelProps {
   onApplyEdit: (newContent: string) => void;
 }
 
-export function EditPanel({ isOpen, onClose, onExitComplete, content, onApplyEdit }: EditPanelProps) {
+export function EditPanel({ isOpen, onClose, onExitComplete, content, onApplyEdit }: Props) {
   const [editRequest, setEditRequest] = useState('');
   const [editedContent, setEditedContent] = useState('');
   const [showDiff, setShowDiff] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
-  const editMutation = useMutation({
-    mutationFn: (input: { review: string; request: string }) =>
-      apiPost<{ review: string }>('/api/edit-review', input),
-    onSuccess: (data) => {
-      setEditedContent(data.review);
-      setShowDiff(true);
-    },
-  });
+  const handleSubmit = async () => {
+    if (!editRequest.trim() || abortRef.current) return;
 
-  const handleSubmit = () => {
-    if (!editRequest.trim()) return;
-    editMutation.mutate({ review: content, request: editRequest });
+    setIsPending(true);
+    setIsError(false);
+    setEditedContent('');
+
+    abortRef.current = new AbortController();
+
+    try {
+      await apiSSE(
+        '/api/chat/edit-review',
+        {
+          originalReview: content,
+          editRequest,
+          styleProfile: null,
+        },
+        {
+          onToken: (fullText) => setEditedContent(fullText),
+          onDone: (fullText) => {
+            setEditedContent(fullText);
+            setShowDiff(true);
+          },
+        },
+        { signal: abortRef.current.signal },
+      );
+    } catch {
+      if (!abortRef.current?.signal.aborted) {
+        setIsError(true);
+      }
+    } finally {
+      setIsPending(false);
+      abortRef.current = null;
+    }
   };
 
   const handleApply = () => {
@@ -43,13 +67,17 @@ export function EditPanel({ isOpen, onClose, onExitComplete, content, onApplyEdi
   };
 
   const handleRetry = () => {
-    if (!editRequest.trim()) return;
-    editMutation.mutate({ review: content, request: editRequest });
+    setShowDiff(false);
+    setEditedContent('');
+    handleSubmit();
   };
 
   const handleCancelDiff = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
     setShowDiff(false);
     setEditedContent('');
+    setIsPending(false);
   };
 
   const { editPanel } = REVIEW_MESSAGES;
@@ -71,12 +99,12 @@ export function EditPanel({ isOpen, onClose, onExitComplete, content, onApplyEdi
         <button
           onClick={handleSubmit}
           className="w-full rounded-2xl bg-stone-900 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:bg-stone-400"
-          disabled={!editRequest.trim() || editMutation.isPending || showDiff}
+          disabled={!editRequest.trim() || isPending || showDiff}
         >
-          {editMutation.isPending ? editPanel.submitting : editPanel.submit}
+          {isPending ? editPanel.submitting : editPanel.submit}
         </button>
 
-        {editMutation.isError && (
+        {isError && (
           <p className="text-center text-sm text-red-500">{editPanel.error}</p>
         )}
 

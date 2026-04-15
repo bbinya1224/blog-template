@@ -1,5 +1,4 @@
-import { getSession } from '@/shared/lib/authUtils';
-import { readStyleProfile } from '@/shared/api/dataFiles';
+import { getAuthenticatedStyleProfileContext } from '@/shared/lib';
 import { ChatPageContent, PublicChatView } from '@/views/chat';
 import { AppShell } from '@/widgets/app-shell';
 
@@ -9,9 +8,9 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const session = await getSession();
+  const authenticatedContext = await getAuthenticatedStyleProfileContext();
 
-  if (!session?.user?.email) {
+  if (!authenticatedContext) {
     return (
       <main className='h-dvh'>
         <PublicChatView />
@@ -19,9 +18,7 @@ export default async function HomePage() {
     );
   }
 
-  const userEmail = session.user.email;
-
-  const styleProfile = await readStyleProfile(userEmail);
+  const { userEmail, styleProfile } = authenticatedContext;
 
   return (
     <AppShell>

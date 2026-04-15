@@ -9,6 +9,7 @@ import type { ConversationMessage } from '@/entities/review';
 type UpdateReviewDeps = {
   updateReview: (
     id: string,
+    userEmail: string,
     content: string,
     conversation?: ConversationMessage[],
   ) => Promise<void>;
@@ -66,6 +67,7 @@ export const createUpdateReviewHandler = (deps: UpdateReviewDeps) => {
 
       await deps.updateReview(
         decodeURIComponent(id),
+        request.user.email,
         content,
         validatedConversation,
       );

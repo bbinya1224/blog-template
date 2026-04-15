@@ -8,7 +8,9 @@ type PromptKey =
   | 'review_edit_system'
   | 'review_edit_user'
   | 'parse_conversation_system'
-  | 'smart_followup_system';
+  | 'parse_conversation_user'
+  | 'smart_followup_system'
+  | 'smart_followup_user';
 
 type CategorySlug = 'restaurant' | 'product' | 'tech_blog';
 
@@ -142,16 +144,32 @@ export const getReviewEditPrompt = async (
   return getPrompt('review_edit_system', category);
 };
 
-export const getParseConversationPrompt = async (
+export const getParseConversationPrompts = async (
   category: CategorySlug = 'restaurant'
 ) => {
-  return getPrompt('parse_conversation_system', category);
+  const prompts = await getPrompts(
+    ['parse_conversation_system', 'parse_conversation_user'],
+    category,
+  );
+
+  return {
+    systemPrompt: prompts.parse_conversation_system,
+    userPrompt: prompts.parse_conversation_user,
+  };
 };
 
-export const getSmartFollowupPrompt = async (
+export const getSmartFollowupPrompts = async (
   category: CategorySlug = 'restaurant'
 ) => {
-  return getPrompt('smart_followup_system', category);
+  const prompts = await getPrompts(
+    ['smart_followup_system', 'smart_followup_user'],
+    category,
+  );
+
+  return {
+    systemPrompt: prompts.smart_followup_system,
+    userPrompt: prompts.smart_followup_user,
+  };
 };
 
 export const getReviewEditPrompts = async (

@@ -8,13 +8,13 @@ const quickActions = [
   {
     title: '1단계 · 스타일 분석',
     body: 'RSS 주소와 최근 글 수를 입력하면 내 말투를 JSON 프로필로 추출합니다.',
-    href: '/analyze',
+    href: '/',
     cta: '스타일 분석 시작',
   },
   {
     title: '2단계 · 리뷰 생성',
     body: '가게 정보와 템플릿 요소를 입력하면 1500자 리뷰 초안을 만듭니다.',
-    href: '/generate',
+    href: '/',
     cta: '리뷰 생성하기',
   },
   {
