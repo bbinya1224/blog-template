@@ -152,6 +152,12 @@ export const getParseConversationPrompts = async (
     category,
   );
 
+  if (!prompts.parse_conversation_system || !prompts.parse_conversation_user) {
+    throw new Error(
+      `[promptService] parse_conversation 프롬프트 누락 (category=${category})`,
+    );
+  }
+
   return {
     systemPrompt: prompts.parse_conversation_system,
     userPrompt: prompts.parse_conversation_user,
@@ -165,6 +171,12 @@ export const getSmartFollowupPrompts = async (
     ['smart_followup_system', 'smart_followup_user'],
     category,
   );
+
+  if (!prompts.smart_followup_system || !prompts.smart_followup_user) {
+    throw new Error(
+      `[promptService] smart_followup 프롬프트 누락 (category=${category})`,
+    );
+  }
 
   return {
     systemPrompt: prompts.smart_followup_system,

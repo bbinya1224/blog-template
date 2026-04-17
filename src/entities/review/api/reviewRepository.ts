@@ -100,13 +100,18 @@ export async function updateReview(
     updateData.conversation = conversation;
   }
 
-  const { error } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from('user_reviews')
     .update(updateData)
     .eq('id', id)
-    .eq('user_email', userEmail);
+    .eq('user_email', userEmail)
+    .select('id');
 
   if (error) {
     throw new Error('리뷰 수정 실패: ' + error.message);
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error('수정할 리뷰를 찾을 수 없습니다.');
   }
 }

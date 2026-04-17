@@ -29,7 +29,8 @@ export function EditPanel({ isOpen, onClose, onExitComplete, content, onApplyEdi
     setIsError(false);
     setEditedContent('');
 
-    abortRef.current = new AbortController();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     try {
       await apiSSE(
@@ -46,15 +47,15 @@ export function EditPanel({ isOpen, onClose, onExitComplete, content, onApplyEdi
             setShowDiff(true);
           },
         },
-        { signal: abortRef.current.signal },
+        { signal: controller.signal },
       );
     } catch {
-      if (!abortRef.current?.signal.aborted) {
+      if (!controller.signal.aborted) {
         setIsError(true);
       }
     } finally {
       setIsPending(false);
-      abortRef.current = null;
+      if (abortRef.current === controller) abortRef.current = null;
     }
   };
 

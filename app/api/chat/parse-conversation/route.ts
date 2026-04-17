@@ -78,10 +78,10 @@ export async function POST(req: NextRequest) {
       await getParseConversationPrompts();
 
     const userPrompt = userPromptTemplate
-      .replace('{selectedTopic}', selectedTopic)
-      .replace('{infoSummary}', infoSummary || '(아직 없음)')
-      .replace('{conversationHistory}', conversationSummary || '(아직 없음)')
-      .replace('{userMessage}', userMessage);
+      .replaceAll('{selectedTopic}', selectedTopic)
+      .replaceAll('{infoSummary}', infoSummary || '(아직 없음)')
+      .replaceAll('{conversationHistory}', conversationSummary || '(아직 없음)')
+      .replaceAll('{userMessage}', userMessage);
 
     console.log(
       `\n[Parse Conversation API] 대화 파싱 시작 (${selectedTopic})`,
