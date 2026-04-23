@@ -7,8 +7,6 @@ export const STORAGE_KEYS = {
 export const API_ENDPOINTS = {
   FETCH_RSS: '/api/fetch-rss',
   ANALYZE_STYLE: '/api/analyze-style',
-  GENERATE_REVIEW: '/api/generate-review',
-  EDIT_REVIEW: '/api/edit-review',
   STYLE_PROFILE: '/api/style-profile',
 } as const;
 

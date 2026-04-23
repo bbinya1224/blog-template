@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import { requireAuth } from '@/shared/lib/authUtils';
 import { getReviewById } from '@/entities/review/api';
 import { ReviewDetailViewer } from '@/widgets/review-detail/ui/ReviewDetailViewer';
 import { DeleteReviewButton } from '@/widgets/review-detail';
@@ -12,8 +13,10 @@ interface ReviewDetailPageProps {
 }
 
 export default async function ReviewDetailPage({ params }: ReviewDetailPageProps) {
+  const { user } = await requireAuth();
+
   const { id } = await params;
-  const review = await getReviewById(decodeURIComponent(id));
+  const review = await getReviewById(decodeURIComponent(id), user.email);
 
   if (!review) {
     notFound();

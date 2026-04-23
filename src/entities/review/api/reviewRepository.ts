@@ -1,23 +1,12 @@
 import { supabaseAdmin } from '@/shared/lib/supabase';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/auth';
 import type { Review, ConversationMessage } from '@/entities/review/model/review';
 
-/**
- * 현재 로그인한 사용자의 리뷰 목록 조회
- */
-export async function getReviews(limit?: number): Promise<Review[]> {
+export async function getReviews(userEmail: string, limit?: number): Promise<Review[]> {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return [];
-    }
-
     let query = supabaseAdmin
       .from('user_reviews')
       .select('*')
-      .eq('user_email', session.user.email)
+      .eq('user_email', userEmail)
       .order('created_at', { ascending: false });
 
     if (limit) {
@@ -49,22 +38,13 @@ export async function getReviews(limit?: number): Promise<Review[]> {
   }
 }
 
-/**
- * ID로 특정 리뷰 조회
- */
-export async function getReviewById(id: string): Promise<Review | null> {
+export async function getReviewById(id: string, userEmail: string): Promise<Review | null> {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return null;
-    }
-
     const { data, error } = await supabaseAdmin
       .from('user_reviews')
       .select('*')
       .eq('id', id)
-      .eq('user_email', session.user.email)
+      .eq('user_email', userEmail)
       .single();
 
     if (error || !data) {
@@ -107,36 +87,31 @@ export async function deleteReview(id: string, userEmail: string): Promise<void>
 
 export async function updateReview(
   id: string,
+  userEmail: string,
   content: string,
   conversation?: ConversationMessage[]
 ): Promise<void> {
-  try {
-    const session = await getServerSession(authOptions);
+  const updateData: Record<string, unknown> = {
+    review_content: content,
+    updated_at: new Date().toISOString(),
+  };
 
-    if (!session?.user?.email) {
-      throw new Error('인증 필요');
-    }
+  if (conversation !== undefined) {
+    updateData.conversation = conversation;
+  }
 
-    const updateData: Record<string, unknown> = {
-      review_content: content,
-      updated_at: new Date().toISOString(),
-    };
+  const { data, error } = await supabaseAdmin
+    .from('user_reviews')
+    .update(updateData)
+    .eq('id', id)
+    .eq('user_email', userEmail)
+    .select('id');
 
-    if (conversation !== undefined) {
-      updateData.conversation = conversation;
-    }
+  if (error) {
+    throw new Error('리뷰 수정 실패: ' + error.message);
+  }
 
-    const { error } = await supabaseAdmin
-      .from('user_reviews')
-      .update(updateData)
-      .eq('id', id)
-      .eq('user_email', session.user.email);
-
-    if (error) {
-      throw new Error('리뷰 수정 실패: ' + error.message);
-    }
-  } catch (error) {
-    console.error('리뷰 수정 중 오류:', error);
-    throw error;
+  if (!data || data.length === 0) {
+    throw new Error('수정할 리뷰를 찾을 수 없습니다.');
   }
 }

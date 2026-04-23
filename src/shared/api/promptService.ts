@@ -144,12 +144,6 @@ export const getReviewEditPrompt = async (
   return getPrompt('review_edit_system', category);
 };
 
-export const getParseConversationPrompt = async (
-  category: CategorySlug = 'restaurant'
-) => {
-  return getPrompt('parse_conversation_system', category);
-};
-
 export const getParseConversationPrompts = async (
   category: CategorySlug = 'restaurant'
 ) => {
@@ -158,16 +152,16 @@ export const getParseConversationPrompts = async (
     category,
   );
 
+  if (!prompts.parse_conversation_system || !prompts.parse_conversation_user) {
+    throw new Error(
+      `[promptService] parse_conversation 프롬프트 누락 (category=${category})`,
+    );
+  }
+
   return {
     systemPrompt: prompts.parse_conversation_system,
     userPrompt: prompts.parse_conversation_user,
   };
-};
-
-export const getSmartFollowupPrompt = async (
-  category: CategorySlug = 'restaurant'
-) => {
-  return getPrompt('smart_followup_system', category);
 };
 
 export const getSmartFollowupPrompts = async (
@@ -177,6 +171,12 @@ export const getSmartFollowupPrompts = async (
     ['smart_followup_system', 'smart_followup_user'],
     category,
   );
+
+  if (!prompts.smart_followup_system || !prompts.smart_followup_user) {
+    throw new Error(
+      `[promptService] smart_followup 프롬프트 누락 (category=${category})`,
+    );
+  }
 
   return {
     systemPrompt: prompts.smart_followup_system,

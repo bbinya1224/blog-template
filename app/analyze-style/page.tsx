@@ -1,5 +1,4 @@
-import { getSession } from '@/shared/lib/authUtils';
-import { readStyleProfile } from '@/shared/api/dataFiles';
+import { getAuthenticatedStyleProfileContext } from '@/shared/lib';
 import { redirect } from 'next/navigation';
 import { AppShell } from '@/widgets/app-shell';
 import { AnalyzeStyleContent } from '@/views/analyze-style';
@@ -10,15 +9,13 @@ export const metadata = {
 };
 
 export default async function AnalyzeStylePage() {
-  const session = await getSession();
+  const authenticatedContext = await getAuthenticatedStyleProfileContext();
 
-  if (!session?.user?.email) {
+  if (!authenticatedContext) {
     redirect('/');
   }
 
-  const userEmail = session.user.email;
-  const userName = session.user.name || null;
-  const styleProfile = await readStyleProfile(userEmail);
+  const { userEmail, userName, styleProfile } = authenticatedContext;
 
   return (
     <AppShell>

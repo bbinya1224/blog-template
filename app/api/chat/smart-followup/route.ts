@@ -47,8 +47,8 @@ export async function POST(req: NextRequest) {
     const { systemPrompt, userPrompt: userPromptTemplate } =
       await getSmartFollowupPrompts();
     const userPrompt = userPromptTemplate
-      .replace('{selectedTopic}', selectedTopic)
-      .replace('{infoSummary}', infoSummary || '(아직 없음)');
+      .replaceAll('{selectedTopic}', selectedTopic)
+      .replaceAll('{infoSummary}', infoSummary || '(아직 없음)');
 
     console.log(
       `\n[Smart Followup API] 후속 질문 생성 시작 (${selectedTopic})`,

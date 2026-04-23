@@ -47,7 +47,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
           소중한 순간을 남겨보세요
         </p>
         <Link
-          href="/generate"
+          href="/"
           className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-white shadow-lg shadow-orange-200 transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-xl"
         >
           첫 리뷰 시작하기

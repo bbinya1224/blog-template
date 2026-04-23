@@ -6,4 +6,5 @@ export * from './validators';
 export * from './search';
 export * from './kakaoLocal';
 export * from './authUtils';
+export * from './styleProfilePageContext';
 export * from './supabase';

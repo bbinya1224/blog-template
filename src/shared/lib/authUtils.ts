@@ -1,20 +1,27 @@
+import { cache } from 'react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import { redirect } from 'next/navigation';
 
-export async function getSession() {
+export const getSession = cache(async () => {
   return await getServerSession(authOptions);
-}
+});
 
-/**
- * 로그인하지 않은 경우 홈으로 리다이렉트
- */
-export async function requireAuth() {
+export type AuthenticatedSession = {
+  user: { email: string; name: string | null };
+};
+
+export async function requireAuth(): Promise<AuthenticatedSession> {
   const session = await getSession();
 
-  if (!session || !session.user) {
+  if (!session?.user?.email) {
     redirect('/');
   }
 
-  return session;
+  return {
+    user: {
+      email: session.user.email,
+      name: session.user.name ?? null,
+    },
+  };
 }

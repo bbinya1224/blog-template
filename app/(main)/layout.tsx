@@ -10,7 +10,7 @@ export default async function MainLayout({
 }>) {
   const session = await requireAuth();
 
-  const userStatus = session?.user?.email ? await getUserStatus(session.user.email) : null;
+  const userStatus = await getUserStatus(session.user.email);
   const isPreview = userStatus?.is_preview ?? false;
   const usageCount = userStatus?.usage_count || 0;
 
