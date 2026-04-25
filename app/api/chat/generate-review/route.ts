@@ -18,7 +18,7 @@ import {
 } from '@/features/chat-review';
 
 import { reviewPayloadSchema } from '@/shared/types/review';
-import { styleProfileSchema } from '@/shared/types/styleProfile';
+import { styleProfileSchema, type StyleProfile } from '@/shared/types/styleProfile';
 
 const generateReviewInputSchema = z.object({
   payload: reviewPayloadSchema,
@@ -98,14 +98,15 @@ export async function POST(req: NextRequest) {
     );
 
     // 시스템 및 유저 프롬프트 구성
+    const resolvedProfile = (styleProfile ?? null) as StyleProfile | null;
     const systemPrompt = buildReviewSystemPrompt(
       prompts.systemPrompt,
-      styleProfile
+      resolvedProfile
     );
     const userPrompt = buildReviewUserPrompt(
       prompts.userPrompt,
       payload,
-      styleProfile,
+      resolvedProfile,
       kakaoPlaceFormatted,
       tavilyContext,
       writingSamples

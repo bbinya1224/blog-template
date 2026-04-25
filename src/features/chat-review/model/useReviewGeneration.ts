@@ -63,9 +63,9 @@ export function useReviewGeneration() {
       setStep('review-edit');
 
       updateMessage(msgId, {
-        type: 'review-preview',
-        content: MESSAGES.reviewEdit.complete,
-        metadata: { review: fullText, characterCount: fullText.length },
+        type: 'text',
+        content: fullText,
+        metadata: { streaming: false, reviewComplete: true },
       });
     } catch (error) {
       setSavedReviewId(null);
@@ -116,9 +116,9 @@ export function useReviewGeneration() {
         );
 
         updateMessage(msgId, {
-          type: 'review-preview',
-          content: MESSAGES.reviewEdit.complete,
-          metadata: { review: fullText, characterCount: fullText.length },
+          type: 'text',
+          content: fullText,
+          metadata: { streaming: false, reviewComplete: true },
         });
 
         const result = handleReviewEdited(fullText);

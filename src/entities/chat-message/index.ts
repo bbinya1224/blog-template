@@ -16,5 +16,6 @@ export {
 
 export { PlaceCard } from './ui/PlaceCard';
 export { ReviewPreview } from './ui/ReviewPreview';
+export { ReviewActions } from './ui/ReviewActions';
 export { StyleSummaryCard } from './ui/StyleSummaryCard';
 export { MessageContent } from './ui/MessageContent';
