@@ -145,7 +145,6 @@ export async function POST(req: NextRequest) {
           visit_date: payload.date || new Date().toISOString().split('T')[0],
           review_content: reviewText,
           metadata: payload,
-          character_count: reviewText.length,
           created_at: new Date().toISOString(),
         })
         .select('id')
