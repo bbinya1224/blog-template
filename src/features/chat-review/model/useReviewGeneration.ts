@@ -55,7 +55,7 @@ export function useReviewGeneration() {
       );
 
       if (!receivedReviewId) {
-        throw new Error('Missing reviewId in SSE done payload');
+        console.warn('[generateReview] reviewId 없음 — DB 저장 실패 가능성');
       }
 
       setGeneratedReview(fullText);

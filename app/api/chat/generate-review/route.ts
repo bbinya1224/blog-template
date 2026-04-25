@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (insertError) {
-        throw new Error(`리뷰 저장 실패: ${insertError.message}`);
+        console.error(`[Review Gen API] 리뷰 저장 실패 (non-blocking): ${insertError.message}`);
       }
 
       console.log(`\n✅ [Review Gen API] 리뷰 생성 완료: ${reviewText.length}자`);
