@@ -87,6 +87,7 @@ export type SideEffect =
   | { type: 'place-search'; query: string }
   | { type: 'edit-review'; request: string }
   | { type: 'parse-conversation'; userMessage: string }
+  | { type: 'generate-review' }
   | { type: 'none' };
 
 export interface UserInput {

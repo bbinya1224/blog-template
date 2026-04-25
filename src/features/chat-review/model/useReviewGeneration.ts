@@ -19,6 +19,14 @@ export function useReviewGeneration() {
   const setSavedReviewId = useChatStore((s) => s.setSavedReviewId);
 
   const generateReview = useCallback(async () => {
+    if (!styleProfile) {
+      addAssistantMessage(
+        '글 스타일 프로필이 아직 없어요! 스타일 분석을 먼저 진행해주세요.',
+      );
+      setStep('style-check');
+      return;
+    }
+
     setSavedReviewId(null);
     const msgId = addAssistantMessage('', 'text', undefined, {
       streaming: true,
@@ -29,7 +37,7 @@ export function useReviewGeneration() {
 
       const fullText = await apiSSE(
         '/api/chat/generate-review',
-        { payload: collectedInfo, styleProfile },
+        { payload: collectedInfo, styleProfile: styleProfile ?? null },
         {
           onToken: (text) => {
             updateMessage(msgId, {

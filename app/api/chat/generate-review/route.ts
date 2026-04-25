@@ -22,7 +22,7 @@ import { styleProfileSchema } from '@/shared/types/styleProfile';
 
 const generateReviewInputSchema = z.object({
   payload: reviewPayloadSchema,
-  styleProfile: styleProfileSchema.nullable(),
+  styleProfile: styleProfileSchema.nullable().optional(),
 });
 
 const getRandomWritingSamples = async (

@@ -50,8 +50,32 @@ export const FLOW_GRAPH: FlowGraph = {
 
   generating: {
     onEnter: async (ctx) => {
+      if (!ctx.state.styleProfile) {
+        return {
+          messages: [
+            assistantMsg(
+              'text',
+              '글 스타일 프로필이 아직 없어요! 스타일 분석을 먼저 진행해주세요.',
+            ),
+          ],
+        };
+      }
       await ctx.generateReview();
       return { messages: [] };
+    },
+    onInput: (input) => {
+      if (input.optionId === 'retry') {
+        return {
+          messages: [],
+          actions: [],
+          sideEffect: { type: 'generate-review' },
+        };
+      }
+      return {
+        messages: [],
+        actions: [{ type: 'GO_TO_STEP', payload: 'conversation' }],
+        sideEffect: { type: 'none' },
+      };
     },
   },
 
