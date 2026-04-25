@@ -35,30 +35,30 @@ export type StyleProfile = {
 };
 
 export const writingStyleSchema = z.object({
-  formality: z.string(),
-  tone: z.string(),
-  emotion: z.string(),
-  sentence_length: z.string(),
-  pacing: z.string(),
-  habitual_phrases: z.array(z.string()),
-  emoji_usage: z.string(),
-  style_notes: z.string(),
+  formality: z.string().optional(),
+  tone: z.string().optional(),
+  emotion: z.string().optional(),
+  sentence_length: z.string().optional(),
+  pacing: z.string().optional(),
+  habitual_phrases: z.array(z.string()).optional(),
+  emoji_usage: z.string().optional(),
+  style_notes: z.string().optional(),
 });
 
 export const structurePatternSchema = z.object({
-  overall_flow: z.string(),
-  opening_style: z.string(),
-  frequent_sections: z.array(z.string()),
+  overall_flow: z.string().optional(),
+  opening_style: z.string().optional(),
+  frequent_sections: z.array(z.string()).optional(),
 });
 
 export const keywordProfileSchema = z.object({
-  frequent_words: z.array(z.string()),
-  topic_bias: z.string(),
+  frequent_words: z.array(z.string()).optional(),
+  topic_bias: z.string().optional(),
 });
 
 export const visualStructureSchema = z.object({
-  line_breaks: z.string(),
-  paragraph_pattern: z.string(),
+  line_breaks: z.string().optional(),
+  paragraph_pattern: z.string().optional(),
 });
 
 export const styleProfileSchema = z.object({
