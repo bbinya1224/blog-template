@@ -9,6 +9,7 @@ import { getParseConversationPrompts } from '@/shared/api/promptService';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import { formatCollectedInfo } from '@/features/chat-review/lib/promptBuilder';
 import { normalizeConversationResult } from '@/features/chat-review/lib/conversation/reviewReadiness';
+import { sanitizeUserInput, wrapInXmlTag } from '@/shared/lib/sanitizeInput';
 import type Anthropic from '@anthropic-ai/sdk';
 import type { ReviewPayload } from '@/shared/types/review';
 
@@ -69,6 +70,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const { data: reserved, error: rpcError } = await supabaseAdmin.rpc(
+      'try_reserve_usage',
+      { p_email: session.user.email },
+    );
+    if (rpcError || !reserved) {
+      return ApiResponse.quotaExceeded();
+    }
+
     const infoSummary = formatCollectedInfo(
       collectedInfo as Partial<ReviewPayload>,
     );
@@ -82,7 +91,7 @@ export async function POST(req: NextRequest) {
       .replaceAll('{selectedTopic}', selectedTopic)
       .replaceAll('{infoSummary}', infoSummary || '(아직 없음)')
       .replaceAll('{conversationHistory}', conversationSummary || '(아직 없음)')
-      .replaceAll('{userMessage}', userMessage);
+      .replaceAll('{userMessage}', wrapInXmlTag('user_input', sanitizeUserInput(userMessage)));
 
     console.log(
       `\n[Parse Conversation API] 대화 파싱 시작 (${selectedTopic})`,
@@ -151,14 +160,6 @@ export async function POST(req: NextRequest) {
       userMessage,
       collectedInfo as Partial<ReviewPayload>,
     );
-
-    const { data: reserved, error: rpcError } = await supabaseAdmin.rpc(
-      'try_reserve_usage',
-      { p_email: session.user.email },
-    );
-    if (rpcError || !reserved) {
-      return ApiResponse.quotaExceeded();
-    }
 
     return Response.json(normalizedResult);
   } catch (error) {

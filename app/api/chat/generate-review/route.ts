@@ -18,7 +18,7 @@ import {
 } from '@/features/chat-review';
 
 import { reviewPayloadSchema } from '@/shared/types/review';
-import { styleProfileSchema, type StyleProfile } from '@/shared/types/styleProfile';
+import { styleProfileSchema } from '@/shared/types/styleProfile';
 
 const generateReviewInputSchema = z.object({
   payload: reviewPayloadSchema,
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
     );
 
     // 시스템 및 유저 프롬프트 구성
-    const resolvedProfile = (styleProfile ?? null) as StyleProfile | null;
+    const resolvedProfile = styleProfile ?? null;
     const systemPrompt = buildReviewSystemPrompt(
       prompts.systemPrompt,
       resolvedProfile
@@ -177,5 +177,6 @@ function toISODate(dateStr?: string): string {
   if (!dateStr) return new Date().toISOString().split('T')[0];
   const parsed = new Date(dateStr);
   if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().split('T')[0];
+  console.warn(`[toISODate] 파싱 불가한 날짜, 오늘로 대체: "${dateStr}"`);
   return new Date().toISOString().split('T')[0];
 }

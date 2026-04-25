@@ -39,13 +39,16 @@ export const StyleProfileSummary = ({
   );
 };
 
-const KeyValuePair = ({ label, value }: { label: string; value: string }) => (
-  <p>
-    <span className='font-semibold'>{label}:</span> {value}
-  </p>
-);
+const KeyValuePair = ({ label, value }: { label: string; value?: string }) => {
+  if (!value) return null;
+  return (
+    <p>
+      <span className='font-semibold'>{label}:</span> {value}
+    </p>
+  );
+};
 
-const HabitualPhrases = ({ phrases }: { phrases: string[] }) => (
+const HabitualPhrases = ({ phrases = [] }: { phrases?: string[] }) => (
   <div>
     <p className='mb-3 text-sm font-semibold text-gray-700'>
       💬 자주 사용하는 표현
@@ -87,7 +90,7 @@ const StyleProfileDetails = ({
       />
       <DetailSection title='주요 섹션'>
         <div className='flex flex-wrap gap-2'>
-          {styleProfile.structure_pattern.frequent_sections.map((section) => (
+          {(styleProfile.structure_pattern.frequent_sections ?? []).map((section) => (
             <span
               key={section}
               className='rounded-md bg-gray-200 px-2 py-1 text-xs text-gray-700'
