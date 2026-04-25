@@ -7,7 +7,8 @@ import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import { getParseConversationPrompts } from '@/shared/api/promptService';
 import { supabaseAdmin } from '@/shared/lib/supabase';
-import { isGenerateIntent } from '@/features/chat-review/lib/conversation/isGenerateIntent';
+import { formatCollectedInfo } from '@/features/chat-review/lib/promptBuilder';
+import { normalizeConversationResult } from '@/features/chat-review/lib/conversation/reviewReadiness';
 import type Anthropic from '@anthropic-ai/sdk';
 import type { ReviewPayload } from '@/shared/types/review';
 
@@ -164,49 +165,6 @@ export async function POST(req: NextRequest) {
     console.error('[Parse Conversation API] 에러:', error);
     return ApiResponse.serverError();
   }
-}
-
-function formatCollectedInfo(info: Partial<ReviewPayload>): string {
-  const entries = Object.entries(info).filter(
-    ([, value]) => value !== undefined && value !== '',
-  );
-  if (entries.length === 0) return '';
-
-  const labels: Record<string, string> = {
-    name: '매장명',
-    location: '위치',
-    date: '날짜',
-    menu: '메뉴',
-    companion: '동행',
-    pros: '좋았던 점',
-    cons: '아쉬운 점',
-    extra: '기타',
-  };
-
-  return entries
-    .map(([key, value]) => `- ${labels[key] || key}: ${value}`)
-    .join('\n');
-}
-
-function normalizeConversationResult(
-  result: z.infer<typeof parseConversationOutputSchema>,
-  userMessage: string,
-  collectedInfo: Partial<ReviewPayload>,
-) {
-  const mergedInfo = { ...collectedInfo, ...result.parsedInfo };
-  const isReady = computeIsReady(mergedInfo, isGenerateIntent(userMessage));
-
-  return {
-    ...result,
-    isReady,
-  };
-}
-
-function computeIsReady(
-  info: Partial<ReviewPayload>,
-  wantsGenerate: boolean,
-): boolean {
-  return reviewPayloadSchema.safeParse(info).success || wantsGenerate;
 }
 
 function maskPreview(text: string): string {
