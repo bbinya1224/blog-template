@@ -173,10 +173,17 @@ export async function POST(req: NextRequest) {
   }
 }
 
+function toLocalISODate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 function toISODate(dateStr?: string): string {
-  if (!dateStr) return new Date().toISOString().split('T')[0];
+  if (!dateStr) return toLocalISODate(new Date());
   const parsed = new Date(dateStr);
-  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().split('T')[0];
+  if (!Number.isNaN(parsed.getTime())) return toLocalISODate(parsed);
   console.warn(`[toISODate] 파싱 불가한 날짜, 오늘로 대체: "${dateStr}"`);
-  return new Date().toISOString().split('T')[0];
+  return toLocalISODate(new Date());
 }

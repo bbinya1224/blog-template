@@ -10,8 +10,10 @@ interface Props {
   onAction?: (action: 'complete' | 'edit') => void;
 }
 
+type CopyState = 'idle' | 'copied' | 'failed';
+
 export function ReviewActions({ review, characterCount, onAction }: Props) {
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<CopyState>('idle');
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   useEffect(() => {
@@ -23,12 +25,13 @@ export function ReviewActions({ review, characterCount, onAction }: Props) {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(review);
-      setCopied(true);
-      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
-      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+      setCopyState('copied');
     } catch {
-      // clipboard API 실패 시 무시
+      console.warn('[ReviewActions] 클립보드 복사 실패');
+      setCopyState('failed');
     }
+    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    copyTimeoutRef.current = setTimeout(() => setCopyState('idle'), 2000);
   };
 
   return (
@@ -43,12 +46,12 @@ export function ReviewActions({ review, characterCount, onAction }: Props) {
         className={cn(
           'flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs',
           'transition-all duration-200',
-          copied
-            ? 'bg-green-50 text-green-600'
-            : 'bg-stone-100 text-stone-500 hover:bg-stone-200',
+          copyState === 'copied' && 'bg-green-50 text-green-600',
+          copyState === 'failed' && 'bg-red-50 text-red-500',
+          copyState === 'idle' && 'bg-stone-100 text-stone-500 hover:bg-stone-200',
         )}
       >
-        {copied ? (
+        {copyState === 'copied' ? (
           <>
             <svg
               className='size-3.5'
@@ -65,6 +68,8 @@ export function ReviewActions({ review, characterCount, onAction }: Props) {
             </svg>
             <span>복사됨</span>
           </>
+        ) : copyState === 'failed' ? (
+          <span>복사 실패</span>
         ) : (
           <>
             <svg
@@ -77,7 +82,7 @@ export function ReviewActions({ review, characterCount, onAction }: Props) {
                 strokeLinecap='round'
                 strokeLinejoin='round'
                 strokeWidth={2}
-                d='M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z'
+                d='M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2 2v8a2 2 0 002 2z'
               />
             </svg>
             <span>복사</span>

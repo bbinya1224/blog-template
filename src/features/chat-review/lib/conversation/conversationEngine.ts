@@ -272,12 +272,12 @@ export function extractDateInfo(input: string): string {
   const lowered = input.toLowerCase();
 
   if (lowered.includes('오늘')) {
-    return today.toISOString().split('T')[0];
+    return toLocalISODate(today);
   }
   if (lowered.includes('어제')) {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    return yesterday.toISOString().split('T')[0];
+    return toLocalISODate(yesterday);
   }
   if (lowered.includes('이번 주') || lowered.includes('이번주')) {
     return '이번 주';
@@ -292,6 +292,13 @@ export function extractDateInfo(input: string): string {
   }
 
   return input;
+}
+
+function toLocalISODate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 export function extractCompanionInfo(input: string): string {
