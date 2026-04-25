@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { Check, Copy, Sparkles, Pencil } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/Button';
 
@@ -53,38 +54,14 @@ export function ReviewActions({ review, characterCount, onAction }: Props) {
       >
         {copyState === 'copied' ? (
           <>
-            <svg
-              className='size-3.5'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M5 13l4 4L19 7'
-              />
-            </svg>
+            <Check className='size-3.5' />
             <span>복사됨</span>
           </>
         ) : copyState === 'failed' ? (
           <span>복사 실패</span>
         ) : (
           <>
-            <svg
-              className='size-3.5'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2 2v8a2 2 0 002 2z'
-              />
-            </svg>
+            <Copy className='size-3.5' />
             <span>복사</span>
           </>
         )}
@@ -96,7 +73,7 @@ export function ReviewActions({ review, characterCount, onAction }: Props) {
             variant='unstyled'
             onClick={() => onAction('complete')}
             className={cn(
-              'rounded-lg px-3 py-1.5 text-xs font-medium',
+              'flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium',
               'bg-linear-to-r from-orange-400 to-orange-500 text-white',
               'shadow-sm shadow-orange-200/50',
               'hover:shadow-md hover:shadow-orange-200/70',
@@ -104,20 +81,22 @@ export function ReviewActions({ review, characterCount, onAction }: Props) {
               'transition-all duration-200',
             )}
           >
-            ✨ 완벽해요
+            <Sparkles className='size-3.5' />
+            <span>완벽해요</span>
           </Button>
           <Button
             variant='unstyled'
             onClick={() => onAction('edit')}
             className={cn(
-              'rounded-lg px-3 py-1.5 text-xs font-medium',
+              'flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium',
               'border border-stone-200 bg-white text-stone-600',
               'hover:border-stone-300 hover:bg-stone-50',
               'active:scale-[0.98]',
               'transition-all duration-200',
             )}
           >
-            ✏️ 수정할래요
+            <Pencil className='size-3.5' />
+            <span>수정할래요</span>
           </Button>
         </>
       )}
