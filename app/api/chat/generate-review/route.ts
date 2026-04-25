@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
         .insert({
           user_email: authenticatedEmail,
           restaurant_name: payload.name,
-          visit_date: payload.date || new Date().toISOString().split('T')[0],
+          visit_date: toISODate(payload.date),
           review_content: reviewText,
           metadata: payload,
           created_at: new Date().toISOString(),
@@ -170,4 +170,11 @@ export async function POST(req: NextRequest) {
     console.error('Review generation error:', error);
     return ApiResponse.serverError();
   }
+}
+
+function toISODate(dateStr?: string): string {
+  if (!dateStr) return new Date().toISOString().split('T')[0];
+  const parsed = new Date(dateStr);
+  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().split('T')[0];
+  return new Date().toISOString().split('T')[0];
 }
