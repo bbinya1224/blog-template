@@ -19,9 +19,10 @@ import {
 
 import { reviewPayloadSchema } from '@/shared/types/review';
 import { styleProfileSchema } from '@/shared/types/styleProfile';
+import { toISODate } from '@/shared/lib/date';
 
 const generateReviewInputSchema = z.object({
-  payload: reviewPayloadSchema,
+  payload: reviewPayloadSchema.partial().extend({ name: z.string().min(1) }),
   styleProfile: styleProfileSchema.nullable().optional(),
 });
 
@@ -34,8 +35,12 @@ const getRandomWritingSamples = async (
 
     if (!Array.isArray(samples) || samples.length === 0) return '';
 
-    return samples
-      .sort(() => 0.5 - Math.random())
+    const shuffled = [...samples];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled
       .slice(0, count)
       .join('\n\n[Reference Sample]\n\n');
   } catch (error) {
@@ -74,7 +79,7 @@ export async function POST(req: NextRequest) {
     const { payload, styleProfile } = parsed.data;
 
     // 검색 및 프롬프트 로드
-    const searchQuery = `${payload.location} ${payload.name}`;
+    const searchQuery = `${payload.location ?? ''} ${payload.name}`.trim();
     console.log(`\n[Review Gen API] 검색 시작: "${searchQuery}"`);
 
     const [searchResult, writingSamples, prompts] = await Promise.all([
@@ -173,17 +178,3 @@ export async function POST(req: NextRequest) {
   }
 }
 
-function toLocalISODate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function toISODate(dateStr?: string): string {
-  if (!dateStr) return toLocalISODate(new Date());
-  const parsed = new Date(dateStr);
-  if (!Number.isNaN(parsed.getTime())) return toLocalISODate(parsed);
-  console.warn(`[toISODate] 파싱 불가한 날짜, 오늘로 대체: "${dateStr}"`);
-  return toLocalISODate(new Date());
-}

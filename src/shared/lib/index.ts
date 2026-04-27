@@ -8,3 +8,4 @@ export * from './kakaoLocal';
 export * from './authUtils';
 export * from './styleProfilePageContext';
 export * from './supabase';
+export * from './date';

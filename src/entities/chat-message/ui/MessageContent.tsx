@@ -53,7 +53,6 @@ export function MessageContent({
           {isReviewComplete && (
             <ReviewActions
               review={message.content}
-              characterCount={message.content.length}
               onAction={onReviewAction}
             />
           )}

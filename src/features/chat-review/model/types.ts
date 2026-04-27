@@ -65,7 +65,7 @@ export const stepTransitions: Record<ConversationStep, ConversationStep[]> = {
   'style-setup': ['topic-select'],
   'topic-select': ['conversation'],
   conversation: ['conversation', 'generating'],
-  generating: ['review-edit'],
+  generating: ['review-edit', 'conversation', 'style-check'],
   'review-edit': ['review-edit', 'complete'],
   complete: [],
 };

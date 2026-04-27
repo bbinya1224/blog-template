@@ -53,10 +53,7 @@ export const FLOW_GRAPH: FlowGraph = {
       if (!ctx.state.styleProfile) {
         return {
           messages: [
-            assistantMsg(
-              'text',
-              '글 스타일 프로필이 아직 없어요! 스타일 분석을 먼저 진행해주세요.',
-            ),
+            assistantMsg('text', MESSAGES.generating.noStyleProfile),
           ],
           actions: [{ type: 'GO_TO_STEP', payload: 'style-check' }],
         };

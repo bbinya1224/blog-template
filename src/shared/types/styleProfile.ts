@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const writingStyleSchema = z.object({
   formality: z.string().optional(),
-  tone: z.string().optional(),
+  tone: z.string().min(1),
   emotion: z.string().optional(),
   sentence_length: z.string().optional(),
   pacing: z.string().optional(),

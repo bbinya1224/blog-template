@@ -20,9 +20,7 @@ export function useReviewGeneration() {
 
   const generateReview = useCallback(async () => {
     if (!styleProfile) {
-      addAssistantMessage(
-        '글 스타일 프로필이 아직 없어요! 스타일 분석을 먼저 진행해주세요.',
-      );
+      addAssistantMessage(MESSAGES.generating.noStyleProfile);
       setStep('style-check');
       return;
     }
@@ -56,6 +54,9 @@ export function useReviewGeneration() {
 
       if (!receivedReviewId) {
         console.warn('[generateReview] reviewId 없음 — DB 저장 실패 가능성');
+        addAssistantMessage(
+          '리뷰가 생성되었지만 저장에 실패했어요. 텍스트를 복사해두세요.',
+        );
       }
 
       setGeneratedReview(fullText);

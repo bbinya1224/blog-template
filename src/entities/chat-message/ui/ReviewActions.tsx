@@ -7,13 +7,12 @@ import { Button } from '@/shared/ui/Button';
 
 interface Props {
   review: string;
-  characterCount: number;
   onAction?: (action: 'complete' | 'edit') => void;
 }
 
 type CopyState = 'idle' | 'copied' | 'failed';
 
-export function ReviewActions({ review, characterCount, onAction }: Props) {
+export function ReviewActions({ review, onAction }: Props) {
   const [copyState, setCopyState] = useState<CopyState>('idle');
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
@@ -38,7 +37,7 @@ export function ReviewActions({ review, characterCount, onAction }: Props) {
   return (
     <div className='animate-fade-in flex flex-wrap items-center gap-2 pt-3'>
       <span className='text-xs text-stone-400'>
-        {characterCount.toLocaleString()}자
+        {review.length.toLocaleString()}자
       </span>
 
       <Button

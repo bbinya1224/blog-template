@@ -8,6 +8,7 @@ import type { ChatMessage } from '@/entities/chat-message';
 import type { StyleProfile } from '@/entities/style-profile';
 import { MESSAGES } from '../../constants/messages';
 import { CHOICE_OPTIONS } from '../../constants/choiceOptions';
+import { toLocalISODate } from '@/shared/lib/date';
 
 export function canTransition(
   currentStep: ConversationStep,
@@ -292,13 +293,6 @@ export function extractDateInfo(input: string): string {
   }
 
   return input;
-}
-
-function toLocalISODate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
 }
 
 export function extractCompanionInfo(input: string): string {

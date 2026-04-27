@@ -1,5 +1,6 @@
 import type { ChatMessage } from '@/entities/chat-message';
 import type {
+  ConversationAction,
   ConversationState,
   ConversationStep,
   StepHandlerResult,
@@ -19,6 +20,7 @@ export interface FlowInputContext {
 
 export interface FlowEnterResult {
   messages: Omit<ChatMessage, 'id' | 'timestamp'>[];
+  actions?: ConversationAction[];
 }
 
 export interface FlowNode {

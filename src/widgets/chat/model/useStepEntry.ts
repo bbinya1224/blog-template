@@ -25,6 +25,7 @@ export function useStepEntry({
   const orchestrationState = useChatStore((s) => s);
   const addMessage = useChatStore((s) => s.addMessage);
   const addAssistantMessage = useChatStore((s) => s.addAssistantMessage);
+  const dispatchActions = useChatStore((s) => s.dispatchActions);
 
   useEffect(() => {
     const isWelcomeState = messages.length === 0 && step === 'style-check';
@@ -62,11 +63,14 @@ export function useStepEntry({
       },
     };
 
-    const applyResult = (result: { messages: Parameters<typeof addMessage>[0][] }) => {
+    const applyResult = (result: { messages: Parameters<typeof addMessage>[0][]; actions?: Parameters<typeof dispatchActions>[0] }) => {
       if (isStale()) return;
       result.messages.forEach((msg) => {
         addMessage(msg);
       });
+      if (result.actions?.length) {
+        dispatchActions(result.actions);
+      }
     };
 
     try {
@@ -91,6 +95,7 @@ export function useStepEntry({
     orchestrationState,
     addMessage,
     addAssistantMessage,
+    dispatchActions,
     generateReview,
   ]);
 
