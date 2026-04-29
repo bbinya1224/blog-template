@@ -14,7 +14,7 @@ type CopyState = 'idle' | 'copied' | 'failed';
 
 export function ReviewActions({ review, onAction }: Props) {
   const [copyState, setCopyState] = useState<CopyState>('idle');
-  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
