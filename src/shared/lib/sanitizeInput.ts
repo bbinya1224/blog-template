@@ -89,7 +89,8 @@ export function wrapInXmlTag(
     : '';
 
   const sanitized = sanitizeUserInput(content);
-  const closingTag = new RegExp(`</${tag}>`, 'gi');
+  const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const closingTag = new RegExp(`</${escapedTag}>`, 'gi');
   const safeContent = sanitized.replace(closingTag, (m) =>
     m.replace(/</g, '\uFF1C').replace(/>/g, '\uFF1E'),
   );

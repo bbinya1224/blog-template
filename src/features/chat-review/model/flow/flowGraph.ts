@@ -61,8 +61,15 @@ export const FLOW_GRAPH: FlowGraph = {
       await ctx.generateReview();
       return { messages: [] };
     },
-    onInput: (input) => {
+    onInput: (input, ctx) => {
       if (input.optionId === 'retry') {
+        if (!ctx.state.styleProfile) {
+          return {
+            messages: [assistantMsg('text', MESSAGES.generating.noStyleProfile)],
+            actions: [{ type: 'GO_TO_STEP', payload: 'style-check' }],
+            sideEffect: { type: 'none' },
+          };
+        }
         return {
           messages: [],
           actions: [],

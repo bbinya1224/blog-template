@@ -34,7 +34,7 @@
 
 ### FSD (Feature-Sliced Design)
 
-```
+```text
 src/
 ├── shared/          순수 유틸, API 클라이언트, 공통 UI 원자
 ├── entities/        도메인 모델 (ChatMessage, Review, StyleProfile)
@@ -53,11 +53,11 @@ src/
 
 채팅 흐름은 `FLOW_GRAPH`라는 상태 머신 테이블로 관리된다. 각 노드는 순수 핸들러(`onInput`)로 메시지/액션/부수효과를 분리 반환한다.
 
-```
+```text
 style-check → style-setup → topic-select → conversation → generating → review-edit → complete
 ```
 
-```
+```text
 [Client] useChatHandlers.handleSendMessage()
     │
     ├── FLOW_GRAPH[step].onInput()     ← 순수 핸들러 (테스트 가능)
@@ -74,7 +74,7 @@ style-check → style-setup → topic-select → conversation → generating →
 
 ### 3-1. 스타일 분석 플로우
 
-```
+```text
 네이버 블로그 URL 입력
   → convertBlogUrlToRss()
   → POST /api/fetch-rss
@@ -93,7 +93,7 @@ style-check → style-setup → topic-select → conversation → generating →
 
 ### 3-2. 리뷰 생성 플로우
 
-```
+```text
 [conversation 단계]
   사용자 자유 대화
     → POST /api/chat/parse-conversation (Claude Haiku)
@@ -119,7 +119,7 @@ style-check → style-setup → topic-select → conversation → generating →
 
 ### 3-3. 검색 로직
 
-```
+```text
 searchStoreInfo(query)
   ├── searchKakaoPlace() — 카카오 로컬 키워드 검색 (size=1, 10s timeout)
   └── searchTavilyContext() — Tavily 웹 검색 (5건, 30s timeout)

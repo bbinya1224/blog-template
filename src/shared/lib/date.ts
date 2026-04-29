@@ -8,7 +8,10 @@ export function toLocalISODate(date: Date): string {
 export function toISODate(dateStr?: string): string {
   if (!dateStr) return toLocalISODate(new Date());
 
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    if (m >= 1 && m <= 12 && d >= 1 && d <= 31) return dateStr;
+  }
 
   const parsed = new Date(dateStr);
   if (!Number.isNaN(parsed.getTime())) return toLocalISODate(parsed);
