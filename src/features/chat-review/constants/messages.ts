@@ -160,6 +160,9 @@ export const MESSAGES = {
     working: '리뷰를 작성 중이에요...\n잠시만 기다려주세요.',
 
     almostDone: '거의 다 됐어요! 조금만 더요.',
+
+    noStyleProfile:
+      '글 스타일 프로필이 아직 없어요! 스타일 분석을 먼저 진행해주세요.',
   },
 
   // 리뷰 수정

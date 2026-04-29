@@ -14,6 +14,10 @@ export const reviewPayloadSchema = z.object({
 
 export type ReviewPayload = z.infer<typeof reviewPayloadSchema>;
 
+export const reviewMinimumSchema = reviewPayloadSchema
+  .pick({ name: true })
+  .required();
+
 export type RestaurantPayload = ReviewPayload;
 
 export type ReviewEditPayload = {

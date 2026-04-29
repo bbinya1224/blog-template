@@ -17,7 +17,7 @@ export function buildReviewSystemPrompt(
 
 export function buildReviewUserPrompt(
   basePrompt: string,
-  payload: ReviewPayload,
+  payload: Partial<ReviewPayload> & { name: string },
   styleProfile: StyleProfile | null,
   kakaoPlaceInfo: string,
   tavilyContext: string,
@@ -33,10 +33,10 @@ export function buildReviewUserPrompt(
   return basePrompt
     .replace('{스타일 프로필 JSON}', styleProfileJson)
     .replace('{name}', wrap('name', payload.name))
-    .replace('{location}', wrap('location', payload.location))
-    .replace('{date}', formatKoreanDate(payload.date))
-    .replace('{menu}', wrap('menu', payload.menu))
-    .replace('{companion}', wrap('companion', payload.companion))
+    .replace('{location}', wrap('location', payload.location || ''))
+    .replace('{date}', formatKoreanDate(payload.date || ''))
+    .replace('{menu}', wrap('menu', payload.menu || ''))
+    .replace('{companion}', wrap('companion', payload.companion || ''))
     .replace('{pros}', wrap('pros', payload.pros || ''))
     .replace('{cons}', wrap('cons', payload.cons || ''))
     .replace('{extra}', wrap('extra', payload.extra || ''))

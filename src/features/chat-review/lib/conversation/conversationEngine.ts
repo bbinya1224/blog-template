@@ -8,6 +8,7 @@ import type { ChatMessage } from '@/entities/chat-message';
 import type { StyleProfile } from '@/entities/style-profile';
 import { MESSAGES } from '../../constants/messages';
 import { CHOICE_OPTIONS } from '../../constants/choiceOptions';
+import { toLocalISODate } from '@/shared/lib/date';
 
 export function canTransition(
   currentStep: ConversationStep,
@@ -272,12 +273,12 @@ export function extractDateInfo(input: string): string {
   const lowered = input.toLowerCase();
 
   if (lowered.includes('오늘')) {
-    return today.toISOString().split('T')[0];
+    return toLocalISODate(today);
   }
   if (lowered.includes('어제')) {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    return yesterday.toISOString().split('T')[0];
+    return toLocalISODate(yesterday);
   }
   if (lowered.includes('이번 주') || lowered.includes('이번주')) {
     return '이번 주';

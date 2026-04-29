@@ -28,11 +28,14 @@ export function useSideEffects(userName: string | null) {
         case 'parse-conversation':
           await parseConversation(sideEffect.userMessage);
           return true;
+        case 'generate-review':
+          await generateReview();
+          return true;
         case 'none':
           return false;
       }
     },
-    [analyzeBlogUrl, searchPlace, editReview, parseConversation],
+    [analyzeBlogUrl, searchPlace, editReview, parseConversation, generateReview],
   );
 
   return { executeSideEffect, generateReview };

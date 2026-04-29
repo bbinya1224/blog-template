@@ -50,8 +50,37 @@ export const FLOW_GRAPH: FlowGraph = {
 
   generating: {
     onEnter: async (ctx) => {
+      if (!ctx.state.styleProfile) {
+        return {
+          messages: [
+            assistantMsg('text', MESSAGES.generating.noStyleProfile),
+          ],
+          actions: [{ type: 'GO_TO_STEP', payload: 'style-check' }],
+        };
+      }
       await ctx.generateReview();
       return { messages: [] };
+    },
+    onInput: (input, ctx) => {
+      if (input.optionId === 'retry') {
+        if (!ctx.state.styleProfile) {
+          return {
+            messages: [assistantMsg('text', MESSAGES.generating.noStyleProfile)],
+            actions: [{ type: 'GO_TO_STEP', payload: 'style-check' }],
+            sideEffect: { type: 'none' },
+          };
+        }
+        return {
+          messages: [],
+          actions: [],
+          sideEffect: { type: 'generate-review' },
+        };
+      }
+      return {
+        messages: [],
+        actions: [{ type: 'GO_TO_STEP', payload: 'conversation' }],
+        sideEffect: { type: 'none' },
+      };
     },
   },
 

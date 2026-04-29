@@ -7,6 +7,7 @@ import { TextRenderer } from './TextRenderer';
 import { StyleSummaryRenderer } from './StyleSummaryRenderer';
 import { PlaceCard } from './PlaceCard';
 import { ReviewPreview } from './ReviewPreview';
+import { ReviewActions } from './ReviewActions';
 import { ChoiceButtons } from '@/shared/ui/ChoiceButtons';
 
 const METADATA_LABELS: Record<string, string> = {
@@ -40,13 +41,24 @@ export function MessageContent({
   onReviewAction,
 }: MessageContentProps) {
   const renderers: Partial<Record<MessageType, () => ReactNode>> = {
-    text: () => (
-      <TextRenderer
-        content={message.content || ''}
-        enableTyping={enableTyping}
-        isStreaming={!!message.metadata?.streaming}
-      />
-    ),
+    text: () => {
+      const isReviewComplete = !!message.metadata?.reviewComplete;
+      return (
+        <>
+          <TextRenderer
+            content={message.content || ''}
+            enableTyping={enableTyping}
+            isStreaming={!!message.metadata?.streaming}
+          />
+          {isReviewComplete && (
+            <ReviewActions
+              review={message.content}
+              onAction={onReviewAction}
+            />
+          )}
+        </>
+      );
+    },
     choice: () => (
       <>
         <TextRenderer

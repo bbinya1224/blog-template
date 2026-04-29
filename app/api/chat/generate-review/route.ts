@@ -19,10 +19,11 @@ import {
 
 import { reviewPayloadSchema } from '@/shared/types/review';
 import { styleProfileSchema } from '@/shared/types/styleProfile';
+import { toISODate } from '@/shared/lib/date';
 
 const generateReviewInputSchema = z.object({
-  payload: reviewPayloadSchema,
-  styleProfile: styleProfileSchema.nullable(),
+  payload: reviewPayloadSchema.partial().extend({ name: z.string().min(1) }),
+  styleProfile: styleProfileSchema.nullable().optional(),
 });
 
 const getRandomWritingSamples = async (
@@ -34,8 +35,12 @@ const getRandomWritingSamples = async (
 
     if (!Array.isArray(samples) || samples.length === 0) return '';
 
-    return samples
-      .sort(() => 0.5 - Math.random())
+    const shuffled = [...samples];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled
       .slice(0, count)
       .join('\n\n[Reference Sample]\n\n');
   } catch (error) {
@@ -74,7 +79,7 @@ export async function POST(req: NextRequest) {
     const { payload, styleProfile } = parsed.data;
 
     // 검색 및 프롬프트 로드
-    const searchQuery = `${payload.location} ${payload.name}`;
+    const searchQuery = `${payload.location ?? ''} ${payload.name}`.trim();
     console.log(`\n[Review Gen API] 검색 시작: "${searchQuery}"`);
 
     const [searchResult, writingSamples, prompts] = await Promise.all([
@@ -98,14 +103,15 @@ export async function POST(req: NextRequest) {
     );
 
     // 시스템 및 유저 프롬프트 구성
+    const resolvedProfile = styleProfile ?? null;
     const systemPrompt = buildReviewSystemPrompt(
       prompts.systemPrompt,
-      styleProfile
+      resolvedProfile
     );
     const userPrompt = buildReviewUserPrompt(
       prompts.userPrompt,
       payload,
-      styleProfile,
+      resolvedProfile,
       kakaoPlaceFormatted,
       tavilyContext,
       writingSamples
@@ -142,17 +148,16 @@ export async function POST(req: NextRequest) {
         .insert({
           user_email: authenticatedEmail,
           restaurant_name: payload.name,
-          visit_date: payload.date || new Date().toISOString().split('T')[0],
+          visit_date: toISODate(payload.date),
           review_content: reviewText,
           metadata: payload,
-          character_count: reviewText.length,
           created_at: new Date().toISOString(),
         })
         .select('id')
         .single();
 
       if (insertError) {
-        throw new Error(`리뷰 저장 실패: ${insertError.message}`);
+        console.error(`[Review Gen API] 리뷰 저장 실패 (non-blocking): ${insertError.message}`);
       }
 
       console.log(`\n✅ [Review Gen API] 리뷰 생성 완료: ${reviewText.length}자`);
@@ -172,3 +177,4 @@ export async function POST(req: NextRequest) {
     return ApiResponse.serverError();
   }
 }
+

@@ -65,7 +65,7 @@ export const stepTransitions: Record<ConversationStep, ConversationStep[]> = {
   'style-setup': ['topic-select'],
   'topic-select': ['conversation'],
   conversation: ['conversation', 'generating'],
-  generating: ['review-edit'],
+  generating: ['review-edit', 'conversation', 'style-check'],
   'review-edit': ['review-edit', 'complete'],
   complete: [],
 };
@@ -87,6 +87,7 @@ export type SideEffect =
   | { type: 'place-search'; query: string }
   | { type: 'edit-review'; request: string }
   | { type: 'parse-conversation'; userMessage: string }
+  | { type: 'generate-review' }
   | { type: 'none' };
 
 export interface UserInput {

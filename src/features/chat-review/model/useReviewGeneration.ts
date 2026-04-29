@@ -19,6 +19,12 @@ export function useReviewGeneration() {
   const setSavedReviewId = useChatStore((s) => s.setSavedReviewId);
 
   const generateReview = useCallback(async () => {
+    if (!styleProfile) {
+      addAssistantMessage(MESSAGES.generating.noStyleProfile);
+      setStep('style-check');
+      return;
+    }
+
     setSavedReviewId(null);
     const msgId = addAssistantMessage('', 'text', undefined, {
       streaming: true,
@@ -29,7 +35,7 @@ export function useReviewGeneration() {
 
       const fullText = await apiSSE(
         '/api/chat/generate-review',
-        { payload: collectedInfo, styleProfile },
+        { payload: collectedInfo, styleProfile: styleProfile ?? null },
         {
           onToken: (text) => {
             updateMessage(msgId, {
@@ -47,7 +53,10 @@ export function useReviewGeneration() {
       );
 
       if (!receivedReviewId) {
-        throw new Error('Missing reviewId in SSE done payload');
+        console.warn('[generateReview] reviewId 없음 — DB 저장 실패 가능성');
+        addAssistantMessage(
+          '리뷰가 생성되었지만 저장에 실패했어요. 텍스트를 복사해두세요.',
+        );
       }
 
       setGeneratedReview(fullText);
@@ -55,9 +64,9 @@ export function useReviewGeneration() {
       setStep('review-edit');
 
       updateMessage(msgId, {
-        type: 'review-preview',
-        content: MESSAGES.reviewEdit.complete,
-        metadata: { review: fullText, characterCount: fullText.length },
+        type: 'text',
+        content: fullText,
+        metadata: { streaming: false, reviewComplete: true },
       });
     } catch (error) {
       setSavedReviewId(null);
@@ -108,9 +117,9 @@ export function useReviewGeneration() {
         );
 
         updateMessage(msgId, {
-          type: 'review-preview',
-          content: MESSAGES.reviewEdit.complete,
-          metadata: { review: fullText, characterCount: fullText.length },
+          type: 'text',
+          content: fullText,
+          metadata: { streaming: false, reviewComplete: true },
         });
 
         const result = handleReviewEdited(fullText);
