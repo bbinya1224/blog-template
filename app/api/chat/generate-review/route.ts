@@ -12,6 +12,7 @@ import { readBlogSamples } from '@/shared/api/dataFiles';
 import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_SONNET } from '@/shared/api/claudeClient';
 import { createSSEStream, createSSEResponse } from '@/shared/api/sse';
+import { buildUsageLogEntry, logTokenUsage } from '@/shared/api/usageLogger';
 import {
   buildReviewSystemPrompt,
   buildReviewUserPrompt,
@@ -131,6 +132,12 @@ export async function POST(req: NextRequest) {
       }
 
       const finalMessage = await response.finalMessage();
+      logTokenUsage(buildUsageLogEntry(
+        authenticatedEmail,
+        'generate-review',
+        CLAUDE_SONNET,
+        finalMessage.usage,
+      ));
       const finalText = finalMessage.content
         .filter((block): block is Anthropic.TextBlock => block.type === 'text')
         .map((block) => block.text)

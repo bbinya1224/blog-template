@@ -1,12 +1,15 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import type { StyleProfile } from '@/shared/types/styleProfile';
+import type { TokenUsage } from '@/shared/types/usage';
 import { AppError, NotFoundError } from '@/shared/lib/errors';
 import { ApiResponse } from '@/shared/api/response';
+import { buildUsageLogEntry, logTokenUsage } from '@/shared/api/usageLogger';
+import { CLAUDE_SONNET } from '@/shared/api/claudeClient';
 
 type AnalyzeStyleDeps = {
   readBlogPosts: (email: string) => Promise<string>;
-  generateStyleProfile: (blogText: string) => Promise<StyleProfile>;
+  generateStyleProfile: (blogText: string) => Promise<{ profile: StyleProfile; usage: TokenUsage }>;
   saveStyleProfile: (email: string, profile: StyleProfile) => Promise<void>;
 };
 
@@ -31,7 +34,8 @@ export const createAnalyzeStyleHandler = ({
         );
       }
 
-      const styleProfile = await generateStyleProfile(blogText);
+      const { profile: styleProfile, usage } = await generateStyleProfile(blogText);
+      logTokenUsage(buildUsageLogEntry(email, 'analyze-style', CLAUDE_SONNET, usage));
       await saveStyleProfile(email, styleProfile);
 
       return ApiResponse.success({ styleProfile, message: 'Claude API를 통한 스타일 분석이 완료되었습니다.' });

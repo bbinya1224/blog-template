@@ -7,6 +7,7 @@ import { reviewPayloadSchema } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import { getSmartFollowupPrompts } from '@/shared/api/promptService';
+import { buildUsageLogEntry, logTokenUsage } from '@/shared/api/usageLogger';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import {
   formatCollectedInfo,
@@ -60,6 +61,8 @@ export async function POST(req: NextRequest) {
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     });
+
+    logTokenUsage(buildUsageLogEntry(session.user.email, 'smart-followup', CLAUDE_HAIKU, response.usage));
 
     const text = response.content
       .filter((block): block is Anthropic.TextBlock => block.type === 'text')
