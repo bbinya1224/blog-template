@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useAdminAuthContext, useUsageStats } from '@/features/admin/model';
-import { DateRangeFilter, UserUsageTable, EndpointBreakdown } from '@/features/admin/ui';
+import { DateRangeFilter, UserUsageTable, EndpointBreakdown, BudgetProgressBar } from '@/features/admin/ui';
 
 export default function AdminUsagePage() {
   const { password } = useAdminAuthContext();
@@ -31,6 +31,7 @@ export default function AdminUsagePage() {
       )}
       {data && (
         <>
+          <BudgetProgressBar estimatedCost={data.estimatedCost} />
           <EndpointBreakdown endpoints={data.endpoints} />
           <UserUsageTable users={data.users} />
         </>

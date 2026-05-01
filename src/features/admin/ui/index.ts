@@ -8,3 +8,4 @@ export { PromptEditor } from './PromptEditor';
 export { PromptList } from './PromptList';
 export { UserUsageTable } from './UserUsageTable';
 export { WhitelistTable } from './WhitelistTable';
+export { BudgetProgressBar } from './BudgetProgressBar';

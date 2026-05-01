@@ -18,7 +18,11 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold text-stone-900">대시보드</h2>
-      <DashboardCards userCount={users.length} summary={data?.summary ?? null} />
+      <DashboardCards
+        userCount={users.length}
+        summary={data?.summary ?? null}
+        estimatedCost={data?.estimatedCost ?? 0}
+      />
       {data?.recent && data.recent.length > 0 && (
         <RecentActivityTable items={data.recent} />
       )}

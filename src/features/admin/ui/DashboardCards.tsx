@@ -1,12 +1,13 @@
 'use client';
 
-import { Users, Zap, Hash, Database } from 'lucide-react';
+import { Users, Zap, Hash, Database, DollarSign } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import type { UsageSummary } from '../model/useUsageStats';
 
 interface Props {
   userCount: number;
   summary: UsageSummary | null;
+  estimatedCost: number;
 }
 
 function formatNumber(n: number): string {
@@ -47,11 +48,18 @@ const CARDS = [
     getValue: (props: Props) => formatNumber(props.summary?.total_cache_read_tokens ?? 0),
     color: 'text-purple-600 bg-purple-50',
   },
+  {
+    key: 'cost',
+    label: '예상 비용',
+    icon: DollarSign,
+    getValue: (props: Props) => `$${props.estimatedCost.toFixed(2)}`,
+    color: 'text-emerald-600 bg-emerald-50',
+  },
 ] as const;
 
-export function DashboardCards({ userCount, summary }: Props) {
+export function DashboardCards({ userCount, summary, estimatedCost }: Props) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
       {CARDS.map(({ key, label, icon: Icon, getValue, color }) => (
         <div key={key} className="rounded-xl border border-stone-200 bg-white p-5">
           <div className="flex items-center gap-3">
@@ -61,7 +69,7 @@ export function DashboardCards({ userCount, summary }: Props) {
             <div>
               <p className="text-sm text-stone-500">{label}</p>
               <p className="text-2xl font-bold text-stone-900">
-                {getValue({ userCount, summary })}
+                {getValue({ userCount, summary, estimatedCost })}
               </p>
             </div>
           </div>

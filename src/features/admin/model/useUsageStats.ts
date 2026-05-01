@@ -42,6 +42,7 @@ export interface UsageStatsData {
   users: UserUsageSummary[];
   endpoints: EndpointSummary[];
   recent: RecentActivity[];
+  estimatedCost: number;
 }
 
 export function useUsageStats(password: string) {

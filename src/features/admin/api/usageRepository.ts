@@ -73,6 +73,35 @@ export const getUsageSummary = async (
   };
 };
 
+export const getUsageLogs = async (
+  startDate?: string,
+  endDate?: string,
+) => {
+  let query = supabaseAdmin
+    .from('api_usage_logs')
+    .select(
+      'model, input_tokens, output_tokens, cache_creation_input_tokens, cache_read_input_tokens',
+    );
+
+  if (startDate) query = query.gte('created_at', startDate);
+  if (endDate) query = query.lte('created_at', endDate);
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('사용량 로그 조회 실패:', error);
+    throw error;
+  }
+
+  return (data ?? []).map((row) => ({
+    model: row.model ?? '',
+    input_tokens: row.input_tokens ?? 0,
+    output_tokens: row.output_tokens ?? 0,
+    cache_creation_input_tokens: row.cache_creation_input_tokens ?? 0,
+    cache_read_input_tokens: row.cache_read_input_tokens ?? 0,
+  }));
+};
+
 export const getUserUsageSummaries = async (
   startDate?: string,
   endDate?: string,

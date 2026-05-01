@@ -1,13 +1,13 @@
 import { createUsageGetHandler } from '@/features/admin/api/createUsageHandler';
 import {
-  getUsageSummary,
+  getUsageLogs,
   getUserUsageSummaries,
   getEndpointBreakdown,
   getRecentActivity,
 } from '@/features/admin/api/usageRepository';
 
 const deps = {
-  getUsageSummary,
+  getUsageLogs,
   getUserUsageSummaries,
   getEndpointBreakdown,
   getRecentActivity,
