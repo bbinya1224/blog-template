@@ -6,6 +6,7 @@ import { reviewPayloadSchema } from '@/shared/types/review';
 import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import { getParseConversationPrompts } from '@/shared/api/promptService';
+import { buildUsageLogEntry, logTokenUsage } from '@/shared/api/usageLogger';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import { formatCollectedInfo } from '@/features/chat-review/lib/promptBuilder';
 import { normalizeConversationResult } from '@/features/chat-review/lib/conversation/reviewReadiness';
@@ -103,6 +104,8 @@ export async function POST(req: NextRequest) {
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     });
+
+    logTokenUsage(buildUsageLogEntry(session.user.email, 'parse-conversation', CLAUDE_HAIKU, response.usage));
 
     const text = response.content
       .filter(

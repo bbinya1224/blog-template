@@ -1,7 +1,8 @@
 import type { StyleProfile } from '@/shared/types/styleProfile';
+import type { TokenUsage } from '@/shared/types/usage';
 import { StyleAnalysisError } from '@/shared/lib/errors';
 import { unique } from '@/shared/lib/utils';
-import { analyzeStyleWithClaude } from '@/shared/api/claudeClient';
+import { analyzeStyleWithClaudeAndUsage } from '@/shared/api/claudeClient';
 import { getStyleAnalysisPrompts } from '@/shared/api/promptService';
 
 const COMMON_SECTIONS = ['방문 이유', '분위기', '메뉴/맛', '서비스', '총평'];
@@ -142,7 +143,7 @@ export const generateHeuristicProfile = (text: string): StyleProfile => {
 
 export const generateStyleProfileWithClaude = async (
   blogText: string,
-): Promise<StyleProfile> => {
+): Promise<{ profile: StyleProfile; usage: TokenUsage }> => {
   if (!blogText.trim()) {
     throw new StyleAnalysisError(
       '분석할 텍스트가 비어있습니다. 먼저 RSS를 불러와주세요.',
@@ -152,17 +153,17 @@ export const generateStyleProfileWithClaude = async (
   try {
     const { systemPrompt, userPrompt } = await getStyleAnalysisPrompts();
 
-    const responseText = await analyzeStyleWithClaude(
+    const result = await analyzeStyleWithClaudeAndUsage(
       blogText,
       systemPrompt,
       userPrompt,
     );
 
     console.log('\n[스타일 분석] Claude 응답 (첫 500자):');
-    console.log(responseText.substring(0, 500));
+    console.log(result.text.substring(0, 500));
     console.log('...\n');
 
-    let cleanedJson = responseText;
+    let cleanedJson = result.text;
 
     cleanedJson = cleanedJson.replace(/```json\s*/g, '').replace(/```\s*/g, '');
 
@@ -187,7 +188,7 @@ export const generateStyleProfileWithClaude = async (
       throw new StyleAnalysisError('Claude API 응답이 올바른 형식이 아닙니다.');
     }
 
-    return styleProfile;
+    return { profile: styleProfile, usage: result.usage };
   } catch (error) {
     console.error('스타일 분석 상세 에러:', error);
 

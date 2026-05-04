@@ -3,6 +3,7 @@ import { AppError, RateLimitError } from '@/shared/lib/errors';
 import { withTimeoutAndRetry } from '@/shared/lib/timeout';
 import { isRetryableError } from '@/shared/lib/retry';
 import type { ReviewPayload } from '@/shared/types/review';
+import type { TokenUsage } from '@/shared/types/usage';
 import { sanitizeUserInput, wrapInXmlTag } from '@/shared/lib/sanitizeInput';
 import { withPromptDefense } from '@/shared/lib/promptDefense';
 
@@ -149,6 +150,72 @@ export const callClaude = async (
   }
 };
 
+export const callClaudeWithUsage = async (
+  systemPrompt: string,
+  userPrompt: string,
+  model: string = CLAUDE_SONNET,
+  maxTokens: number = 4096,
+): Promise<{ text: string; usage: TokenUsage }> => {
+  try {
+    const client = getAnthropicClient();
+    const message = await withTimeoutAndRetry(
+      () =>
+        client.messages.create({
+          model,
+          max_tokens: maxTokens,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userPrompt }],
+        }),
+      CLAUDE_TIMEOUT_MS,
+      CLAUDE_RETRY_OPTIONS,
+    );
+
+    const textContent = message.content.find((block) => block.type === 'text');
+    if (!textContent || textContent.type !== 'text') {
+      throw new AppError(
+        'Claude API 응답에서 텍스트를 찾을 수 없습니다.',
+        'INVALID_API_RESPONSE',
+        500,
+      );
+    }
+
+    return { text: textContent.text, usage: message.usage };
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+
+    if (error instanceof Anthropic.APIError) {
+      if (error.status === 401) {
+        throw new AppError('Claude API 인증 실패: API 키를 확인해주세요.', 'AUTHENTICATION_FAILED', 401);
+      }
+      if (error.status === 429) {
+        let retryAfterSeconds: string | null = null;
+        if (error.headers && typeof error.headers.get === 'function') {
+          retryAfterSeconds = error.headers.get('retry-after');
+        } else if (error.headers && typeof error.headers === 'object') {
+          retryAfterSeconds = error.headers['retry-after'] as string;
+        }
+        let retryAfterMs: number | undefined = undefined;
+        if (retryAfterSeconds) {
+          const parsedSeconds = parseInt(retryAfterSeconds, 10);
+          if (!isNaN(parsedSeconds) && parsedSeconds > 0) {
+            retryAfterMs = parsedSeconds * 1000;
+          } else {
+            const dateMs = Date.parse(retryAfterSeconds);
+            if (!isNaN(dateMs)) {
+              const delaySeconds = (dateMs - Date.now()) / 1000;
+              if (delaySeconds > 0) retryAfterMs = Math.ceil(delaySeconds * 1000);
+            }
+          }
+        }
+        throw new RateLimitError('Claude API 요청 한도 초과 (재시도 후 실패).', retryAfterMs);
+      }
+      throw new AppError(`Claude API 오류: ${error.message}`, 'CLAUDE_API_ERROR', error.status || 500);
+    }
+
+    throw new AppError('Claude API 호출 중 예상치 못한 오류가 발생했습니다.', 'UNEXPECTED_ERROR', 500);
+  }
+};
+
 export const analyzeStyleWithClaude = async (
   blogText: string,
   systemPrompt: string,
@@ -160,6 +227,19 @@ export const analyzeStyleWithClaude = async (
   );
 
   return callClaude(systemPrompt, userPrompt, CLAUDE_SONNET, 8192);
+};
+
+export const analyzeStyleWithClaudeAndUsage = async (
+  blogText: string,
+  systemPrompt: string,
+  userPromptTemplate: string,
+): Promise<{ text: string; usage: TokenUsage }> => {
+  const userPrompt = userPromptTemplate.replace(
+    '{여기에 blog-posts.txt 내용 붙이기}',
+    blogText,
+  );
+
+  return callClaudeWithUsage(systemPrompt, userPrompt, CLAUDE_SONNET, 8192);
 };
 
 export interface ReviewGenerationData extends ReviewPayload {

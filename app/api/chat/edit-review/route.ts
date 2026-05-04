@@ -7,6 +7,8 @@ import { getReviewEditPrompts } from '@/shared/api/promptService';
 import { ApiResponse } from '@/shared/api/response';
 import { getAnthropicClient, CLAUDE_HAIKU } from '@/shared/api/claudeClient';
 import { createSSEStream, createSSEResponse } from '@/shared/api/sse';
+import { buildUsageLogEntry, logTokenUsage, addUsage } from '@/shared/api/usageLogger';
+import type { TokenUsage } from '@/shared/types/usage';
 import { supabaseAdmin } from '@/shared/lib/supabase';
 import { withPromptDefense } from '@/shared/lib/promptDefense';
 import { styleProfileSchema } from '@/shared/types/styleProfile';
@@ -59,7 +61,7 @@ async function generateEditedReview(params: {
   systemPrompt: string;
   userPrompt: string;
   signal?: AbortSignal;
-}): Promise<string> {
+}): Promise<{ text: string; usage: TokenUsage }> {
   const response = await getAnthropicClient().messages.create(
     {
       model: CLAUDE_HAIKU,
@@ -70,10 +72,13 @@ async function generateEditedReview(params: {
     { signal: params.signal },
   );
 
-  return response.content
-    .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-    .map((block) => block.text)
-    .join('');
+  return {
+    text: response.content
+      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+      .map((block) => block.text)
+      .join(''),
+    usage: response.usage,
+  };
 }
 
 async function validateWithClaude(params: {
@@ -81,7 +86,7 @@ async function validateWithClaude(params: {
   editedReview: string;
   editRequest: string;
   signal?: AbortSignal;
-}): Promise<z.infer<typeof editValidationSchema>> {
+}): Promise<{ result: z.infer<typeof editValidationSchema>; usage: TokenUsage }> {
   const response = await getAnthropicClient().messages.create(
     {
       model: CLAUDE_HAIKU,
@@ -114,13 +119,16 @@ ${params.editedReview}`,
       .trim();
 
     const parsed = JSON.parse(text);
-    return editValidationSchema.parse(parsed);
+    return { result: editValidationSchema.parse(parsed), usage: response.usage };
   } catch (error) {
     return {
-      valid: false,
-      issues: [
-        `LLM 검수 응답 파싱 실패: ${error instanceof Error ? error.message : 'unknown error'}`,
-      ],
+      result: {
+        valid: false,
+        issues: [
+          `LLM 검수 응답 파싱 실패: ${error instanceof Error ? error.message : 'unknown error'}`,
+        ],
+      },
+      usage: response.usage,
     };
   }
 }
@@ -132,8 +140,10 @@ export async function POST(req: NextRequest) {
       return ApiResponse.unauthorized();
     }
 
+    const authenticatedEmail = session.user.email;
+
     const { data: reserved, error: rpcError } = await supabaseAdmin.rpc('try_reserve_usage', {
-      p_email: session.user.email,
+      p_email: authenticatedEmail,
     });
     if (rpcError || !reserved) {
       return ApiResponse.quotaExceeded();
@@ -174,14 +184,17 @@ export async function POST(req: NextRequest) {
       let editedText = '';
       let lastIssues: string[] = [];
       let finalIssues: string[] = [];
+      let totalUsage: TokenUsage = { input_tokens: 0, output_tokens: 0 };
 
       for (let attempt = 1; attempt <= 2; attempt++) {
         const attemptUserPrompt = buildRetryUserPrompt(userPrompt, lastIssues);
-        editedText = await generateEditedReview({
+        const editResult = await generateEditedReview({
           systemPrompt,
           userPrompt: attemptUserPrompt,
           signal,
         });
+        editedText = editResult.text;
+        totalUsage = addUsage(totalUsage, editResult.usage);
 
         const deterministicValidation = validateEditedReview({
           originalReview,
@@ -192,12 +205,14 @@ export async function POST(req: NextRequest) {
         let llmValidation = { valid: true, issues: [] as string[] };
         if (deterministicValidation.softIssues.length > 0) {
           try {
-            llmValidation = await validateWithClaude({
+            const validationResult = await validateWithClaude({
               originalReview,
               editedReview: editedText,
               editRequest,
               signal,
             });
+            llmValidation = validationResult.result;
+            totalUsage = addUsage(totalUsage, validationResult.usage);
           } catch (error) {
             console.warn('[Review Edit API] Claude 검수 실패, 규칙 검증만 사용:', error);
             llmValidation = {
@@ -238,6 +253,8 @@ export async function POST(req: NextRequest) {
           throw new Error('수정 결과가 검증 기준을 통과하지 못했습니다.');
         }
       }
+
+      logTokenUsage(buildUsageLogEntry(authenticatedEmail, 'edit-review', CLAUDE_HAIKU, totalUsage));
 
       for (const chunk of chunkText(editedText)) {
         emit(chunk);

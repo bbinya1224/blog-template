@@ -1,153 +1,86 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useAdminAuth, useWhitelist, usePrompts } from '@/features/admin/model';
-import {
-  AdminLoginForm,
-  AddEmailForm,
-  WhitelistTable,
-  PromptList,
-} from '@/features/admin/ui';
+import { useEffect } from 'react';
+import { useAdminAuthContext, useWhitelist, useUsageStats } from '@/features/admin/model';
+import { DashboardCards } from '@/features/admin/ui';
+import type { RecentActivity } from '@/features/admin/model';
 
-type Tab = 'whitelist' | 'prompts';
+export default function AdminDashboardPage() {
+  const { password } = useAdminAuthContext();
+  const { users, loading: usersLoading, error: usersError, fetchUsers } = useWhitelist(password);
+  const { data, loading: usageLoading, error: usageError, fetchUsageStats } = useUsageStats(password);
 
-export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('whitelist');
-
-  const {
-    password,
-    setPassword,
-    isAuthenticated,
-    loading: authLoading,
-    error: authError,
-    login,
-    logout,
-  } = useAdminAuth();
-
-  const {
-    users,
-    loading: listLoading,
-    error: listError,
-    fetchUsers,
-    addUser,
-    updateUserStatus,
-    deleteUser,
-  } = useWhitelist(password);
-
-  const {
-    prompts,
-    categories,
-    loading: promptsLoading,
-    error: promptsError,
-    fetchCategories,
-    fetchPrompts,
-    updatePrompt,
-  } = usePrompts(password);
-
-  const [selectedCategory, setSelectedCategory] = useState('');
-
-  // 인증 후 데이터 로드
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchUsers();
-      fetchCategories();
-      fetchPrompts();
-    }
-  }, [isAuthenticated, fetchUsers, fetchCategories, fetchPrompts]);
+    fetchUsers();
+    fetchUsageStats();
+  }, [fetchUsers, fetchUsageStats]);
 
-  // 카테고리 변경 시 프롬프트 리로드
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchPrompts(selectedCategory || undefined);
-    }
-  }, [selectedCategory, isAuthenticated, fetchPrompts]);
-
-  if (!isAuthenticated) {
-    return (
-      <AdminLoginForm
-        password={password}
-        setPassword={setPassword}
-        loading={authLoading}
-        error={authError}
-        onSubmit={login}
-      />
-    );
-  }
-
-  const error = listError || promptsError;
+  const isLoading = usersLoading || usageLoading;
+  const errorMessage = usersError || usageError;
 
   return (
-    <div className='min-h-screen bg-gray-50 p-8'>
-      <div className='mx-auto max-w-6xl'>
-        {/* 헤더 */}
-        <div className='mb-8 flex items-center justify-between'>
-          <h1 className='text-3xl font-bold'>관리자 페이지</h1>
-          <button
-            onClick={logout}
-            className='text-sm text-gray-600 hover:text-gray-900'
-          >
-            로그아웃
-          </button>
+    <div className="space-y-8">
+      <h2 className="text-2xl font-bold text-stone-900">대시보드</h2>
+      {errorMessage && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {errorMessage}
         </div>
-
-        {/* 에러 메시지 */}
-        {error && (
-          <div className='mb-4 rounded-sm border border-red-200 bg-red-50 p-4 text-red-700'>
-            {error}
-          </div>
-        )}
-
-        {/* 탭 네비게이션 */}
-        <div className='mb-6 border-b'>
-          <nav className='-mb-px flex gap-4'>
-            <button
-              onClick={() => setActiveTab('whitelist')}
-              className={`border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'whitelist'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-              }`}
-            >
-              화이트리스트
-            </button>
-            <button
-              onClick={() => setActiveTab('prompts')}
-              className={`border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'prompts'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-              }`}
-            >
-              프롬프트 관리
-            </button>
-          </nav>
-        </div>
-
-        {/* 탭 컨텐츠 */}
-        {activeTab === 'whitelist' && (
-          <>
-            <AddEmailForm onAdd={addUser} loading={listLoading} />
-            <WhitelistTable
-              users={users}
-              loading={listLoading}
-              onRefresh={fetchUsers}
-              onDelete={deleteUser}
-              onUpdateStatus={updateUserStatus}
-            />
-          </>
-        )}
-
-        {activeTab === 'prompts' && (
-          <PromptList
-            prompts={prompts}
-            categories={categories}
-            loading={promptsLoading}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-            onUpdate={updatePrompt}
-            onRefresh={() => fetchPrompts(selectedCategory || undefined)}
+      )}
+      {isLoading ? (
+        <div className="py-12 text-center text-sm text-stone-400">로딩 중...</div>
+      ) : (
+        <>
+          <DashboardCards
+            userCount={users.length}
+            summary={data?.summary ?? null}
+            estimatedCost={data?.estimatedCost ?? 0}
           />
-        )}
+          {data?.recent && data.recent.length > 0 && (
+            <RecentActivityTable items={data.recent} />
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function RecentActivityTable({ items }: { items: RecentActivity[] }) {
+  return (
+    <div className="rounded-xl border border-stone-200 bg-white">
+      <div className="border-b border-stone-200 px-6 py-4">
+        <h3 className="text-lg font-semibold text-stone-900">최근 활동</h3>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-stone-100 text-left text-stone-500">
+              <th className="px-6 py-3 font-medium">사용자</th>
+              <th className="px-6 py-3 font-medium">엔드포인트</th>
+              <th className="px-6 py-3 font-medium">모델</th>
+              <th className="px-6 py-3 text-right font-medium">입력</th>
+              <th className="px-6 py-3 text-right font-medium">출력</th>
+              <th className="px-6 py-3 font-medium">시간</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item) => (
+              <tr key={item.id} className="border-b border-stone-50 last:border-0">
+                <td className="px-6 py-3 font-medium text-stone-900">{item.user_email}</td>
+                <td className="px-6 py-3 text-stone-600">{item.endpoint}</td>
+                <td className="px-6 py-3 text-stone-600">{item.model}</td>
+                <td className="px-6 py-3 text-right text-stone-600">
+                  {item.input_tokens.toLocaleString()}
+                </td>
+                <td className="px-6 py-3 text-right text-stone-600">
+                  {item.output_tokens.toLocaleString()}
+                </td>
+                <td className="px-6 py-3 text-stone-400">
+                  {new Date(item.created_at).toLocaleString('ko-KR')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
