@@ -7,24 +7,38 @@ import type { RecentActivity } from '@/features/admin/model';
 
 export default function AdminDashboardPage() {
   const { password } = useAdminAuthContext();
-  const { users, fetchUsers } = useWhitelist(password);
-  const { data, fetchUsageStats } = useUsageStats(password);
+  const { users, loading: usersLoading, error: usersError, fetchUsers } = useWhitelist(password);
+  const { data, loading: usageLoading, error: usageError, fetchUsageStats } = useUsageStats(password);
 
   useEffect(() => {
     fetchUsers();
     fetchUsageStats();
   }, [fetchUsers, fetchUsageStats]);
 
+  const isLoading = usersLoading || usageLoading;
+  const errorMessage = usersError || usageError;
+
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold text-stone-900">대시보드</h2>
-      <DashboardCards
-        userCount={users.length}
-        summary={data?.summary ?? null}
-        estimatedCost={data?.estimatedCost ?? 0}
-      />
-      {data?.recent && data.recent.length > 0 && (
-        <RecentActivityTable items={data.recent} />
+      {errorMessage && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {errorMessage}
+        </div>
+      )}
+      {isLoading ? (
+        <div className="py-12 text-center text-sm text-stone-400">로딩 중...</div>
+      ) : (
+        <>
+          <DashboardCards
+            userCount={users.length}
+            summary={data?.summary ?? null}
+            estimatedCost={data?.estimatedCost ?? 0}
+          />
+          {data?.recent && data.recent.length > 0 && (
+            <RecentActivityTable items={data.recent} />
+          )}
+        </>
       )}
     </div>
   );

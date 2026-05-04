@@ -29,8 +29,12 @@ export function BudgetProgressBar({ estimatedCost }: Props) {
     const saved = localStorage.getItem(BUDGET_STORAGE_KEY);
     if (saved) {
       const parsed = Number(saved);
-      setBudget(parsed);
-      setInputValue(String(parsed));
+      if (Number.isFinite(parsed) && parsed > 0) {
+        setBudget(parsed);
+        setInputValue(String(parsed));
+      } else {
+        localStorage.removeItem(BUDGET_STORAGE_KEY);
+      }
     }
   }, []);
 
@@ -95,7 +99,7 @@ export function BudgetProgressBar({ estimatedCost }: Props) {
           <div
             className="h-3 w-full overflow-hidden rounded-full bg-stone-100"
             role="progressbar"
-            aria-valuenow={Math.round(percentage)}
+            aria-valuenow={Math.max(0, Math.min(100, Math.round(percentage)))}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label="예산 사용률"

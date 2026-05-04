@@ -18,6 +18,11 @@ export interface UsageLogRow {
 const isKnownModel = (model: string): model is ModelId =>
   model in PRICING;
 
+export interface CostResult {
+  cost: number;
+  unknownModels: string[];
+}
+
 export const calculateCost = (
   model: string,
   input: number,
@@ -25,7 +30,10 @@ export const calculateCost = (
   cacheCreation: number,
   cacheRead: number,
 ): number => {
-  if (!isKnownModel(model)) return 0;
+  if (!isKnownModel(model)) {
+    console.warn(`[tokenPricing] 알 수 없는 모델: ${model} — 비용 0으로 처리`);
+    return 0;
+  }
 
   const price = PRICING[model];
   return (
@@ -36,9 +44,11 @@ export const calculateCost = (
   );
 };
 
-export const calculateTotalCost = (logs: UsageLogRow[]): number =>
-  logs.reduce(
-    (sum, log) =>
+export const calculateTotalCostWithWarnings = (logs: UsageLogRow[]): CostResult => {
+  const unknownModels = new Set<string>();
+  const cost = logs.reduce((sum, log) => {
+    if (!isKnownModel(log.model)) unknownModels.add(log.model);
+    return (
       sum +
       calculateCost(
         log.model,
@@ -46,9 +56,12 @@ export const calculateTotalCost = (logs: UsageLogRow[]): number =>
         log.output_tokens,
         log.cache_creation_input_tokens,
         log.cache_read_input_tokens,
-      ),
-    0,
-  );
+      )
+    );
+  }, 0);
+
+  return { cost, unknownModels: Array.from(unknownModels) };
+};
 
 export interface UsageSummaryResult {
   total_requests: number;

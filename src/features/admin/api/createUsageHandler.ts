@@ -1,6 +1,6 @@
 import { ApiResponse } from '@/shared/api/response';
 import { withAdmin } from '@/shared/api/middleware';
-import { calculateTotalCost, computeSummary } from '../lib/tokenPricing';
+import { calculateTotalCostWithWarnings, computeSummary } from '../lib/tokenPricing';
 import type { UsageLogRow } from '../lib/tokenPricing';
 import type {
   UserUsageSummary,
@@ -24,12 +24,25 @@ type UsageDeps = {
   getRecentActivity: (limit?: number) => Promise<RecentActivity[]>;
 };
 
+const isValidISODate = (value: string): boolean =>
+  !Number.isNaN(Date.parse(value));
+
 export const createUsageGetHandler = (deps: UsageDeps) => {
   const handler = async (request: Request): Promise<Response> => {
     try {
       const url = new URL(request.url);
-      const startDate = url.searchParams.get('startDate') ?? undefined;
-      const endDate = url.searchParams.get('endDate') ?? undefined;
+      const rawStart = url.searchParams.get('startDate');
+      const rawEnd = url.searchParams.get('endDate');
+
+      if (rawStart && !isValidISODate(rawStart)) {
+        return ApiResponse.validationError('startDate 형식이 올바르지 않습니다.');
+      }
+      if (rawEnd && !isValidISODate(rawEnd)) {
+        return ApiResponse.validationError('endDate 형식이 올바르지 않습니다.');
+      }
+
+      const startDate = rawStart ?? undefined;
+      const endDate = rawEnd ?? undefined;
 
       const [logs, users, endpoints, recent] = await Promise.all([
         deps.getUsageLogs(startDate, endDate),
@@ -39,9 +52,16 @@ export const createUsageGetHandler = (deps: UsageDeps) => {
       ]);
 
       const summary = computeSummary(logs);
-      const estimatedCost = calculateTotalCost(logs);
+      const { cost: estimatedCost, unknownModels } = calculateTotalCostWithWarnings(logs);
 
-      return ApiResponse.success({ summary, users, endpoints, recent, estimatedCost });
+      return ApiResponse.success({
+        summary,
+        users,
+        endpoints,
+        recent,
+        estimatedCost,
+        ...(unknownModels.length > 0 && { unknownModels }),
+      });
     } catch (error) {
       console.error('사용량 조회 오류:', error);
       return ApiResponse.serverError('사용량 조회에 실패했습니다.');

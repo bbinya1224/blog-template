@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { createAdminClient } from '@/shared/api/adminClient';
 
 export interface UsageSummary {
@@ -49,11 +49,13 @@ export function useUsageStats(password: string) {
   const [data, setData] = useState<UsageStatsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const requestSeq = useRef(0);
 
   const client = useMemo(() => createAdminClient(password), [password]);
 
   const fetchUsageStats = useCallback(
     async (startDate?: string, endDate?: string) => {
+      const seq = ++requestSeq.current;
       setLoading(true);
       setError(null);
       try {
@@ -61,11 +63,13 @@ export function useUsageStats(password: string) {
         if (startDate) params.startDate = startDate;
         if (endDate) params.endDate = endDate;
         const result = await client.get<UsageStatsData>('/api/admin/usage', params);
-        setData(result);
+        if (seq === requestSeq.current) setData(result);
       } catch (err) {
-        setError(err instanceof Error ? err.message : '사용량 데이터 로드 실패');
+        if (seq === requestSeq.current) {
+          setError(err instanceof Error ? err.message : '사용량 데이터 로드 실패');
+        }
       } finally {
-        setLoading(false);
+        if (seq === requestSeq.current) setLoading(false);
       }
     },
     [client]
